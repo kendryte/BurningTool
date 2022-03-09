@@ -1,0 +1,29 @@
+{
+	"[jsonc]": {
+		"editor.defaultFormatter": "vscode.json-language-features"
+	},
+	"cmake.sourceDirectory": "${workspaceFolder}",
+	"cmake.buildDirectory": "${workspaceFolder}/build-vscode",
+	"cmake.configureSettings": {
+		"CMAKE_TOOLCHAIN_FILE": "${workspaceFolder}/vcpkg/scripts/buildsystems/vcpkg.cmake",
+		"TERMINAL_SUPPORT_HYPERLINK": "0",
+	},
+	"search.exclude": {
+		"**/vcpkg": true,
+		"**/build-*": true
+	},
+	"files.associations": {
+		"*.h": "cpp",
+		"iostream": "cpp",
+		"*.tcc": "c",
+		"exception": "c",
+		"memory_resource": "c",
+		"istream": "c",
+		"new": "c",
+		"ostream": "c",
+		"stdexcept": "c",
+		"streambuf": "c",
+		"typeinfo": "c",
+		"numbers": "c"
+	}
+}

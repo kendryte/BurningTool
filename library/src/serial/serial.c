@@ -1,0 +1,52 @@
+#include "serial.h"
+
+// unsigned char g_GreetingBuf[15]={0xc0,0xc2,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0xc0};
+unsigned char g_GreetingBuf[] = {0xc0, 0xc2, 0x00,
+								 0x00, 0x00,
+								 0x00, 0x00, 0x00, 0x00,
+								 0x00, 0x00, 0x00, 0x00,
+								 0x00, 0x0, 0x0, 0x0,
+								 0xc0};
+
+unsigned char g_GetChipID[] = {0xc0, 0xf0, 0x00,
+							   0x00, 0x00,
+							   0x00, 0x00, 0x00, 0x00,
+							   0x00, 0x00, 0x00, 0x00,
+							   0x00, 0x0, 0x0, 0x0,
+							   0xc0};
+
+uint32_t isp_calculate_checksum(uint8_t *message, uint32_t size)
+{
+	// crc32 checksum
+	int j;
+	uint32_t byte, crc, mask;
+
+	crc = 0xFFFFFFFF;
+	while (size != 0)
+	{
+		byte = *message;
+		crc = crc ^ byte;
+		for (j = 7; j >= 0; j--)
+		{
+			mask = -(crc & 1);
+			crc = (crc >> 1) ^ (0xEDB88320 & mask);
+		}
+
+		message++;
+		size--;
+	}
+	return ~crc;
+}
+
+int analysis_serial_return_data(const uint8_t *ret, uint32_t len, uint8_t *op, uint8_t *reason)
+{
+	if (len < 2)
+	{
+		op = 0;
+		reason = 0;
+		return -1;
+	}
+	*op = ret[0];
+	*reason = ret[1];
+	return 0;
+}

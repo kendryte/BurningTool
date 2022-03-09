@@ -1,0 +1,8 @@
+{
+	"recommendations": [
+		"ms-vscode.cpptools",
+		"austin.code-gnu-global",
+		"ms-vscode.cmake-tools",
+		"cheshirekow.cmake-format"
+	]
+}
