@@ -14,3 +14,6 @@ set_target_properties(KBurningTool PROPERTIES LINKER_LANGUAGE CXX)
 
 add_dependencies(KBurningTool canaan_burn)
 target_link_libraries(KBurningTool PRIVATE canaan_burn)
+
+find_package(Argtable3 CONFIG REQUIRED)
+target_link_libraries(KBurningTool PRIVATE argtable3::argtable3)

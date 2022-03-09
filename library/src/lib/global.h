@@ -22,7 +22,8 @@ void global_resource_unregister(dispose_function callback, void *userData);
 #define gt_zero(x) (x > 0 ? x : 0)
 
 #ifndef NDEBUG
-#if TERMINAL_SUPPORT_HYPERLINK == 1
+
+#ifndef DISABLE_TERM_HYPERLINK
 #define S(x) #x
 #define S_(x) S(x)
 #define debug_print(fmt, ...)                                                      \
@@ -31,16 +32,21 @@ void global_resource_unregister(dispose_function callback, void *userData);
 			BASENAME(__FILE__), __LINE__,                                          \
 			(int)gt_zero(24 - strlen(BASENAME(__FILE__)) - strlen(S_(__LINE__))),  \
 			"" __VA_OPT__(, ) __VA_ARGS__)
-#else
+
+#else // DISABLE_TERM_HYPERLINK
+
 #define RELATIVE_PATH (__FILE__ + strlen(PROJECT_ROOT))
 #define debug_print(fmt, ...)                                                                                      \
 	fprintf(stderr, "\x1B[2m[.%s:%-*d]\x1B[0m " fmt "\n", RELATIVE_PATH, gt_zero(43 - (int)strlen(RELATIVE_PATH)), \
 			__LINE__ __VA_OPT__(, ) __VA_ARGS__)
-#endif
-#else
+
+#endif // DISABLE_TERM_HYPERLINK
+
+#else // NDEBUG
 
 #define debug_print(fmt, ...)
-#endif
+
+#endif // NDEBUG
 
 static inline bool
 prefix(const char *pre, const char *str)

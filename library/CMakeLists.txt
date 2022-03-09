@@ -16,8 +16,9 @@ endif()
 
 get_filename_component(PROJECT_ROOT "${CMAKE_CURRENT_LIST_DIR}/.." ABSOLUTE)
 add_compile_definitions("PROJECT_ROOT=\"${PROJECT_ROOT}\"")
-add_compile_definitions(
-  "TERMINAL_SUPPORT_HYPERLINK=${TERMINAL_SUPPORT_HYPERLINK}")
+if(${DISABLE_TERM_HYPERLINK})
+  add_compile_definitions("DISABLE_TERM_HYPERLINK")
+endif()
 
 project(
   BurningLibrary
@@ -44,7 +45,6 @@ find_package(libusb CONFIG REQUIRED)
 target_include_directories(canaan_burn PRIVATE ${LIBUSB_INCLUDE_DIRS})
 target_link_libraries(canaan_burn PRIVATE ${LIBUSB_LIBRARIES})
 
-include(
-  "${VCPKG_ROOT}/installed/x64-linux/share/libsercomm/sercommConfig.cmake")
-# find_package(libsercomm CONFIG REQUIRED)
+include("${VCPKG_INSTALLED_DIR}/x64-linux/share/libsercomm/sercommConfig.cmake")
+# find_package(sercomm CONFIG REQUIRED)
 target_link_libraries(canaan_burn PRIVATE sercomm)
