@@ -12,7 +12,12 @@
 			"args": [],
 			"stopAtEntry": false,
 			"cwd": "${workspaceFolder}/build-vscode",
-			"environment": [],
+			"environment": [
+				{
+					"name": "LD_PRELOAD",
+					"value": "/usr/lib64/libasan.so.6"
+				}
+			],
 			"externalConsole": false,
 			"MIMode": "gdb",
 			"preLaunchTask": "CMake: Build",

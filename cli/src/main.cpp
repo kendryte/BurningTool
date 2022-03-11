@@ -4,23 +4,40 @@
 
 using namespace std;
 
-bool verify(const struct kburnSerialNode *dev)
+const char *test_null(const char *str)
 {
-	cout << "ask connect: " << dev->path << endl;
+	return str ? str : "NULL";
+}
+
+bool verify(const kburnDeviceNode *dev, void *ctx)
+{
+	cout << "ask connect: " << dev->path << ", isUSB=" << dev->deviceInfo.isUSB << endl;
 	return true;
 }
 
-void handle(const struct kburnSerialNode *dev)
+void handle(kburnDeviceNode *dev, void *ctx)
 {
 	cout << "GotDev: " << dev->path << endl;
-	cout << "isOpen: " << dev->isOpen << endl;
-	cout << "isConfirm: " << dev->isConfirm << endl;
-	cout << "error status: " << dev->isError << ", " << dev->errorMessage << endl;
+	cout << "  * isOpen: " << dev->isOpen << endl;
+	cout << "  * isConfirm: " << dev->isConfirm << endl;
+	cout << "  * error status: " << dev->error->code << ", " << test_null(dev->error->errorMessage) << endl;
+}
+
+void disconnect(const kburnDeviceNode *dev, void *ctx)
+{
+	cout << "Disconnect: " << dev->path << endl;
+	cout << "  * isOpen: " << dev->isOpen << endl;
+	cout << "  * isConfirm: " << dev->isConfirm << endl;
+	cout << "  * error status: " << dev->error->code << ", " << test_null(dev->error->errorMessage) << endl;
 }
 
 int main()
 {
-	kburnWaitDevice(verify, handle);
+	kburnRegisterDisconnectCallback(disconnect, NULL);
+	kburnSetCallbackVerifyDevice(verify, NULL);
+	kburnSetCallbackHandler(handle, NULL);
+
+	kburnWaitDeviceInitStart();
 
 	printf("Press ENTER to stop monitoring\n");
 	getchar();

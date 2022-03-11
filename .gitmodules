@@ -2,3 +2,6 @@
 	path = vcpkg
 	url = https://github.com/microsoft/vcpkg
 	shallow = true
+[submodule "library/3rdparty/sanitizers-cmake"]
+	path = library/3rdparty/sanitizers-cmake
+	url = https://github.com/arsenm/sanitizers-cmake

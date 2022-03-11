@@ -1,14 +1,20 @@
 #include "serial.h"
 
-ser_opts_t opts = SER_OPTS_INIT;
+ser_opts_t opts = {
+	.port = NULL,
+	.baudrate = KBURN_K510_BAUDRATE_DEFAULT,
+	.bytesz = SER_BYTESZ_8,
+	.parity = SER_PAR_NONE,
+	.stopbits = SER_STOPB_ONE,
+	.timeouts = {.rd = 800, .wr = 200},
+};
 
-int32_t serial_open_with_current_config(ser_t *ser, const char *path)
+ser_opts_t get_current_serial_options(const char *path)
 {
 	ser_opts_t _opts = SER_OPTS_INIT;
 	memcpy(&_opts, &opts, sizeof(ser_opts_t));
 	_opts.port = path;
-
-	return ser_open(ser, &_opts);
+	return _opts;
 }
 
 void kburnSetSerialBaudrate(uint32_t baudrate)

@@ -1,50 +1,54 @@
 #include "serial.h"
 
-void on_device_attach(const char *path)
+kburn_err_t on_serial_device_attach(KBCTX scope, const char *path)
 {
-	debug_print("on_device_attach(%s)", path);
+	kburn_err_t err;
+	debug_print("on_serial_device_attach(%s)", path);
 
-	if (prefix("/dev/tty", path))
+	kburnDeviceNode *node;
+
+	err = create_empty_device_instance(scope, &node);
+	assert((err == KBurnNoErr) && "critical memory alloc failed");
+	if (err != KBurnNoErr)
+		return err;
+
+	err = init_serial_port(node->serial, path);
+	assert((err == KBurnNoErr) && "init_serial_port now do not return error");
+	if (err != KBurnNoErr)
+		return err;
+
+	if (scope->serial->verify_callback != NULL)
 	{
-		const char n = path[8];
-		if (n == '\0' || n == 'S' || (n >= '0' && n <= 9))
-		{
-			debug_print("  - ignore tty");
-			return;
-		}
-	}
-
-	kburnSerialNode *node = create_port(path);
-
-	if (mon.verify_callback != NULL)
-	{
-		if (!mon.verify_callback(node))
+		if (!scope->serial->verify_callback(node, scope->serial->verify_callback_ctx))
 		{
 			debug_print("verify return false");
-			destroy_port(node);
-			return;
+			destroy_serial_port(scope, node);
+			return KBURN_ERROR_KIND_COMMON | KBurnUserCancel;
 		}
 	}
 
-	if (!node->isOpen)
+	if (!node->serial->isOpen)
 	{
-		if (!serial_low_open(node))
+		if (!serial_low_open(node->serial))
 		{
+			err = node->error->code;
 			debug_print("open failed");
-			destroy_port(node);
-			return;
+			destroy_serial_port(scope, node);
+			return err;
 		}
 	}
 
-	if (!node->isConfirm)
+	if (!node->serial->isConfirm)
 	{
-		if (!confirm_port_is_ready(node))
+		if (!confirm_port_is_ready(node->serial))
 		{
+			err = node->error->code;
 			debug_print("confirm failed");
-			destroy_port(node);
-			return;
+			destroy_serial_port(scope, node);
+			return err;
 		}
 	}
 
-	mon.handler_callback(node);
+	scope->serial->handler_callback(node, scope->serial->handler_callback_ctx);
+	return err;
 }

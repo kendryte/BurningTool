@@ -2,14 +2,6 @@
 #include <stdlib.h>
 #include <assert.h>
 
-typedef struct element
-{
-	struct element *prev;
-	void *userData;
-	dispose_function callback;
-	struct element *next;
-} element;
-
 void dispose_add(disposable_registry *source, dispose_callback e)
 {
 	debug_print("dispose_add(%p, %p) [size=%d]", (void *)source, (void *)e.userData, source->size);
@@ -19,6 +11,12 @@ void dispose_add(disposable_registry *source, dispose_callback e)
 	ele->next = NULL;
 
 	lock(&source->lock);
+
+	if (!source->head)
+		source->head = ele;
+
+	if (source->tail)
+		source->tail->next = ele;
 
 	ele->prev = source->tail;
 
@@ -55,17 +53,14 @@ void dispose_delete(disposable_registry *source, dispose_callback e)
 {
 	debug_print("dispose_delete(%p, %p) [size=%d]", (void *)source, (void *)e.userData, source->size);
 
-	lock(&source->lock);
-	for (element *curs = source->head; curs != NULL; curs = curs->next)
+	disposable_foreach_start(source, curs);
+	if (curs->callback == e.callback && curs->userData == e.userData)
 	{
-		if (curs->callback == e.callback && curs->userData == e.userData)
-		{
-			do_delete(source, curs);
-			unlock(&source->lock);
-			return;
-		}
+		do_delete(source, curs);
+		unlock(&source->lock);
+		return;
 	}
-	unlock(&source->lock);
+	disposable_foreach_end(source);
 
 	debug_print("  - not found");
 }
@@ -74,13 +69,12 @@ void dispose(disposable_registry *target)
 {
 	debug_print("dispose(%p) [size=%d]", (void *)target, target->size);
 
-	lock(&target->lock);
-	while (target->head)
+	while (target->tail)
 	{
-		element *current = target->head;
-		current->callback(current->userData);
+		element *current = target->tail;
+		current->callback(target, current->userData);
 
-		assert((current != target->head) && "disposed function not call to dispose_delete()");
+		debug_print("  * dispose callback return, size=%d", target->size);
+		assert((current != target->tail) && "disposed function not call to dispose_delete()");
 	}
-	unlock(&target->lock);
 }

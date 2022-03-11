@@ -27,6 +27,25 @@
 		"stdexcept": "c",
 		"streambuf": "c",
 		"typeinfo": "c",
-		"numbers": "c"
+		"numbers": "c",
+		"array": "c",
+		"deque": "c",
+		"string": "c",
+		"unordered_map": "c",
+		"vector": "c",
+		"string_view": "c",
+		"initializer_list": "c",
+		"system_error": "c",
+		"cstddef": "c",
+		"list": "c",
+		"cstdlib": "c",
+		"atomic": "c",
+		"compare": "c",
+		"functional": "c",
+		"tuple": "c",
+		"type_traits": "c",
+		"utility": "c",
+		"random": "c",
+		"cerrno": "c"
 	}
 }

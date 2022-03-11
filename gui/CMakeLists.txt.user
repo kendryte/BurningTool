@@ -53,7 +53,7 @@
    <value type="bool" key="EditorConfiguration.cleanWhitespace">true</value>
    <value type="QString" key="EditorConfiguration.ignoreFileTypes">*.md, *.MD, Makefile</value>
    <value type="bool" key="EditorConfiguration.inEntireDocument">true</value>
-   <value type="bool" key="EditorConfiguration.skipTrailingWhitespace">true</value>
+   <value type="bool" key="EditorConfiguration.skipTrialingWhitespace">true</value>
   </valuemap>
  </data>
  <data>

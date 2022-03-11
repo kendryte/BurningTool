@@ -1,80 +1,102 @@
 #include "serial.h"
 
-monitor mon = {NULL, NULL, NULL};
-static bool already_init = false;
-
-static void on_event(void *UNUSED(_), ser_dev_evt_t evt, const ser_dev_t *dev)
+static void on_event(void *ctx, ser_dev_evt_t evt, const ser_dev_t *dev)
 {
+	KBCTX scope = ctx;
 	switch (evt)
 	{
 	case SER_DEV_EVT_ADDED:
 		debug_print("[monitor] connect: %s", dev->path);
-		on_device_attach(dev->path);
+		on_serial_device_attach(scope, dev->path);
 		break;
 	case SER_DEV_EVT_REMOVED:
 		debug_print("[monitor] remove : %s", dev->path);
-		kburnSerialNode *port = find_from_port_list(dev->path);
-		if (port)
-			destroy_port(port);
+		kburnDeviceNode *device = get_device_by_serial_port_path(scope, dev->path);
+		if (device)
+			destroy_serial_port(scope, device);
+
 		break;
 	}
 }
 
-static inline void init_list()
+void kburnOnSerialConnect(KBCTX scope, on_device_connect verify_callback, void *ctx)
 {
+	scope->serial->verify_callback = verify_callback;
+	scope->serial->verify_callback_ctx = ctx;
+}
+void kburnOnSerialConfirm(KBCTX scope, on_device_handle handler_callback, void *ctx)
+{
+	scope->serial->handler_callback = handler_callback;
+	scope->serial->handler_callback_ctx = ctx;
+}
+
+kburn_err_t serial_subsystem_init(KBCTX scope)
+{
+	debug_print("\tserial_subsystem_init()");
+
 	debug_print("[monitor] init_list()");
 	ser_dev_list_t *lst;
 
 	lst = ser_dev_list_get();
-	assert((lst != NULL) && sererr_last());
+	if (!lst)
+	{
+		debug_print("serial port list get failed: %s", sererr_last());
+		return KBURN_ERROR_KIND_COMMON | KBurnSerialFailListDevice;
+	}
+
 	ser_dev_list_t *item;
 
 	ser_dev_list_foreach(item, lst)
 	{
+		if (prefix("/dev/ttyS", item->dev.path))
+		{
+			continue;
+		}
 		debug_print("[monitor]   * %s", item->dev.path);
-		on_device_attach(item->dev.path);
+		on_serial_device_attach(scope, item->dev.path);
 	}
 
 	ser_dev_list_destroy(lst);
+
+	return KBurnNoErr;
 }
 
-void dispose_monitor(void *UNUSED(_))
+void serial_subsystem_deinit(KBCTX scope)
 {
-	global_resource_unregister(dispose_monitor, NULL);
-	if (mon.instance != NULL)
+	debug_print("serial_subsystem_deinit()");
+	if (scope->serial->monitor_instance)
 	{
-		kburnWaitDevicePause();
+		ser_dev_monitor_stop(scope->serial->monitor_instance);
+	}
+	free(scope->serial);
+}
+
+void serial_monitor_pause(KBCTX scope)
+{
+	debug_print("serial_monitor_pause() [instance=%p]", (void *)scope->serial->monitor_instance);
+	if (scope->serial && scope->serial->monitor_instance)
+	{
+		ser_dev_monitor_stop(scope->serial->monitor_instance);
+		scope->serial->monitor_instance = NULL;
 	}
 }
 
-void kburnWaitDevice(on_device_connect verify_callback, on_device_handle handler_callback)
+kburn_err_t serial_monitor_resume(KBCTX scope)
 {
-	debug_print("kburnWaitDevice() [already_init=%d]", already_init);
-
-	mon.handler_callback = handler_callback;
-	mon.verify_callback = verify_callback;
-
-	if (!already_init)
+	if (!scope->serial)
 	{
-		already_init = true;
-		init_list();
-		kburnWaitDeviceResume();
-		global_resource_register(dispose_monitor, NULL);
+		kburn_err_t e = serial_subsystem_init(scope);
+		if (e != KBurnNoErr)
+		{
+			return e;
+		}
 	}
-}
+	debug_print("serial_monitor_resume() [instance=%p]", (void *)scope->serial->monitor_instance);
+	if (scope->serial->monitor_instance == NULL)
+		scope->serial->monitor_instance = ser_dev_monitor_init(on_event, scope);
 
-void kburnWaitDevicePause()
-{
-	debug_print("kburnWaitDevicePause() [instance=%p]", (void *)mon.instance);
-	if (mon.instance != NULL)
-	{
-		ser_dev_monitor_stop(mon.instance);
-		mon.instance = NULL;
-	}
-}
-void kburnWaitDeviceResume()
-{
-	debug_print("kburnWaitDeviceResume() [instance=%p]", (void *)mon.instance);
-	if (mon.instance == NULL)
-		mon.instance = ser_dev_monitor_init(on_event, NULL);
+	if (scope->serial->monitor_instance == NULL)
+		return KBURN_ERROR_KIND_COMMON | KBurnSerialMonitorFailStart;
+
+	return KBurnNoErr;
 }

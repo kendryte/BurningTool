@@ -13,4 +13,4 @@ target_include_directories(
 set_target_properties(test PROPERTIES LINKER_LANGUAGE CXX)
 
 add_dependencies(test canaan_burn)
-target_link_libraries(test PRIVATE canaan_burn)
+target_link_libraries(test PRIVATE canaan_burn udev)

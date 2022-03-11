@@ -2,25 +2,40 @@
 #include <stdlib.h>
 #include <string.h>
 
-static disposable_registry global_disposable = {NULL, NULL, 0, 0};
-
-void kburnDispose()
+void global_resource_register(KBCTX scope, dispose_function callback, void *userData)
 {
-	debug_print("kburnDispose()");
-	dispose(&global_disposable);
+	dispose_add(scope->disposables, disposable(callback, userData));
 }
 
-void global_resource_register(dispose_function callback, void *userData)
+void global_resource_unregister(KBCTX scope, dispose_function callback, void *userData)
 {
-	dispose_add(&global_disposable, disposable(callback, userData));
+	dispose_delete(scope->disposables, disposable(callback, userData));
 }
 
-void global_resource_unregister(dispose_function callback, void *userData)
+#if WIN32
+#include <windows.h>
+#else
+#include <unistd.h>
+#endif
+
+void do_sleep(int ms)
 {
-	dispose_delete(&global_disposable, disposable(callback, userData));
+#if WIN32
+	Sleep(ms);
+#else
+	usleep(ms * 1000);
+#endif
 }
 
-uint32_t kburnGetResourceCount()
+#ifndef NDEBUG
+__attribute__((access(read_only, 2, 3))) void __print_buffer(const char *dir, const uint8_t *buff, size_t size, size_t max_dump)
 {
-	return global_disposable.size;
+	fprintf(stderr, "\n\t%s: \x1B[2m", dir);
+	size_t cnt = size > max_dump ? max_dump : size;
+	for (size_t i = 0; i < cnt; i++)
+	{
+		fprintf(stderr, "0x%02X ", buff[i]);
+	}
+	fprintf(stderr, "| %ld bytes\x1B[0m\n", size);
 }
+#endif

@@ -3,11 +3,11 @@
 #include <time.h>
 #include <stdbool.h>
 #include <string.h>
-#include "usbinterface.h"
+#include "usb.h"
 
 // Command Block Wrapper (CBW)
 struct command_block_wrapper
-{
+{ 
 	uint8_t dCBWSignature[4];
 	uint32_t dCBWTag;
 	uint32_t dCBWDataTransferLength;
@@ -26,91 +26,7 @@ struct command_status_wrapper
 	uint8_t bCSWStatus;
 };
 
-/*************************************************
-Function: libusbInit()
-Description: libusb 初始化
-Return: 函数返回值为负数，说明初始化失败，返回0成功
-*************************************************/
-int libusbInit()
-{
-	int r;
-	const struct libusb_version *version;
-	/* libusb 的版本 */
-	version = libusb_get_version();
-	printf("Using libusb v%d.%d.%d.%d\n\n", version->major, version->minor, version->micro, version->nano);
-	/* libusb 初始化 */
-	r = libusb_init(NULL);
-	if (r < 0)
-	{
-		printf("Libusb init failed: %s\n", libusb_strerror((enum libusb_error)r));
-		return r;
-	}
-	/* 设置日志级别 */
-	r = libusb_set_option(NULL, LIBUSB_OPTION_LOG_LEVEL, LIBUSB_LOG_LEVEL_INFO);
-	if (r < 0)
-	{
-		printf("Log level set failed: %s\n", libusb_strerror((enum libusb_error)r));
-	}
-	return 0;
-}
 
-/***************************************************
-Function: libusbExit()
-Description: libusb退出，调用此函数后不能再用libusb接口
-****************************************************/
-void libusbExit()
-{
-	libusb_exit(NULL);
-}
-
-/****************************************************
-Function: getDevEndpoint
-Description: 获取usb设备的端点。in和out
-Called By:   由函数serchOpenDevice()调用
-param1 : dev         枚举出来并符合vid pid的usb设备
-param2 : current     当前设备节点
-Return: 返回负数说明获取端点失败，返回0为成功
-*******************************************************/
-static int getDevEndpoint(libusb_device *dev, usbdev_node *current)
-{
-	int r;
-	int k, j;
-	struct libusb_config_descriptor *conf_desc;
-	const struct libusb_endpoint_descriptor *endpoint;
-
-	/* 获取配置描述符，里面包含端点信息 */
-	r = libusb_get_config_descriptor(dev, 0, &conf_desc);
-	if (r < 0)
-	{
-		printf("Get config descriptor failed: %s\n", libusb_strerror((enum libusb_error)r));
-		return -1;
-	}
-
-	/* 默认使用第一个接口 usb_interface[0]*/
-	for (j = 0; j < conf_desc->usb_interface[0].num_altsetting; j++)
-	{
-		for (k = 0; k < conf_desc->usb_interface[0].altsetting[j].bNumEndpoints; k++)
-		{
-			endpoint = &conf_desc->usb_interface[0].altsetting[j].endpoint[k];
-			printf("Endpoint[%d].address: %02X\n", k, endpoint->bEndpointAddress);
-			/* 使用批量传输的端点 */
-			if (endpoint->bmAttributes & LIBUSB_TRANSFER_TYPE_MASK & LIBUSB_TRANSFER_TYPE_BULK)
-			{
-				if (endpoint->bEndpointAddress & LIBUSB_ENDPOINT_IN)
-				{
-					current->endpoint_in = endpoint->bEndpointAddress;
-				}
-				else
-				{
-					current->endpoint_out = endpoint->bEndpointAddress;
-				}
-			}
-		}
-	}
-	/* 释放配置描述符 */
-	libusb_free_config_descriptor(conf_desc);
-	return 0;
-}
 
 /************************************************************
 Function: getmaxlun
