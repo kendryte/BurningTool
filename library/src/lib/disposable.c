@@ -4,7 +4,7 @@
 
 void dispose_add(disposable_registry *source, dispose_callback e)
 {
-	debug_print("dispose_add(%p, %p) [size=%d]", (void *)source, (void *)e.userData, source->size);
+	debug_print("dispose_add(%p[%s], %p) [size=%d]", (void *)source, source->comment, (void *)e.userData, source->size);
 	element *ele = malloc(sizeof(element));
 	ele->callback = e.callback;
 	ele->userData = e.userData;
@@ -51,7 +51,7 @@ static void do_delete(disposable_registry *source, element *target)
 
 void dispose_delete(disposable_registry *source, dispose_callback e)
 {
-	debug_print("dispose_delete(%p, %p) [size=%d]", (void *)source, (void *)e.userData, source->size);
+	debug_print("dispose_delete(%p[%s], %p) [size=%d]", (void *)source, source->comment, (void *)e.userData, source->size);
 
 	disposable_foreach_start(source, curs);
 	if (curs->callback == e.callback && curs->userData == e.userData)
@@ -67,14 +67,54 @@ void dispose_delete(disposable_registry *source, dispose_callback e)
 
 void dispose(disposable_registry *target)
 {
-	debug_print("dispose(%p) [size=%d]", (void *)target, target->size);
+	bool selfDisposing = target->size > 0 && target->head->callback == free_pointer && target->head->userData == target;
+	debug_print("dispose(%p[%s]) [size=%d, selfDisposing=%d]", (void *)target, target->comment, target->size, selfDisposing);
+	bool selfLast = false;
 
 	while (target->tail)
 	{
+		if (selfDisposing && target->size == 1)
+			selfLast = true;
+
 		element *current = target->tail;
 		current->callback(target, current->userData);
 
-		debug_print("  * dispose callback return, size=%d", target->size);
-		assert((current != target->tail) && "disposed function not call to dispose_delete()");
+		if (selfLast)
+		{
+			debug_print("  * dispose callback return, self memory free");
+			return;
+		}
+		else
+		{
+			debug_print("  * dispose callback return, size=%d", target->size);
+			assert((current != target->tail) && "disposed function not call to dispose_delete()");
+		}
 	}
+}
+
+DECALRE_DISPOSE(free_pointer, void)
+{
+	free(context);
+}
+DECALRE_DISPOSE_END()
+
+void *register_free_pointer_pass(disposable_registry *reg, void *ptr)
+{
+	if (reg == ptr)
+	{
+		assert(reg->size == 0 && "free self must at first element");
+	}
+	dispose_add(reg, disposable(free_pointer, ptr));
+	return ptr;
+}
+
+DECALRE_DISPOSE(dispose_child, void)
+{
+	dispose(context);
+}
+DECALRE_DISPOSE_END()
+
+void dispose_chain(disposable_registry *parent, disposable_registry *child)
+{
+	dispose_add(parent, disposable(dispose_child, child));
 }

@@ -5,6 +5,7 @@
 
 typedef struct disposable_registry
 {
+	char comment[32];
 	struct element *head;
 	struct element *tail;
 	uint32_t size;
@@ -59,3 +60,10 @@ static inline dispose_callback disposable(dispose_function callback, void *userD
 
 #define DECALRE_DISPOSE_END() \
 	}
+
+void free_pointer(disposable_registry *ctx, void *ptr);
+void *register_free_pointer_pass(disposable_registry *reg, void *ptr);
+#define FREE_WITH(disposable_registry, ptr) register_free_pointer_pass(disposable_registry, ptr)
+
+void dispose_child(disposable_registry *parent, void *child);
+void dispose_chain(disposable_registry *parent, disposable_registry *child);

@@ -3,34 +3,33 @@
 #include "serial.h"
 #include "device-link-list.h"
 
-disposable_registry lib_global_scope = {NULL, NULL, 0, 0};
-
-static DECALRE_DISPOSE(scope_delete, kburnContext)
-{
-	debug_print("scope_delete(0x%p)", (void *)context);
-	dispose(context->disposables);
-	free(context->disposables);
-	free(context->usb);
-	free(context->serial);
-	free(context->openDeviceList);
-	free(context);
-}
-DECALRE_DISPOSE_END()
+disposable_registry lib_global_scope = {
+	.comment = "entire global scope",
+	.head = NULL,
+	.tail = NULL,
+	.lock = 0,
+	.size = 0,
+};
 
 kburn_err_t kburnCreate(KBCTX *ppCtx)
 {
-	*ppCtx = KBALLOC(kburnContext);
+	disposable_registry *dis = KBALLOC(disposable_registry);
+	FREE_WITH(dis, dis);
+
+	*ppCtx = KBALLOC_SCOPE(dis, kburnContext);
+
+	snprintf(dis->comment, sizeof(dis->comment), "context 0x%p", (void *)*ppCtx);
 
 	kburnContext src = {
-		.serial = KBALLOC(serial_subsystem_context),
-		.usb = KBALLOC(usb_subsystem_context),
-		.disposables = KBALLOC(disposable_registry),
-		.openDeviceList = KBALLOC(struct port_link_list),
+		.serial = KBALLOC_SCOPE(dis, serial_subsystem_context),
+		.usb = KBALLOC_SCOPE(dis, usb_subsystem_context),
+		.disposables = dis,
+		.openDeviceList = KBALLOC_SCOPE(dis, struct port_link_list),
 		.monitor_inited = false,
 	};
 	memcpy(*ppCtx, &src, sizeof(kburnContext));
 
-	dispose_add(&lib_global_scope, disposable(scope_delete, *ppCtx));
+	dispose_chain(&lib_global_scope, dis);
 
 	return KBurnNoErr;
 }
@@ -43,7 +42,7 @@ void kburnGlobalDestroy()
 
 void kburnDestroy(KBCTX scope)
 {
-	scope_delete(&lib_global_scope, scope);
+	dispose_child(&lib_global_scope, scope->disposables);
 }
 
 uint32_t kburnGetResourceCount()

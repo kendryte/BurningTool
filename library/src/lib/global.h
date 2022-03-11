@@ -123,3 +123,5 @@ void driver_get_devinfo_free(kburnSerialDeviceInfo);
 #define KBALLOC(...) __KBALLOC_X(, ##__VA_ARGS__,          \
 								 __KBALLOC_2(__VA_ARGS__), \
 								 __KBALLOC_1(__VA_ARGS__))
+
+#define KBALLOC_SCOPE(disposable_registry, type, ...) (type *)FREE_WITH(disposable_registry, KBALLOC(type __VA_OPT__(, ) __VA_ARGS__))
