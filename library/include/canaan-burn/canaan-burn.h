@@ -11,6 +11,7 @@
 DEFINE_START
 
 #ifndef kburn_scope
+#define kburn_scope
 typedef struct kburnContext kburnContext;
 typedef kburnContext *KBCTX;
 #endif
@@ -78,6 +79,9 @@ PUBLIC uint32_t kburnGetOpenPortCount();
 #define KBURN_VIDPID_FILTER_ANY -1
 #define KBURN_VIDPID_FILTER_DEFAULT -2
 PUBLIC void kburnSetUsbFilter(KBCTX scope, int32_t vid, int32_t pid);
+
+PUBLIC kburn_err_t kburnOpenUSB(KBCTX scope, uint16_t vid, uint16_t pid, const uint8_t *serial);
+PUBLIC kburn_err_t kburnPollUSB(KBCTX scope);
 
 DEFINE_END
 

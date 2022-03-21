@@ -39,13 +39,31 @@ typedef struct usb_subsystem_context
 	struct libusb_context *libusb;
 	bool inited;
 	bool monitor_enabled;
+	libusb_hotplug_callback_handle monitor_handle;
 } usb_subsystem_context;
 
 kburn_err_t usb_subsystem_init(KBCTX scope);
 void usb_subsystem_deinit(KBCTX scope);
 void usb_monitor_pause(KBCTX scope);
 kburn_err_t usb_monitor_resume(KBCTX scope);
-kburn_err_t init_list_usb(KBCTX scope);
+
+struct usb_get_serial_ret
+{
+	int error;
+	uint16_t vid;
+	uint16_t pid;
+};
+struct usb_get_serial_ret usb_get_serial(struct libusb_device *dev, uint8_t *output, size_t buffsize);
+libusb_device *get_usb_device(struct libusb_context *libusb, uint16_t vid, uint16_t pid, const uint8_t *serial);
+void free_got_usb_device(libusb_device *dev);
+void free_all_unopend_usb_info(kburnUsbDeviceInfo **list);
+int get_all_unopend_usb_info(KBCTX scope, int vid, int pid, kburnUsbDeviceInfo **ret);
+kburn_err_t init_list_all_usb_devices(KBCTX scope);
+
+kburn_err_t open_single_usb_port(KBCTX scope, struct libusb_device *dev);
+kburn_err_t close_single_usb_port(KBCTX scope, kburnDeviceNode *dev);
 
 void destroy_usb_port(KBCTX scope, kburnDeviceNode *device);
 kburn_err_t create_usb_port(KBCTX scope, kburnDeviceNode *device);
+
+kburnDeviceNode *usb_device_find(KBCTX scope, uint16_t vid, uint16_t pid, const uint8_t *serial);

@@ -12,6 +12,7 @@ enum KBurnCommonError
 	KBurnSerialMonitorFailStart,
 	KBurnSerialFailListDevice,
 	KBurnUsbMonitorFailStart,
+	KBurnUsbDeviceNotFound,
 	KBurnProtocolOpMismatch,
 	KBurnUserCancel,
 };

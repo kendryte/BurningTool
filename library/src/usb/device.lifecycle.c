@@ -51,7 +51,30 @@ int get_device_info(libusb_device *dev, usbdev_node *current)
 void destroy_usb_port(KBCTX UNUSED(scope), kburnDeviceNode *device)
 {
 	kburnUsbDeviceNode *usb = device->usb;
-	if (!usb->init)
+	if (!device->usb->init)
 		return;
+
+	if (usb->isOpen)
+	{
+		// TODO: close
+	}
+
+	if (usb->handle)
+	{
+	}
+
 	debug_print("destroy_usb_port(usn[0x%p, %s])", (void *)usb, "");
+}
+
+kburn_err_t create_usb_port(KBCTX UNUSED(scope), kburnDeviceNode *device)
+{
+	kburnUsbDeviceNode *usb = device->usb;
+	if (device->usb->init)
+		return KBurnNoErr;
+
+	usb->isOpen = false;
+	usb->isConfirm = false;
+	usb->init = true;
+
+	return KBurnNoErr;
 }

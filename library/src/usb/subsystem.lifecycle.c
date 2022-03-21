@@ -33,8 +33,11 @@ kburn_err_t usb_subsystem_init(KBCTX scope)
 
 	scope->usb->inited = true;
 
+	extern bool libUsbHasWathcer;
+	libUsbHasWathcer = libusb_has_capability(LIBUSB_CAP_HAS_HOTPLUG);
+
 	if (libusb_set_option(NULL, LIBUSB_OPTION_LOG_LEVEL, LIBUSB_LOG_LEVEL_INFO) < 0)
 		debug_print("log level set failed: %s\n", libusb_strerror((enum libusb_error)r));
 
-	return init_list_usb(scope);
+	return init_list_all_usb_devices(scope);
 }

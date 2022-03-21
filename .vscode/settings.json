@@ -46,6 +46,7 @@
 		"type_traits": "c",
 		"utility": "c",
 		"random": "c",
-		"cerrno": "c"
+		"cerrno": "c",
+		"iosfwd": "c"
 	}
 }

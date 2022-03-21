@@ -1,32 +1,44 @@
 #include "usb.h"
 
-static libusb_hotplug_callback_handle monitor_handle;
-static bool monitor_enabled = false;
+bool libUsbHasWathcer = false;
 
 static int on_event(struct libusb_context *UNUSED(ctx), struct libusb_device *dev,
-					libusb_hotplug_event event, void *UNUSED(user_data))
+					libusb_hotplug_event event, void *user_data)
 {
-	static libusb_device_handle *dev_handle = NULL;
-	struct libusb_device_descriptor desc;
-	int rc;
-
-	(void)libusb_get_device_descriptor(dev, &desc);
+	KBCTX scope = user_data;
 
 	if (LIBUSB_HOTPLUG_EVENT_DEVICE_ARRIVED == event)
 	{
-		rc = libusb_open(dev, &dev_handle);
-		if (LIBUSB_SUCCESS != rc)
+		uint8_t serialString[MAX_SERIAL_LENGTH];
+		struct usb_get_serial_ret ret = usb_get_serial(dev, serialString, MAX_SERIAL_LENGTH);
+		if (ret.error != LIBUSB_SUCCESS)
 		{
-			printf("Could not open USB device\n");
+			debug_print("[usb monitor] failed get device serial %s", libusb_strerror(ret.error));
+			return 0;
 		}
+
+		if (usb_device_find(scope, ret.vid, ret.pid, serialString) != NULL)
+		{
+			debug_print("THAT IS IMPOSSIBLE!");
+		}
+
+		kburn_err_t r = open_single_usb_port(scope, dev);
+		if (r != KBurnNoErr)
+			debug_print("failed open single port: %ld", r);
 	}
 	else if (LIBUSB_HOTPLUG_EVENT_DEVICE_LEFT == event)
 	{
-		if (dev_handle)
+		uint8_t serialString[MAX_SERIAL_LENGTH];
+		struct usb_get_serial_ret ret = usb_get_serial(dev, serialString, MAX_SERIAL_LENGTH);
+		if (ret.error != LIBUSB_SUCCESS)
 		{
-			libusb_close(dev_handle);
-			dev_handle = NULL;
+			debug_print("[usb monitor] failed get device serial %s", libusb_strerror(ret.error));
+			return 0;
 		}
+
+		kburnDeviceNode *node = usb_device_find(scope, ret.vid, ret.pid, serialString);
+		if (node != NULL)
+			close_single_usb_port(scope, node);
 	}
 	else
 	{
@@ -39,8 +51,8 @@ static int on_event(struct libusb_context *UNUSED(ctx), struct libusb_device *de
 void usb_monitor_pause(KBCTX scope)
 {
 	debug_print("usb_monitor_pause()");
-	libusb_hotplug_deregister_callback(scope->usb->libusb, monitor_handle);
-	monitor_enabled = false;
+	libusb_hotplug_deregister_callback(scope->usb->libusb, scope->usb->monitor_handle);
+	scope->usb->monitor_enabled = false;
 }
 
 kburn_err_t usb_monitor_resume(KBCTX scope)
@@ -48,6 +60,10 @@ kburn_err_t usb_monitor_resume(KBCTX scope)
 	debug_print("usb_monitor_resume()");
 	if (scope->usb->monitor_enabled)
 		return KBurnNoErr;
+
+	//	if(!libUsbHasWathcer){
+	// TODO: polling
+	//	}
 
 	if (!scope->usb->inited)
 	{
@@ -67,8 +83,8 @@ kburn_err_t usb_monitor_resume(KBCTX scope)
 		scope->usb->filter.pid == KBURN_VIDPID_FILTER_ANY ? LIBUSB_HOTPLUG_MATCH_ANY : scope->usb->filter.pid,
 		LIBUSB_HOTPLUG_MATCH_ANY,
 		on_event,
-		NULL,
-		&monitor_handle);
+		scope,
+		&scope->usb->monitor_handle);
 
 	if (LIBUSB_SUCCESS != ret)
 	{
