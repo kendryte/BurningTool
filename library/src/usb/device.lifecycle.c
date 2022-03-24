@@ -103,7 +103,7 @@ kburn_err_t open_single_usb_port(KBCTX scope, struct libusb_device *dev)
 	if (rusb < LIBUSB_SUCCESS)
 		goto cleanup_single_port;
 
-	rusb = libusb_open(dev, &node->usb->handle);
+	rusb = libusb_open(dev, &node->usb->handle); // TODO: leak
 	if (rusb < LIBUSB_SUCCESS)
 	{
 		debug_print_libusb_error("open_single_usb_port: libusb_open", rusb);

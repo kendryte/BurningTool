@@ -2,6 +2,7 @@
 
 kburn_err_t usb_device_hello(kburnDeviceNode *node)
 {
+	debug_print("usb_device_hello:");
 	usbIspCommandPacket request = {
 		.command = USB_ISP_COMMAND_HELLO,
 	};
@@ -22,23 +23,24 @@ kburn_err_t usb_device_hello(kburnDeviceNode *node)
 
 	/* 状态阶段 */
 	kburn_err_t e = usb_lowlevel_status_read(node->usb->handle, node->usb->deviceInfo.endpoint_in, expected_tag);
-	kburnErrorDesc rr = kburnSplitErrorCode(e);
-	if (rr.kind == KBURN_ERROR_KIND_COMMON && rr.code == KBurnUsbErrorSense)
+	if (e != KBurnNoErr)
 	{
-		usb_lowlevel_error_read(node->usb->handle, node->usb->deviceInfo.endpoint_in, node->usb->deviceInfo.endpoint_out);
+		kburnErrorDesc rr = kburnSplitErrorCode(e);
+		if (rr.kind == KBURN_ERROR_KIND_COMMON && rr.code == KBurnUsbErrorSense)
+		{
+			usb_lowlevel_error_read(node->usb->handle, node->usb->deviceInfo.endpoint_in, node->usb->deviceInfo.endpoint_out);
+		}
 		return e;
 	}
 	return KBurnNoErr;
 }
-kburn_err_t usb_device_serial_bind(kburnDeviceNode *node)
-{
-	debug_print("usb_device_serial_bind:");
-	assert((node->bind_id != 0) && "call alloc_new_bind_id before this");
 
+static kburn_err_t usb_device_serial_putc(kburnDeviceNode *node, uint8_t ch)
+{
 	usbIspCommandPacket request = {
 		.command = USB_ISP_COMMAND_WRITE_DEVICE,
 		.target = USB_ISP_COMMAND_TARGET_UART,
-		.uart = node->bind_id,
+		.uart = ch,
 	};
 
 	int r;
@@ -47,21 +49,19 @@ kburn_err_t usb_device_serial_bind(kburnDeviceNode *node)
 	/* 批量传输的三个阶段，命令阶段，数据阶段，状态阶段 */
 	/* 命令阶段 */
 	r = usb_lowlevel_command_send(node->usb->handle, node->usb->deviceInfo.endpoint_out, request, LIBUSB_ENDPOINT_OUT, 0, expected_tag);
-	if (r < LIBUSB_SUCCESS)
-	{
-		return KBURN_ERROR_KIND_USB | r;
-	}
-	/* 数据阶段 */
+	if (r != KBurnNoErr)
+		return r;
 
-	/* 没有数据阶段了*/
+	return usb_lowlevel_status_read(node->usb->handle, node->usb->deviceInfo.endpoint_in, expected_tag);
+}
 
-	/* 状态阶段 */
-	kburn_err_t e = usb_lowlevel_status_read(node->usb->handle, node->usb->deviceInfo.endpoint_in, expected_tag);
-	kburnErrorDesc rr = kburnSplitErrorCode(e);
-	if (rr.kind == KBURN_ERROR_KIND_COMMON && rr.code == KBurnUsbErrorSense)
+kburn_err_t usb_device_serial_print(kburnDeviceNode *node, const uint8_t *buff, size_t buff_size)
+{
+	for (size_t i = 0; i < buff_size; i++)
 	{
-		usb_lowlevel_error_read(node->usb->handle, node->usb->deviceInfo.endpoint_in, node->usb->deviceInfo.endpoint_out);
-		return e;
+		kburn_err_t e = usb_device_serial_putc(node, buff[i]);
+		if (e != KBurnNoErr)
+			return e;
 	}
 	return KBurnNoErr;
 }

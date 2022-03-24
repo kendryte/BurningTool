@@ -18,11 +18,11 @@
 typedef enum usbIspCommand
 {
 	USB_ISP_COMMAND_HELLO = 0x0000,
-	USB_ISP_COMMAND_SENSE = 0x0300,
-	USB_ISP_COMMAND_WRITE_BURN = 0xE000,
-	USB_ISP_COMMAND_WRITE_DEVICE = 0xE002,
-	USB_ISP_COMMAND_READ_BURN = 0xE100,
-	USB_ISP_COMMAND_READ_CAPACITY = 0xE101,
+	USB_ISP_COMMAND_SENSE = 0x0003,
+	USB_ISP_COMMAND_WRITE_BURN = 0x00E0,
+	USB_ISP_COMMAND_WRITE_DEVICE = 0x02E0,
+	USB_ISP_COMMAND_READ_BURN = 0x00E1,
+	USB_ISP_COMMAND_READ_CAPACITY = 0x01E1,
 	USB_ISP_COMMAND_MAX = UINT16_MAX,
 } __attribute__((__packed__)) usbIspCommand;
 static_assert(sizeof(usbIspCommand) == 2, "enum must 16bit");
@@ -61,7 +61,7 @@ typedef struct usbIspCommandPacket
 	{
 		struct usbIspCommandPacketBurnBody burn;
 		struct usbIspCommandPacketLedBody led;
-		uint32_t uart;
+		uint8_t uart;
 		struct
 		{
 			uint8_t _reserved;

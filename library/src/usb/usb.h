@@ -59,6 +59,7 @@ kburn_err_t usb_lowlevel_error_read(libusb_device_handle *handle, uint8_t endpoi
 // void debug_print_libusb_error(const char *msg, int libusb_err);
 
 kburn_err_t usb_device_hello(kburnDeviceNode *node);
+kburn_err_t usb_device_serial_print(kburnDeviceNode *node, const uint8_t *buff, size_t buff_size);
 kburn_err_t usb_device_serial_bind(kburnDeviceNode *node);
 
 #ifndef NDEBUG

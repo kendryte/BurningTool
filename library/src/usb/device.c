@@ -45,7 +45,16 @@ int usb_get_device_serial(libusb_device *dev, libusb_device_handle *handle, uint
 	if (desc.iSerialNumber == 0)
 		return LIBUSB_SUCCESS;
 
-	r = libusb_get_string_descriptor_ascii(handle, desc.iSerialNumber, output, MAX_SERIAL_LENGTH);
+	int try = 5;
+	while (try-- > 0)
+	{
+		r = libusb_get_string_descriptor_ascii(handle, desc.iSerialNumber, output, MAX_SERIAL_LENGTH);
+		if (r != LIBUSB_ERROR_BUSY)
+			break;
+		debug_print_libusb_error("libusb_get_string_descriptor_ascii()", r);
+		do_sleep(1000);
+	}
+
 	if (r < LIBUSB_SUCCESS)
 	{
 		debug_print_libusb_error("libusb_get_string_descriptor_ascii()", r);
