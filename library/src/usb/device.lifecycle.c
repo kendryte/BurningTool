@@ -152,9 +152,15 @@ kburn_err_t open_single_usb_port(KBCTX scope, struct libusb_device *dev)
 
 	debug_print("hello success.");
 
-	risp = usb_device_serial_bind(node);
-	if (risp != KBurnNoErr)
-		goto cleanup_single_port;
+	alloc_new_bind_id(node);
+	debug_print("	bind id = %d", node->bind_id);
+
+	for (int try = 20; try > 0; try--)
+	{
+		risp = usb_device_serial_bind(node);
+		if (risp != KBurnNoErr)
+			goto cleanup_single_port;
+	}
 
 	goto success_single_port;
 cleanup_single_port:

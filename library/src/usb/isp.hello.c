@@ -33,8 +33,7 @@ kburn_err_t usb_device_hello(kburnDeviceNode *node)
 kburn_err_t usb_device_serial_bind(kburnDeviceNode *node)
 {
 	debug_print("usb_device_serial_bind:");
-	alloc_new_bind_id(node);
-	debug_print("	bind id = %d", node->bind_id);
+	assert((node->bind_id != 0) && "call alloc_new_bind_id before this");
 
 	usbIspCommandPacket request = {
 		.command = USB_ISP_COMMAND_WRITE_DEVICE,
