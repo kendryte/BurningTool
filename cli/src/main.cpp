@@ -37,7 +37,7 @@ int main()
 	kburnSetCallbackVerifyDevice(verify, NULL);
 	kburnSetCallbackHandler(handle, NULL);
 
-	kburnWaitDeviceInitStart();
+	kburnStartWaitingDevices();
 
 	printf("Press ENTER to stop monitoring\n");
 	getchar();

@@ -22,6 +22,9 @@ typedef struct kburnDeviceNode
 	kburnSerialDeviceNode *const serial;
 	kburnUsbDeviceNode *const usb;
 	PCONST struct kburnContext *const _scope;
+
+	PCONST bool destroy_in_progress;
+	PCONST uint32_t bind_id;
 } kburnDeviceNode;
 
 typedef bool (*on_device_connect)(const kburnDeviceNode *dev, void *ctx);

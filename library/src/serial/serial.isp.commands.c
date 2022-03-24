@@ -126,7 +126,7 @@ bool kburnSerialIspBootMemory(kburnSerialDeviceNode *node, kburn_address_t addre
 		return false;
 	}
 
-	debug_print("kburnSerialIspBootMemory: command sent, now switch to usb protocol!");
+	debug_print("kburnSerialIspBootMemory: command sent, now switch to usb protocol!\n\n");
 	return true;
 }
 

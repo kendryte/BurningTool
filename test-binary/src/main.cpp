@@ -49,6 +49,9 @@ void disconnect(const kburnDeviceNode *dev, void *ctx)
 
 int main(int argc, char **argv)
 {
+	cout << '\x1B' << 'c';
+	flush(cout);
+
 	KBCTX context = NULL;
 	kburn_err_t err = kburnCreate(&context);
 	if (err != KBurnNoErr)
@@ -61,14 +64,16 @@ int main(int argc, char **argv)
 	kburnOnSerialConnect(context, verify, NULL);
 	kburnOnSerialConfirm(context, handle, NULL);
 
-	// kburnWaitDeviceInitStart();
+	kburnStartWaitingDevices(context);
 
-	kburnOpenSerial(context, "/dev/ttyUSB0");
+	// kburnOpenSerial(context, "/dev/ttyUSB0");
 	// testDevice(argv[1]);
 
 	// kburnOpen("/dev/ttyUSB3");
 	// kburnOpen("/dev/ttyUSB4");
 	// kburnOpen("/dev/ttyUSB5");
+
+	// kburnOpenUSB(context, 0x0559, 0x4001, (const uint8_t *)"4b7e4b47");
 
 	printf("Press ENTER to stop monitoring\n");
 	getchar();

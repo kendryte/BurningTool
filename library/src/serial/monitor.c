@@ -30,9 +30,9 @@ void kburnOnSerialConfirm(KBCTX scope, on_device_handle handler_callback, void *
 	scope->serial->handler_callback_ctx = ctx;
 }
 
-kburn_err_t serial_subsystem_init(KBCTX scope)
+kburn_err_t serial_monitor_prepare(KBCTX scope)
 {
-	debug_print("\tserial_subsystem_init()");
+	debug_print("serial_monitor_prepare()");
 
 	debug_print("[monitor] init_list()");
 	ser_dev_list_t *lst;
@@ -61,20 +61,20 @@ kburn_err_t serial_subsystem_init(KBCTX scope)
 	return KBurnNoErr;
 }
 
-void serial_subsystem_deinit(KBCTX scope)
+void serial_subsystem_cleanup(KBCTX scope)
 {
 	debug_print("serial_subsystem_deinit()");
 	if (scope->serial->monitor_instance)
 	{
 		ser_dev_monitor_stop(scope->serial->monitor_instance);
+		scope->serial->monitor_instance = NULL;
 	}
-	free(scope->serial);
 }
 
 void serial_monitor_pause(KBCTX scope)
 {
 	debug_print("serial_monitor_pause() [instance=%p]", (void *)scope->serial->monitor_instance);
-	if (scope->serial && scope->serial->monitor_instance)
+	if (scope->serial->monitor_instance)
 	{
 		ser_dev_monitor_stop(scope->serial->monitor_instance);
 		scope->serial->monitor_instance = NULL;
@@ -83,20 +83,15 @@ void serial_monitor_pause(KBCTX scope)
 
 kburn_err_t serial_monitor_resume(KBCTX scope)
 {
-	if (!scope->serial)
-	{
-		kburn_err_t e = serial_subsystem_init(scope);
-		if (e != KBurnNoErr)
-		{
-			return e;
-		}
-	}
 	debug_print("serial_monitor_resume() [instance=%p]", (void *)scope->serial->monitor_instance);
 	if (scope->serial->monitor_instance == NULL)
 		scope->serial->monitor_instance = ser_dev_monitor_init(on_event, scope);
 
 	if (scope->serial->monitor_instance == NULL)
+	{
+		debug_print("ser_dev_monitor_init fail");
 		return KBURN_ERROR_KIND_COMMON | KBurnSerialMonitorFailStart;
+	}
 
 	return KBurnNoErr;
 }

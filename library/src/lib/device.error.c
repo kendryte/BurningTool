@@ -59,7 +59,7 @@ void slip_error(kburnSerialDeviceNode *node, slip_error_t err)
 	}
 }
 
-void _serial_isp_command_error(kburnDeviceNode *node, enum ISPErrorCode err)
+void _serial_isp_command_error(kburnDeviceNode *node, kburnIspErrorCode err)
 {
 	switch (err)
 	{

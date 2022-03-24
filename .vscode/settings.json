@@ -47,6 +47,8 @@
 		"utility": "c",
 		"random": "c",
 		"cerrno": "c",
-		"iosfwd": "c"
+		"iosfwd": "c",
+		"numeric": "c",
+		"iterator": "c"
 	}
 }

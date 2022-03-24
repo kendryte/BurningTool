@@ -2,13 +2,35 @@
 #include <stdlib.h>
 #include <assert.h>
 
-void dispose_add(disposable_registry *source, dispose_callback e)
+#ifndef NDEBUG
+dispose_callback __disposable(dispose_function callback, void *userData, const char *debug_title)
 {
-	debug_print("dispose_add(%p[%s], %p) [size=%d]", (void *)source, source->comment, (void *)e.userData, source->size);
-	element *ele = malloc(sizeof(element));
+	dispose_callback ret = {
+		userData,
+		callback,
+		debug_title,
+	};
+	return ret;
+}
+#else
+dispose_callback disposable(dispose_function callback, void *userData)
+{
+	dispose_callback ret = {
+		.userData = userData,
+		.callback = callback,
+	};
+	return ret;
+}
+#endif
+
+kburn_err_t dispose_add(disposable_registry *source, dispose_callback e)
+{
+	debug_print("dispose_add(<%s>[%d]): %s", NULLSTR(source->comment), source->size, NULLSTR(e.debug_title));
+	element *ele = KBALLOC(element);
 	ele->callback = e.callback;
 	ele->userData = e.userData;
 	ele->next = NULL;
+	ele->debug_title = e.debug_title;
 
 	lock(&source->lock);
 
@@ -24,12 +46,11 @@ void dispose_add(disposable_registry *source, dispose_callback e)
 	source->size++;
 
 	unlock(&source->lock);
+	return KBurnNoErr;
 }
 
 static void do_delete(disposable_registry *source, element *target)
 {
-	debug_print("\tdispose::do_delete(%p, %p) [size=%d]", (void *)source, (void *)target->userData, source->size);
-
 	assert((source->size > 0) && "delete element from empty list");
 
 	if (target->prev)
@@ -51,24 +72,28 @@ static void do_delete(disposable_registry *source, element *target)
 
 void dispose_delete(disposable_registry *source, dispose_callback e)
 {
-	debug_print("dispose_delete(%p[%s], %p) [size=%d]", (void *)source, source->comment, (void *)e.userData, source->size);
-
+	bool found = false;
 	disposable_foreach_start(source, curs);
 	if (curs->callback == e.callback && curs->userData == e.userData)
 	{
+		debug_print("dispose_delete(<%s>[%d]): %s", NULLSTR(source->comment), source->size, NULLSTR(curs->debug_title));
 		do_delete(source, curs);
-		unlock(&source->lock);
-		return;
+		found = true;
+		break;
 	}
 	disposable_foreach_end(source);
 
-	debug_print("  - not found");
+	if (!found)
+	{
+		debug_print("\x1B[38;5;9mdispose_delete\x1B[0m(<%s>[%d]): %s", NULLSTR(source->comment), source->size, NULLSTR(e.debug_title));
+		debug_print("  - not found");
+	}
 }
 
 void dispose(disposable_registry *target)
 {
 	bool selfDisposing = target->size > 0 && target->head->callback == free_pointer && target->head->userData == target;
-	debug_print("dispose(%p[%s]) [size=%d, selfDisposing=%d]", (void *)target, target->comment, target->size, selfDisposing);
+	debug_print("dispose(%s) [size=%d, selfDisposing=%d]", NULLSTR(target->comment), target->size, selfDisposing);
 	bool selfLast = false;
 
 	while (target->tail)
@@ -86,7 +111,7 @@ void dispose(disposable_registry *target)
 		}
 		else
 		{
-			debug_print("  * dispose callback return, size=%d", target->size);
+			// debug_print("  * dispose callback return, size=%d", target->size);
 			assert((current != target->tail) && "disposed function not call to dispose_delete()");
 		}
 	}
@@ -97,24 +122,14 @@ DECALRE_DISPOSE(free_pointer, void)
 	free(context);
 }
 DECALRE_DISPOSE_END()
-
-void *register_free_pointer_pass(disposable_registry *reg, void *ptr)
+DECALRE_DISPOSE(free_pointer_null, void *)
 {
-	if (reg == ptr)
-	{
-		assert(reg->size == 0 && "free self must at first element");
-	}
-	dispose_add(reg, disposable(free_pointer, ptr));
-	return ptr;
+	free(*context);
+	*context = NULL;
 }
-
+DECALRE_DISPOSE_END()
 DECALRE_DISPOSE(dispose_child, void)
 {
 	dispose(context);
 }
 DECALRE_DISPOSE_END()
-
-void dispose_chain(disposable_registry *parent, disposable_registry *child)
-{
-	dispose_add(parent, disposable(dispose_child, child));
-}

@@ -5,6 +5,7 @@ DEFINE_START
 enum KBurnCommonError
 {
 	KBurnNoErr = 0,
+	KBurnWiredError,
 	KBurnNoMemory,
 	KBurnSerialDriverAttrReadErr,
 	KBurnSerialDriverAttrWriteErr,
@@ -13,6 +14,10 @@ enum KBurnCommonError
 	KBurnSerialFailListDevice,
 	KBurnUsbMonitorFailStart,
 	KBurnUsbDeviceNotFound,
+	KBurnUsbReadSizeMismatch,
+	KBurnUsbReadIndexMismatch,
+	KBurnUsbErrorSense,
+	KBurnUsbProtocolWrong,
 	KBurnProtocolOpMismatch,
 	KBurnUserCancel,
 };

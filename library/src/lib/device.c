@@ -3,6 +3,9 @@
 
 static DECALRE_DISPOSE(destroy_device, kburnDeviceNode)
 {
+	if (context->destroy_in_progress)
+		return;
+	context->destroy_in_progress = true;
 	delete_from_device_list(context);
 	destroy_serial_port(context->_scope, context);
 	destroy_usb_port(context->_scope, context);
@@ -16,14 +19,10 @@ DECALRE_DISPOSE_END()
 
 void device_instance_collect(KBCTX scope, kburnDeviceNode *instance)
 {
-	if (!instance->serial->init && !instance->usb->init)
+	if (!instance->serial->init && !instance->usb->init && !instance->destroy_in_progress)
 	{
 		destroy_device(scope->disposables, instance);
 	}
-}
-void device_instance_merge(kburnDeviceNode *dst, kburnDeviceNode *src)
-{
-	debug_print("TODO: %p, %p", (void *)dst, (void *)src);
 }
 
 kburn_err_t create_empty_device_instance(KBCTX scope, kburnDeviceNode **output)
@@ -34,6 +33,8 @@ kburn_err_t create_empty_device_instance(KBCTX scope, kburnDeviceNode **output)
 		.serial = KBALLOC(kburnSerialDeviceNode),
 		.usb = KBALLOC(kburnUsbDeviceNode),
 		._scope = scope,
+		.destroy_in_progress = false,
+		.bind_id = 0,
 	};
 
 	*output = KBALLOC(kburnDeviceNode);

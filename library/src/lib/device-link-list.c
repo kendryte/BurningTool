@@ -74,7 +74,7 @@ bool delete_from_device_list(kburnDeviceNode *target)
 	return false;
 }
 
-static inline port_link_element *find(KBCTX scope, const char *path)
+static inline port_link_element *find_serial_device(KBCTX scope, const char *path)
 {
 	port_link_element *curs = NULL;
 
@@ -82,9 +82,21 @@ static inline port_link_element *find(KBCTX scope, const char *path)
 	for (curs = scope->openDeviceList->head; curs != NULL; curs = curs->next)
 	{
 		if (strcmp(curs->node->serial->path, path) == 0)
-		{
 			break;
-		}
+	}
+	unlock(&scope->openDeviceList->exclusion);
+	return curs;
+}
+
+static inline port_link_element *find_usb_device_by_vidpidpath(KBCTX scope, uint16_t vid, uint8_t pid, const uint8_t *path)
+{
+	port_link_element *curs = NULL;
+
+	lock(&scope->openDeviceList->exclusion);
+	for (curs = scope->openDeviceList->head; curs != NULL; curs = curs->next)
+	{
+		if (curs->node->usb->deviceInfo.idVendor == vid && curs->node->usb->deviceInfo.idProduct == pid && strncmp((char *)path, (char *)curs->node->usb->deviceInfo.path, MAX_PATH_LENGTH) == 0)
+			break;
 	}
 	unlock(&scope->openDeviceList->exclusion);
 	return curs;
@@ -92,16 +104,39 @@ static inline port_link_element *find(KBCTX scope, const char *path)
 
 kburnDeviceNode *get_device_by_serial_port_path(KBCTX scope, const char *path)
 {
-	port_link_element *ret = find(scope, path);
+	port_link_element *ret = find_serial_device(scope, path);
 	return ret ? ret->node : NULL;
 }
 
-uint32_t kburnGetOpenPortCount()
+kburnDeviceNode *get_device_by_usb_port_path(KBCTX scope, uint16_t vid, uint8_t pid, const uint8_t *path)
 {
-	uint32_t i = 0;
-	disposable_foreach_start(&lib_global_scope, item);
-	const KBCTX scope = (KBCTX)item->userData;
-	i += scope->openDeviceList->size;
-	disposable_foreach_end(&lib_global_scope);
-	return i;
+	port_link_element *ret = find_usb_device_by_vidpidpath(scope, vid, pid, path);
+	return ret ? ret->node : NULL;
+}
+
+static bool has_bind_id_used(KBCTX scope, uint32_t id)
+{
+	port_link_element *curs = NULL;
+
+	for (curs = scope->openDeviceList->head; curs != NULL; curs = curs->next)
+	{
+		if (curs->node->bind_id == id)
+			return true;
+	}
+	return false;
+}
+
+void alloc_new_bind_id(kburnDeviceNode *node)
+{
+	uint32_t id = 0;
+
+	lock(&node->_scope->openDeviceList->exclusion);
+
+	do
+	{
+		id = rand();
+	} while (has_bind_id_used(node->_scope, id));
+	node->bind_id = id;
+
+	unlock(&node->_scope->openDeviceList->exclusion);
 }

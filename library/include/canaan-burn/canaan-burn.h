@@ -67,7 +67,7 @@ PUBLIC void kburnOnSerialDisconnect(KBCTX scope, on_device_remove disconnect_cal
 /**
  * 开始监视串口+USB设备
  **/
-PUBLIC kburn_err_t kburnWaitDeviceInitStart(KBCTX scope);
+PUBLIC kburn_err_t kburnStartWaitingDevices(KBCTX scope);
 PUBLIC void kburnWaitDevicePause(KBCTX scope);
 PUBLIC kburn_err_t kburnWaitDeviceResume(KBCTX scope);
 

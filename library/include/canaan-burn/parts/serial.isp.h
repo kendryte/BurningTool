@@ -2,7 +2,7 @@
 
 DEFINE_START
 
-enum ISPErrorCode
+enum kburnIspErrorCode
 {
 	ISP_RET_DEFAULT = 0,
 	ISP_RET_OK = 0xE0,
@@ -13,6 +13,7 @@ enum ISPErrorCode
 
 	ISP_RET_MAX = UINT8_MAX,
 } __attribute__((__packed__));
+typedef enum kburnIspErrorCode kburnIspErrorCode;
 
 PUBLIC bool kburnSerialIspGreeting(kburnSerialDeviceNode *node);
 PUBLIC bool kburnSerialIspSetBaudrate(kburnSerialDeviceNode *node, uint32_t want_br);

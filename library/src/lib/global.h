@@ -69,6 +69,11 @@ void global_resource_unregister(KBCTX scope, dispose_function callback, void *us
 
 #endif // NDEBUG
 
+static inline const char *NULLSTR(const char *str)
+{
+	return str ? str : "<NULLSTR>";
+}
+
 #define TODO debug_print("\x1B[38;5;11mTODO in %s()\x1B[0m", __func__)
 
 static inline bool
@@ -124,4 +129,23 @@ void driver_get_devinfo_free(kburnSerialDeviceInfo);
 								 __KBALLOC_2(__VA_ARGS__), \
 								 __KBALLOC_1(__VA_ARGS__))
 
-#define KBALLOC_SCOPE(disposable_registry, type, ...) (type *)FREE_WITH(disposable_registry, KBALLOC(type __VA_OPT__(, ) __VA_ARGS__))
+#ifdef __LITTLE_ENDIAN__
+#include <byteswap.h>
+#define CHIP_ENDIAN32(x) bswap_32(x)
+#else
+#define CHIP_ENDIAN32(x) x
+#endif
+
+typedef void (*thread_function)(KBCTX scope, const bool *const quit);
+typedef struct thread_passing_object *kbthread;
+kburn_err_t thread_create(const char *debug_title, thread_function start_routine, KBCTX scope, kbthread *out_thread);
+void thread_tell_quit(kbthread thread);
+void thread_wait_quit(kbthread thread);
+
+typedef struct queue_info *queue_t;
+kburn_err_t queue_create(queue_t *queue);
+void queue_destroy(queue_t queue);
+kburn_err_t queue_push(queue_t queue, void *data, bool free_when_destroy);
+void *queue_shift(queue_t queue);
+
+char *sprintf_alloc(const char *fmt, ...);

@@ -13,20 +13,27 @@ disposable_registry lib_global_scope = {
 
 kburn_err_t kburnCreate(KBCTX *ppCtx)
 {
+	static uint32_t dbg_index = 0;
 	disposable_registry *dis = KBALLOC(disposable_registry);
-	FREE_WITH(dis, dis);
+	register_dispose_pointer(dis, dis);
 
-	*ppCtx = KBALLOC_SCOPE(dis, kburnContext);
+	dis->comment = sprintf_alloc("context %d", dbg_index++);
+	if (dis->comment)
+		register_dispose_pointer_null(dis, dis->comment);
 
-	snprintf(dis->comment, sizeof(dis->comment), "context 0x%p", (void *)*ppCtx);
+	*ppCtx = CALLOC_AUTO_FREE(dis, kburnContext);
 
 	kburnContext src = {
-		.serial = KBALLOC_SCOPE(dis, serial_subsystem_context),
-		.usb = KBALLOC_SCOPE(dis, usb_subsystem_context),
+		.serial = CALLOC_AUTO_FREE(dis, serial_subsystem_context),
+		.usb = CALLOC_AUTO_FREE(dis, usb_subsystem_context),
 		.disposables = dis,
-		.openDeviceList = KBALLOC_SCOPE(dis, struct port_link_list),
+		.openDeviceList = CALLOC_AUTO_FREE(dis, struct port_link_list),
 		.monitor_inited = false,
 	};
+
+	src.usb->filter.vid = DEFAULT_VID;
+	src.usb->filter.pid = DEFAULT_PID;
+
 	memcpy(*ppCtx, &src, sizeof(kburnContext));
 
 	dispose_chain(&lib_global_scope, dis);
@@ -51,6 +58,16 @@ uint32_t kburnGetResourceCount()
 	disposable_foreach_start(&lib_global_scope, item);
 	const KBCTX scope = (KBCTX)item->userData;
 	i += scope->disposables->size;
+	disposable_foreach_end(&lib_global_scope);
+	return i;
+}
+
+uint32_t kburnGetOpenPortCount()
+{
+	uint32_t i = 0;
+	disposable_foreach_start(&lib_global_scope, item);
+	const KBCTX scope = (KBCTX)item->userData;
+	i += scope->openDeviceList->size;
 	disposable_foreach_end(&lib_global_scope);
 	return i;
 }
