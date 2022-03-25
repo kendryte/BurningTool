@@ -2,7 +2,7 @@
 * 本项目有子模块
 * 默认所有人都使用vscode开发
 * 使用vcpkg处理依赖、cmake编译
-* 
+* 调试模式链接了libasan，用于查找内存问题，发布模式没有
 
 # 构建
 1. clone本项目（注意：有子模块）    
@@ -33,3 +33,5 @@
 	cmake --build .
 
 # 常见问题
+1. `LD_PRELOAD=/usr/lib64/libasan.so.6 ./build-vscode/test-binary/test`
+2. 

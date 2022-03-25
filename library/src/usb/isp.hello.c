@@ -35,13 +35,18 @@ kburn_err_t usb_device_hello(kburnDeviceNode *node)
 	return KBurnNoErr;
 }
 
-static kburn_err_t usb_device_serial_putc(kburnDeviceNode *node, uint8_t ch)
+static kburn_err_t usb_device_serial_put_str5(kburnDeviceNode *node, const uint8_t ch[5])
 {
 	usbIspCommandPacket request = {
 		.command = USB_ISP_COMMAND_WRITE_DEVICE,
 		.target = USB_ISP_COMMAND_TARGET_UART,
-		.uart = ch,
 	};
+
+	for (size_t i = 0; i < 5; i++)
+	{
+		request.uart[i] = ch[i];
+		request.uart[5] += __builtin_popcount(ch[i]);
+	}
 
 	int r;
 	uint32_t expected_tag = rand();
@@ -57,9 +62,19 @@ static kburn_err_t usb_device_serial_putc(kburnDeviceNode *node, uint8_t ch)
 
 kburn_err_t usb_device_serial_print(kburnDeviceNode *node, const uint8_t *buff, size_t buff_size)
 {
-	for (size_t i = 0; i < buff_size; i++)
+	for (size_t i = 0; i < buff_size; i += 5)
 	{
-		kburn_err_t e = usb_device_serial_putc(node, buff[i]);
+		kburn_err_t e;
+		if (i + 5 > buff_size)
+		{
+			uint8_t nbuff[5] = {0};
+			memcpy(nbuff, buff + i, buff_size - i);
+			e = usb_device_serial_put_str5(node, nbuff);
+		}
+		else
+		{
+			e = usb_device_serial_put_str5(node, buff + i);
+		}
 		if (e != KBurnNoErr)
 			return e;
 	}

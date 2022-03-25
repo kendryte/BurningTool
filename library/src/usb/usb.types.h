@@ -61,7 +61,7 @@ typedef struct usbIspCommandPacket
 	{
 		struct usbIspCommandPacketBurnBody burn;
 		struct usbIspCommandPacketLedBody led;
-		uint8_t uart;
+		uint8_t uart[6];
 		struct
 		{
 			uint8_t _reserved;
