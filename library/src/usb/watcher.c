@@ -112,7 +112,6 @@ kburn_err_t usb_monitor_prepare(KBCTX scope)
 		usb_subsystem_init(scope);
 
 	debug_print("usb_monitor_prepare()");
-
 	if (scope->usb->monitor_prepared)
 	{
 		debug_print("\talready inited.");

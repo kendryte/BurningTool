@@ -25,6 +25,7 @@ typedef struct usb_subsystem_context
 
 kburn_err_t usb_subsystem_init(KBCTX scope);
 void usb_subsystem_deinit(KBCTX scope);
+
 kburn_err_t usb_monitor_prepare(KBCTX scope);
 void usb_monitor_destroy(KBCTX scope);
 void usb_monitor_pause(KBCTX scope);
@@ -34,7 +35,7 @@ int usb_get_vid_pid_path(struct libusb_device *dev, uint16_t *out_vid, uint16_t 
 int usb_get_device_path(struct libusb_device *dev, uint8_t *path);
 int usb_get_device_serial(libusb_device *dev, libusb_device_handle *handle, uint8_t *output);
 
-libusb_device *get_usb_device(struct libusb_context *libusb, uint16_t vid, uint16_t pid, const uint8_t *serial);
+libusb_device *get_usb_device(struct libusb_context *libusb, uint16_t vid, uint16_t pid, const uint8_t *path);
 void free_got_usb_device(libusb_device *dev);
 void free_all_unopend_usb_info(kburnUsbDeviceInfo **list);
 int get_all_unopend_usb_info(KBCTX scope, int vid, int pid, kburnUsbDeviceInfo **ret);

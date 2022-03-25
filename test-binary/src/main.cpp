@@ -1,6 +1,7 @@
 #include <canaan-burn/canaan-burn.h>
 #include <stddef.h>
 #include <iostream>
+#include <cassert>
 #include "main.h"
 
 using namespace std;
@@ -49,6 +50,7 @@ void disconnect(const kburnDeviceNode *dev, void *ctx)
 
 int main(int argc, char **argv)
 {
+	assert(KBURN_ERROR_KIND_SERIAL > UINT32_MAX);
 	cout << '\x1B' << 'c';
 	flush(cout);
 

@@ -28,6 +28,7 @@ static void *start_routine_wrapper(void *_ctx)
 	context->running = true;
 
 	debug_print("[thread] \"%s\" start", context->debug_title);
+	do_sleep(1000);
 
 #ifdef APPLE
 	pthread_setname_np(context->debug_title);

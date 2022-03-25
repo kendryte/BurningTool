@@ -15,18 +15,17 @@ void global_resource_unregister(KBCTX scope, dispose_function callback, void *us
 
 #if WIN32
 #include <windows.h>
-#else
-#include <unistd.h>
-#endif
-
 void do_sleep(int ms)
 {
-#if WIN32
 	Sleep(ms);
-#else
-	usleep(ms * 1000);
-#endif
 }
+#else
+#include <unistd.h>
+void do_sleep(int ms)
+{
+	usleep(ms * 1000);
+}
+#endif
 
 #ifndef NDEBUG
 __attribute__((access(read_only, 2, 3))) void __print_buffer(const char *dir, const uint8_t *buff, size_t size, size_t max_dump)

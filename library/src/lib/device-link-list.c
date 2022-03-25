@@ -3,6 +3,47 @@
 #include <string.h>
 #include <stdlib.h>
 
+static inline bool _should_insert_waitting_list(kburnDeviceNode *node)
+{
+	return node->serial->init && node->serial->isOpen && node->serial->isSwitchIsp && !node->serial->isUsbBound;
+}
+
+static void _recreate_waitting_list(KBCTX scope)
+{
+	debug_print("\tportlist::recreate_waitting_list()");
+	port_link_element *curs = NULL;
+
+	lock(&scope->waittingDevice.lock);
+
+	memset(scope->waittingDevice.list, 0, sizeof(scope->waittingDevice.list));
+
+	size_t itr = 0;
+	for (curs = scope->openDeviceList->head; curs != NULL; curs = curs->next)
+	{
+		if (_should_insert_waitting_list(curs->node))
+		{
+			debug_print("\t\t%s", curs->node->serial->path);
+			scope->waittingDevice.list[itr] = curs->node->serial;
+
+			itr++;
+			if (itr >= MAX_WAITTING_DEVICES)
+			{
+				break;
+			}
+		}
+	}
+	debug_print("\t%lu items", itr);
+
+	unlock(&scope->waittingDevice.lock);
+}
+
+void recreate_waitting_list(KBCTX scope)
+{
+	lock(&scope->openDeviceList->exclusion);
+	_recreate_waitting_list(scope);
+	unlock(&scope->openDeviceList->exclusion);
+}
+
 void add_to_device_list(kburnDeviceNode *target)
 {
 	KBCTX scope = target->_scope;
@@ -30,6 +71,10 @@ void add_to_device_list(kburnDeviceNode *target)
 
 		scope->openDeviceList->size++;
 	}
+
+	if (_should_insert_waitting_list(target))
+		_recreate_waitting_list(target->_scope);
+
 	unlock(&scope->openDeviceList->exclusion);
 }
 
@@ -51,6 +96,9 @@ static void do_delete(KBCTX scope, port_link_element *target)
 
 	assert((scope->openDeviceList->size > 0) && "delete port from empty list");
 	scope->openDeviceList->size--;
+
+	if (_should_insert_waitting_list(target->node))
+		_recreate_waitting_list(scope);
 
 	free(target);
 }

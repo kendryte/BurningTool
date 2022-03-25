@@ -10,6 +10,7 @@ PUBLIC void kburnSetSerialReadTimeout(int32_t readTimeout);	  // 0 is infinity
 PUBLIC void kburnSetSerialWriteTimeout(int32_t writeTimeout); // 0 is infinity
 
 #define KBURN_K510_BAUDRATE_DEFAULT 115200
+#define KBURN_K510_BAUDRATE_USBISP 115200
 PUBLIC void kburnSetHighSpeedValue(uint32_t baudrate);
 PUBLIC uint32_t kburnGetHighSpeedValue();
 

@@ -30,10 +30,8 @@ void kburnOnSerialConfirm(KBCTX scope, on_device_handle handler_callback, void *
 	scope->serial->handler_callback_ctx = ctx;
 }
 
-kburn_err_t serial_monitor_prepare(KBCTX scope)
+static void first_init_list(KBCTX scope, const bool *const quit)
 {
-	debug_print("serial_monitor_prepare()");
-
 	debug_print("[monitor] init_list()");
 	ser_dev_list_t *lst;
 
@@ -41,13 +39,16 @@ kburn_err_t serial_monitor_prepare(KBCTX scope)
 	if (!lst)
 	{
 		debug_print("serial port list get failed: %s", sererr_last());
-		return KBURN_ERROR_KIND_COMMON | KBurnSerialFailListDevice;
+		return;
 	}
 
 	ser_dev_list_t *item;
 
 	ser_dev_list_foreach(item, lst)
 	{
+		if (*quit)
+			break;
+
 		if (prefix("/dev/ttyS", item->dev.path))
 		{
 			continue;
@@ -57,18 +58,45 @@ kburn_err_t serial_monitor_prepare(KBCTX scope)
 	}
 
 	ser_dev_list_destroy(lst);
-
-	return KBurnNoErr;
 }
 
-void serial_subsystem_cleanup(KBCTX scope)
+void serial_monitor_destroy(KBCTX scope)
 {
-	debug_print("serial_subsystem_deinit()");
+	debug_print("serial_monitor_destroy()");
+	if (!scope->serial->monitor_prepared)
+		return;
 	if (scope->serial->monitor_instance)
 	{
 		ser_dev_monitor_stop(scope->serial->monitor_instance);
 		scope->serial->monitor_instance = NULL;
 	}
+
+	if (scope->serial->init_list_thread)
+	{
+		thread_tell_quit(scope->serial->init_list_thread);
+		thread_wait_quit(scope->serial->init_list_thread);
+		scope->serial->init_list_thread = NULL;
+	}
+
+	scope->serial->monitor_prepared = false;
+}
+
+kburn_err_t serial_monitor_prepare(KBCTX scope)
+{
+	debug_print("serial_monitor_prepare()");
+	if (scope->serial->monitor_prepared)
+		return KBurnNoErr;
+	scope->serial->monitor_prepared = true;
+
+	if (scope->serial->monitor_instance)
+	{
+		debug_print("\talready inited.");
+		return KBurnNoErr;
+	}
+
+	thread_create("serial init list", first_init_list, scope, &scope->serial->init_list_thread);
+
+	return KBurnNoErr;
 }
 
 void serial_monitor_pause(KBCTX scope)

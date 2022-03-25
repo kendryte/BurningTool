@@ -28,6 +28,12 @@ void destroy_serial_port(KBCTX scope, kburnDeviceNode *d)
 
 	serial_isp_delete(serial);
 
+	if (serial->binding)
+	{
+		free(serial->binding);
+		serial->binding = NULL;
+	}
+
 	if (serial->isOpen)
 		serial_low_close(serial);
 

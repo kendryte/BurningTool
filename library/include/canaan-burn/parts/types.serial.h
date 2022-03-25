@@ -49,6 +49,8 @@ typedef struct kburnSerialDeviceNode
 
 	PCONST bool isConfirm;
 	PCONST bool isOpen;
+	PCONST bool isSwitchIsp;
+	PCONST bool isUsbBound;
 	const char *path;
 
 	PCONST uint32_t baudRate;
@@ -57,5 +59,6 @@ typedef struct kburnSerialDeviceNode
 	PCONST kburnSerialDeviceInfo deviceInfo;
 
 	PCONST struct isp_state *isp;
+	PCONST struct binding_state *binding;
 	PCONST struct ser *m_dev_handle;
 } kburnSerialDeviceNode;

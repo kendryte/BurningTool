@@ -33,5 +33,11 @@
 	cmake --build .
 
 # 常见问题
-1. `LD_PRELOAD=/usr/lib64/libasan.so.6 ./build-vscode/test-binary/test`
-2. 
+### 终端进程启动失败: Starting directory (cwd) "/data/DevelopmentRoot/github.com/kendryte/BurningTool/build-vscode" does not exist。
+编译（build）前必须运行配置（configure）
+
+### 
+
+`LD_PRELOAD=/usr/lib64/libasan.so.6 ./build-vscode/test-binary/test`
+
+### /usr/bin/ld: ../library/libcanaan_burn.so: undefined reference to `__asan_report_store4'

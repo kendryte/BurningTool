@@ -89,14 +89,14 @@ bool kburnSerialIspSetBaudrate(kburnSerialDeviceNode *node, uint32_t want_br)
 
 	if (hackdev_serial_low_switch_baudrate(node, want_br) && greeting(node, false))
 	{
-		debug_print("kburnSerialIspSetBaudrate: switch driver attr success");
+		debug_print("switch driver attr success, baudrate to %d", KBURN_K510_BAUDRATE_USBISP);
 	}
 	else
 	{
 		debug_print("kburnSerialIspSetBaudrate: switch driver attr failed");
 		if (!serial_low_switch_baudrate(node, want_br))
 		{
-			debug_print("kburnSerialIspSetBaudrate: failed switch driver attr");
+			debug_print("kburnSerialIspSetBaudrate: failed re-open serial port");
 			return false;
 		}
 
@@ -105,6 +105,7 @@ bool kburnSerialIspSetBaudrate(kburnSerialDeviceNode *node, uint32_t want_br)
 			debug_print("kburnSerialIspSetBaudrate: re-greeting failed");
 			return false;
 		}
+		debug_print("port re-opened with baudrate %d", KBURN_K510_BAUDRATE_USBISP);
 	}
 
 	debug_print("kburnSerialIspSetBaudrate: ok");
@@ -127,6 +128,27 @@ bool kburnSerialIspBootMemory(kburnSerialDeviceNode *node, kburn_address_t addre
 	}
 
 	debug_print("kburnSerialIspBootMemory: command sent, now switch to usb protocol!\n\n");
+
+	if (hackdev_serial_low_switch_baudrate(node, KBURN_K510_BAUDRATE_USBISP))
+	{
+		debug_print("switch driver attr success, baudrate to %d", KBURN_K510_BAUDRATE_USBISP);
+	}
+	else
+	{
+		debug_print("switch driver attr failed");
+		if (!serial_low_switch_baudrate(node, KBURN_K510_BAUDRATE_USBISP))
+		{
+			debug_print("failed re-open serial port");
+			return false;
+		}
+		debug_print("port re-opened with baudrate %d", KBURN_K510_BAUDRATE_USBISP);
+	}
+
+	node->isSwitchIsp = true;
+	serial_isp_delete(node);
+
+	recreate_waitting_list(node->parent->_scope);
+
 	return true;
 }
 

@@ -66,8 +66,18 @@ PUBLIC void kburnOnSerialDisconnect(KBCTX scope, on_device_remove disconnect_cal
 
 /**
  * 开始监视串口+USB设备
+ * 等于两个分别调用
  **/
 PUBLIC kburn_err_t kburnStartWaitingDevices(KBCTX scope);
+/**
+ * 开始监视USB设备
+ **/
+PUBLIC kburn_err_t kburnStartWaitingUsbDevices(KBCTX scope);
+/**
+ * 开始监视串口设备
+ **/
+PUBLIC kburn_err_t kburnStartWaitingSerialDevices(KBCTX scope);
+
 PUBLIC void kburnWaitDevicePause(KBCTX scope);
 PUBLIC kburn_err_t kburnWaitDeviceResume(KBCTX scope);
 
@@ -78,9 +88,20 @@ PUBLIC uint32_t kburnGetOpenPortCount();
 
 #define KBURN_VIDPID_FILTER_ANY -1
 #define KBURN_VIDPID_FILTER_DEFAULT -2
+/**
+ * 设置usb监视器（和扫描）要响应的设备vid pid
+ */
 PUBLIC void kburnSetUsbFilter(KBCTX scope, int32_t vid, int32_t pid);
 
-PUBLIC kburn_err_t kburnOpenUSB(KBCTX scope, uint16_t vid, uint16_t pid, const uint8_t *serial);
+/**
+ * 直接打开端口，通常不应该调用这个函数
+ * @param path 端口设备路径，最多7层
+ */
+PUBLIC kburn_err_t kburnOpenUSB(KBCTX scope, uint16_t vid, uint16_t pid, const uint8_t *path);
+
+/**
+ * 单次扫描usb设备
+ */
 PUBLIC kburn_err_t kburnPollUSB(KBCTX scope);
 
 DEFINE_END

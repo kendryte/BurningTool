@@ -1,11 +1,11 @@
 #include "usb.h"
 
-kburn_err_t kburnOpenUSB(KBCTX scope, uint16_t vid, uint16_t pid, const uint8_t *serial)
+kburn_err_t kburnOpenUSB(KBCTX scope, uint16_t vid, uint16_t pid, const uint8_t *path)
 {
 	if (!scope->usb->libusb)
 		usb_subsystem_init(scope);
 
-	libusb_device *dev = get_usb_device(scope->usb->libusb, vid, pid, serial);
+	libusb_device *dev = get_usb_device(scope->usb->libusb, vid, pid, path);
 
 	if (dev != NULL)
 	{

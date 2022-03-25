@@ -10,7 +10,7 @@ static DECALRE_DISPOSE(_dispose, kburnContext)
 
 		context->monitor_inited = false;
 		usb_subsystem_deinit(context);
-		serial_subsystem_cleanup(context);
+		serial_subsystem_deinit(context);
 	}
 }
 DECALRE_DISPOSE_END()
@@ -26,6 +26,9 @@ kburn_err_t kburnStartWaitingDevices(KBCTX scope)
 	if (!scope->usb->libusb)
 		usb_subsystem_init(scope);
 
+	if (!scope->serial->subsystem_inited)
+		serial_subsystem_init(scope);
+
 	r = serial_monitor_prepare(scope);
 	if (r != KBurnNoErr)
 		return r;
@@ -33,7 +36,7 @@ kburn_err_t kburnStartWaitingDevices(KBCTX scope)
 	r = usb_monitor_prepare(scope);
 	if (r != KBurnNoErr)
 	{
-		serial_subsystem_cleanup(scope);
+		serial_monitor_destroy(scope);
 		return r;
 	}
 

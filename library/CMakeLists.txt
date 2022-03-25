@@ -85,11 +85,13 @@ target_include_directories(canaan_burn PRIVATE ${LIBUSB_INCLUDE_DIRS})
 target_link_libraries(canaan_burn PRIVATE ${LIBUSB_LIBRARIES})
 
 if(WIN32)
-	include("${VCPKG_INSTALLED_DIR}/x64-windows/share/libsercomm/sercommConfig.cmake")
+  include(
+    "${VCPKG_INSTALLED_DIR}/x64-windows/share/libsercomm/sercommConfig.cmake")
 elseif(UNIX)
-	include("${VCPKG_INSTALLED_DIR}/x64-linux/share/libsercomm/sercommConfig.cmake")
+  include(
+    "${VCPKG_INSTALLED_DIR}/x64-linux/share/libsercomm/sercommConfig.cmake")
 elseif(APPLE)
-# todo
+  # todo
 endif()
 # find_package(sercomm CONFIG REQUIRED)
 target_link_libraries(canaan_burn PRIVATE sercomm)
@@ -104,7 +106,7 @@ if(CMAKE_BUILD_TYPE STREQUAL "Debug")
 
   # set(SANITIZE_UNDEFINED "On")
 
-  set(SANITIZE_LINK_STATIC "On")
+  set(SANITIZE_LINK_STATIC "Off")
 
   set(CMAKE_MODULE_PATH
       "${CMAKE_CURRENT_LIST_DIR}/3rdparty/sanitizers-cmake/cmake"
@@ -112,12 +114,5 @@ if(CMAKE_BUILD_TYPE STREQUAL "Debug")
   find_package(Sanitizers REQUIRED)
 
   add_sanitizers(canaan_burn)
-
-  if(MSVC)
-    # warning level 4 and all warnings as errors
-    target_compile_options(canaan_burn PRIVATE /W4 /WX)
-  else()
-    # lots of warnings and all warnings as errors
-    target_compile_options(canaan_burn PRIVATE -Wall -Wextra -pedantic -Werror)
-  endif()
+  target_compile_options(canaan_burn PRIVATE -Wall -Wextra -pedantic -Werror)
 endif()

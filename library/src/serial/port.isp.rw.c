@@ -57,7 +57,10 @@ void serial_isp_delete(kburnSerialDeviceNode *node)
 {
 	debug_print("\tserial_isp_delete()");
 	if (node->isp)
+	{
 		free(node->isp);
+		node->isp = NULL;
+	}
 }
 
 slip_error_t _serial_isp_slip_send_request(kburnSerialDeviceNode *node, isp_request_t *command)

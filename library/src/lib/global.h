@@ -8,12 +8,21 @@
 #include "./device.h"
 #include "./disposable.h"
 
+#define MAX_WAITTING_DEVICES 32
+/**
+ * 库上下文，通过kburnCreate创建，所有函数都需要传此参数。主要用于跟踪内存资源
+ */
 typedef struct kburnContext
 {
 	struct serial_subsystem_context *const serial;
 	struct usb_subsystem_context *const usb;
 	struct disposable_registry *const disposables;
 	struct port_link_list *const openDeviceList;
+	struct
+	{
+		volatile int lock;
+		kburnSerialDeviceNode *list[MAX_WAITTING_DEVICES + 1];
+	} waittingDevice;
 	bool monitor_inited;
 } kburnContext;
 
@@ -88,18 +97,39 @@ prefix(const char *pre, const char *str)
 #define UNUSED(x) UNUSED_##x
 #endif
 
-static inline void lock(volatile int *lock)
+#ifndef NDEBUG
+#define lock(x) __extension__({                         \
+	int lock_time = 0;                                  \
+	while (__sync_lock_test_and_set((x), 1))            \
+	{                                                   \
+		do_sleep(100);                                  \
+		lock_time++;                                    \
+		if (lock_time == 100)                           \
+		{                                               \
+			debug_print("lock [" #x "] take too long"); \
+		}                                               \
+	}                                                   \
+})
+
+#define unlock(l) __extension__({ \
+	__sync_synchronize();         \
+	(*l) = 0;                     \
+})
+#else
+static inline void __lock(volatile int *lock)
 {
 	while (__sync_lock_test_and_set(lock, 1))
 	{
+		do_sleep(100);
 	}
 }
 
-static inline void unlock(volatile int *lock)
+static inline void __unlock(volatile int *lock)
 {
 	__sync_synchronize();
 	*lock = 0;
 }
+#endif
 
 #ifndef NDEBUG
 #define print_buffer(dir, buff, size) \

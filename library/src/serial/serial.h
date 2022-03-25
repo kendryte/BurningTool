@@ -13,7 +13,12 @@ ser_opts_t get_current_serial_options(const char *path);
 
 typedef struct serial_subsystem_context
 {
+	bool subsystem_inited;
+	kbthread init_list_thread;
+
+	bool monitor_prepared;
 	ser_dev_mon_t *monitor_instance;
+	kbthread pairing_thread;
 	on_device_connect verify_callback;
 	void *verify_callback_ctx;
 	on_device_handle handler_callback;
@@ -95,7 +100,10 @@ size_t serial_isp_packet_size(const isp_request_t *packet);
 
 void slip_error(kburnSerialDeviceNode *node, slip_error_t err);
 
+kburn_err_t serial_subsystem_init(KBCTX scope);
+void serial_subsystem_deinit(KBCTX scope);
+
 kburn_err_t serial_monitor_prepare(KBCTX scope);
-void serial_subsystem_cleanup(KBCTX scope);
+void serial_monitor_destroy(KBCTX scope);
 void serial_monitor_pause(KBCTX scope);
 kburn_err_t serial_monitor_resume(KBCTX scope);

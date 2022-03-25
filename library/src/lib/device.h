@@ -26,6 +26,7 @@ kburn_err_t make_error_code(enum kburnErrorKind kind, int32_t code);
 void alloc_new_bind_id(kburnDeviceNode *target);
 void add_to_device_list(kburnDeviceNode *target);
 bool delete_from_device_list(kburnDeviceNode *target);
+void recreate_waitting_list(KBCTX scope);
 kburnDeviceNode *get_device_by_serial_port_path(KBCTX scope, const char *path);
 kburnDeviceNode *get_device_by_usb_port_path(KBCTX scope, uint16_t vid, uint8_t pid, const uint8_t *path);
 
