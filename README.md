@@ -31,3 +31,19 @@ TODO
 1. 执行cmake build
 	```bash
 	cmake --build .
+
+# 开源代码协议
+## MIT
+* [sanitizers-cmake](https://github.com/arsenm/sanitizers-cmake)
+* [vcpkg](https://github.com/microsoft/vcpkg)
+* [slip](https://github.com/marcinbor85/slip) 有改动
+* [libsercomm](https://github.com/ingeniamc/sercomm)
+
+## LGPL
+* [libusb](https://github.com/libusb/libusb)
+
+## GPL
+* [Qt](https://www.qt.io/)
+
+## 专用协议
+* [argtable3](https://github.com/argtable/argtable3)
