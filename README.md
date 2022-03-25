@@ -10,27 +10,7 @@
 TODO
 
 # 开发
-1. clone本项目（注意：有子模块）    
-	```bash
-	git clone https://github.com/kendryte/k510_build_image.git
-	git submodule update --init --recursive --depth 5
-	```
-1. 安装vcpkg    
-	```bash
-	# windows
-	./vcpkg/bootstrap-vcpkg.bat
-	# 其他
-	./vcpkg/bootstrap-vcpkg.sh
-	```
-1. 执行cmake configure
-	```bash
-	mkdir build-xxxx
-	cd build-xxxx
-	cmake ..
-	```
-1. 执行cmake build
-	```bash
-	cmake --build .
+参考 [Contribution.md](./Contribution.md)
 
 # 开源代码协议
 ## MIT

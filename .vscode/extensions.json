@@ -3,6 +3,13 @@
 		"ms-vscode.cpptools",
 		"austin.code-gnu-global",
 		"ms-vscode.cmake-tools",
-		"cheshirekow.cmake-format"
+		"cheshirekow.cmake-format",
+		"jeff-hykin.better-cpp-syntax",
+		"aaron-bond.better-comments",
+		"editorconfig.editorconfig",
+		"ms-vscode.hexeditor",
+		"yzhang.markdown-all-in-one",
+		"tonka3000.qtvsctools",
+		"VisualStudioExptTeam.vscodeintellicode"
 	]
 }

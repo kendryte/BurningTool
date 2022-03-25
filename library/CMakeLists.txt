@@ -84,7 +84,13 @@ find_package(libusb CONFIG REQUIRED)
 target_include_directories(canaan_burn PRIVATE ${LIBUSB_INCLUDE_DIRS})
 target_link_libraries(canaan_burn PRIVATE ${LIBUSB_LIBRARIES})
 
-include("${VCPKG_INSTALLED_DIR}/x64-linux/share/libsercomm/sercommConfig.cmake")
+if(WIN32)
+	include("${VCPKG_INSTALLED_DIR}/x64-windows/share/libsercomm/sercommConfig.cmake")
+elseif(UNIX)
+	include("${VCPKG_INSTALLED_DIR}/x64-linux/share/libsercomm/sercommConfig.cmake")
+elseif(APPLE)
+# todo
+endif()
 # find_package(sercomm CONFIG REQUIRED)
 target_link_libraries(canaan_burn PRIVATE sercomm)
 
