@@ -68,6 +68,8 @@ _quit:
 
 void destroy_usb_port(KBCTX scope, kburnDeviceNode *device)
 {
+	if (!device->usb->init)
+		return;
 	close_single_usb_port(scope, device);
 }
 

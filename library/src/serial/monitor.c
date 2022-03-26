@@ -32,7 +32,7 @@ void kburnOnSerialConfirm(KBCTX scope, on_device_handle handler_callback, void *
 
 static void first_init_list(KBCTX scope, const bool *const quit)
 {
-	debug_print("[monitor] init_list()");
+	debug_print("[init] init_list()");
 	ser_dev_list_t *lst;
 
 	lst = ser_dev_list_get();
@@ -53,7 +53,7 @@ static void first_init_list(KBCTX scope, const bool *const quit)
 		{
 			continue;
 		}
-		debug_print("[monitor]   * %s", item->dev.path);
+		debug_print("[init]   * %s", item->dev.path);
 		on_serial_device_attach(scope, item->dev.path);
 	}
 
