@@ -11,21 +11,30 @@ typedef struct queue_info
 {
 	queue_struct *first;
 	queue_struct *last;
-	volatile int lock;
+	kb_mutex_t mutex;
 } queue_info;
 
 kburn_err_t queue_create(queue_info **queue_ptr)
 {
-	*queue_ptr = KBALLOC(queue_info);
+	DeferEnabled;
+
+	*queue_ptr = MyAlloc(queue_info);
+	DeferCall(free, queue_ptr);
+
+	(*queue_ptr)->mutex = CheckNull(lock_init());
+
+	DeferAbort;
 	return KBurnNoErr;
 }
 
-static void *_queue_shift(queue_info *queue, bool do_free)
+static void *_queue_shift(queue_info *queue, bool lock)
 {
-	lock(&queue->lock);
+	if (lock)
+		lock(queue->mutex);
 	if (queue->first == NULL)
 	{
-		unlock(&queue->lock);
+		if (lock)
+			unlock(queue->mutex);
 		return NULL;
 	}
 	queue_struct *old = queue->first;
@@ -34,34 +43,30 @@ static void *_queue_shift(queue_info *queue, bool do_free)
 		queue->last = NULL;
 	queue->first = old->next;
 
-	unlock(&queue->lock);
+	if (lock)
+		unlock(queue->mutex);
 
-	void *data = old->data;
-	free(old);
-
-	if (do_free)
-	{
-		free(data);
-		return NULL;
-	}
-
-	return data;
+	return old->data;
 }
 
 void queue_destroy(queue_info *queue)
 {
-	while (_queue_shift(queue, true) != NULL)
-		;
+	lock(queue->mutex);
+	void *ele;
+	while ((ele = _queue_shift(queue, false)) != NULL)
+		free(ele);
+	unlock(queue->mutex);
+	lock_deinit(&queue->mutex);
 	free(queue);
 }
 
 kburn_err_t queue_push(queue_info *queue, void *data, bool free_when_destroy)
 {
-	queue_struct *new = KBALLOC(queue_struct);
+	queue_struct *new = MyAlloc(queue_struct);
 	new->data = data;
 	new->free_when_destroy = free_when_destroy;
 
-	lock(&queue->lock);
+	lock(queue->mutex);
 	if (queue->first == NULL)
 	{
 		queue->first = new;
@@ -72,12 +77,12 @@ kburn_err_t queue_push(queue_info *queue, void *data, bool free_when_destroy)
 		queue->last->next = new;
 		queue->last = new;
 	}
-	unlock(&queue->lock);
+	unlock(queue->mutex);
 
 	return KBurnNoErr;
 }
 
 void *queue_shift(queue_info *queue)
 {
-	return _queue_shift(queue, false);
+	return _queue_shift(queue, true);
 }

@@ -53,7 +53,7 @@ typedef struct isp_request_t
 	uint32_t checksum;
 	kburn_address_t address;
 	uint32_t data_len;
-	uint8_t data[1024];
+	uint8_t data[];
 } isp_request_t;
 
 typedef struct isp_response_t
@@ -65,7 +65,7 @@ typedef struct isp_response_t
 
 extern uint32_t baudrateHighValue;
 
-kburn_err_t init_serial_port(kburnSerialDeviceNode *serial, const char *path);
+kburn_err_t serial_port_init(kburnSerialDeviceNode *serial, const char *path);
 void destroy_serial_port(KBCTX scope, kburnDeviceNode *node);
 kburn_err_t on_serial_device_attach(KBCTX scope, const char *path);
 

@@ -1,6 +1,6 @@
 #define _GNU_SOURCE
-#include "global.h"
 #include <pthread.h>
+#include "global.h"
 
 typedef struct thread_passing_object
 {
@@ -48,7 +48,7 @@ static void *start_routine_wrapper(void *_ctx)
 
 kburn_err_t thread_create(const char *debug_title, thread_function start_routine, KBCTX scope, thread_passing_object **out_thread)
 {
-	thread_passing_object *thread = KBALLOC(thread_passing_object);
+	thread_passing_object *thread = MyAlloc(thread_passing_object);
 	*out_thread = thread;
 
 	if (debug_title)
@@ -66,7 +66,7 @@ kburn_err_t thread_create(const char *debug_title, thread_function start_routine
 		return KBURN_ERROR_KIND_SYSCALL | thread_ret;
 	}
 
-	dispose_add(scope->disposables, disposable(destroy_thread, thread));
+	dispose_list_add(scope->disposables, toDisposable(destroy_thread, thread));
 
 	return KBurnNoErr;
 }

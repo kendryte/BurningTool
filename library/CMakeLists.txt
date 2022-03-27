@@ -68,16 +68,12 @@ set_target_properties(canaan_burn PROPERTIES LINKER_LANGUAGE C)
 
 file(GLOB_RECURSE PUBLIC_HEADER "include/canaan-burn/*.h")
 set_target_properties(canaan_burn PROPERTIES PUBLIC_HEADER "${PUBLIC_HEADER}")
-target_include_directories(canaan_burn INTERFACE "include")
+target_include_directories(canaan_burn PUBLIC "${CMAKE_CURRENT_LIST_DIR}/include")
 
-file(GLOB_RECURSE new_list *.h)
-set(dir_list "")
-foreach(file_path ${new_list})
-  get_filename_component(dir_path ${file_path} PATH)
-  set(dir_list "${dir_list}" ${dir_path})
-endforeach()
-list(REMOVE_DUPLICATES dir_list)
-target_include_directories(canaan_burn PRIVATE "${dir_list}")
+target_include_directories(canaan_burn PRIVATE "${CMAKE_CURRENT_LIST_DIR}/src/bridge")
+target_include_directories(canaan_burn PRIVATE "${CMAKE_CURRENT_LIST_DIR}/src/lib")
+target_include_directories(canaan_burn PRIVATE "${CMAKE_CURRENT_LIST_DIR}/src/serial")
+target_include_directories(canaan_burn PRIVATE "${CMAKE_CURRENT_LIST_DIR}/src/usb")
 # ##############################################################################
 
 find_package(libusb CONFIG REQUIRED)
@@ -114,5 +110,5 @@ if(CMAKE_BUILD_TYPE STREQUAL "Debug")
   find_package(Sanitizers REQUIRED)
 
   add_sanitizers(canaan_burn)
+  endif()
   target_compile_options(canaan_burn PRIVATE -Wall -Wextra -pedantic -Werror)
-endif()

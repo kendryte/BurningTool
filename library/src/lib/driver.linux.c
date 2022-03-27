@@ -16,18 +16,22 @@ kburnSerialDeviceInfo driver_get_devinfo(const char *path)
 {
 	debug_print("driver_get_devinfo(%s)", path);
 
+	struct udev_device *dev = NULL;
+	struct udev_enumerate *query = NULL;
+	struct udev *u = NULL;
+
 	const char *pstr;
 	struct udev_list_entry *list;
 	struct udev_list_entry *itr;
 	kburnSerialDeviceInfo ret;
 	memset(&ret, 0, sizeof(kburnSerialDeviceInfo));
 
-	struct udev *u = udev_new();
+	u = udev_new();
 	if (u == NULL)
 		goto exit;
 
 	/* create libudev enumerate */
-	struct udev_enumerate *query = udev_enumerate_new(u);
+	query = udev_enumerate_new(u);
 	if (query == NULL)
 	{
 		goto exit;
@@ -37,7 +41,6 @@ kburnSerialDeviceInfo driver_get_devinfo(const char *path)
 	udev_enumerate_scan_devices(query);
 	list = udev_enumerate_get_list_entry(query);
 
-	struct udev_device *dev = NULL;
 	udev_list_entry_foreach(itr, list)
 	{
 		dev = udev_device_new_from_syspath(u, udev_list_entry_get_name(itr));

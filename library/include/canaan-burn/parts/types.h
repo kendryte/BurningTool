@@ -12,8 +12,8 @@ typedef struct kburnDeviceError
 	PCONST char *errorMessage;
 } kburnDeviceError;
 
-#include "./types.serial.h"
-#include "./types.usb.h"
+#include "types.serial.h"
+#include "types.usb.h"
 
 typedef struct kburnDeviceNode
 {

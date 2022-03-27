@@ -12,8 +12,8 @@ kburn_err_t on_serial_device_attach(KBCTX scope, const char *path)
 	if (err != KBurnNoErr)
 		return err;
 
-	err = init_serial_port(node->serial, path);
-	assert((err == KBurnNoErr) && "init_serial_port now do not return error");
+	err = serial_port_init(node->serial, path);
+	assert((err == KBurnNoErr) && "serial_port_init now do not return error");
 	if (err != KBurnNoErr)
 		return err;
 

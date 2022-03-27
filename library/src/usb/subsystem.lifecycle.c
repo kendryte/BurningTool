@@ -42,8 +42,7 @@ kburn_err_t usb_subsystem_init(KBCTX scope)
 		return KBurnNoErr;
 	}
 
-	const struct libusb_version *version;
-	version = libusb_get_version();
+	const struct libusb_version *version = libusb_get_version();
 	debug_print("\tlibusb v%d.%d.%d.%d\n\n", version->major, version->minor, version->micro, version->nano);
 
 	int r = libusb_init(&scope->usb->libusb);

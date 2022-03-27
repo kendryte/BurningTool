@@ -225,7 +225,7 @@ slip_send_message(slip_handler_s *slip, const uint8_t *data, uint32_t size)
 	uint32_t i;
 	uint8_t byte;
 	uint8_t crc_buf[2];
-	uint16_t crc;
+	uint16_t crc = 0;
 
 	assert(data != NULL);
 	assert(slip != NULL);

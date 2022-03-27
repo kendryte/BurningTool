@@ -18,9 +18,9 @@ void free_got_usb_device(libusb_device *dev)
 	libusb_unref_device(dev);
 }
 
-libusb_device *get_usb_device(struct libusb_context *libusb, uint16_t vid, uint16_t pid, const uint8_t *path)
+libusb_device *get_usb_device(struct libusb_context *libusb, uint16_t vid, uint16_t pid, const uint8_t *in_path)
 {
-	debug_print("get_usb_device(%d, %d, %.8s)", vid, pid, path);
+	debug_print("get_usb_device(%d, %d, %.8s)", vid, pid, in_path);
 	libusb_device *ret = NULL;
 	libusb_device **list;
 	ssize_t cnt = libusb_get_device_list(libusb, &list);
@@ -45,7 +45,7 @@ libusb_device *get_usb_device(struct libusb_context *libusb, uint16_t vid, uint1
 		if (usb_get_device_path(dev, path) < LIBUSB_SUCCESS)
 			continue;
 
-		if (strncmp((const char *)path, (const char *)path, MAX_PATH_LENGTH) == 0)
+		if (strncmp((const char *)path, (const char *)in_path, MAX_PATH_LENGTH) == 0)
 		{
 			ret = dev;
 			libusb_ref_device(ret);

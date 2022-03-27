@@ -4,9 +4,9 @@
 #include <stdint.h>
 #include <stddef.h>
 
-#include "./parts/prefix.h"
-#include "./parts/types.h"
-#include "./parts/errors.h"
+#include "parts/prefix.h"
+#include "parts/types.h"
+#include "parts/errors.h"
 
 DEFINE_START
 
@@ -106,5 +106,5 @@ PUBLIC kburn_err_t kburnPollUSB(KBCTX scope);
 
 DEFINE_END
 
-#include "./parts/serial.config.h"
-#include "./parts/serial.isp.h"
+#include "parts/serial.config.h"
+#include "parts/serial.isp.h"

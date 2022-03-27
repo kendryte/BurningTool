@@ -2,7 +2,7 @@
 
 #include <stdlib.h>
 #include "global.h"
-#include "./usb.types.h"
+#include "usb.types.h"
 
 typedef struct usb_subsystem_context
 {
@@ -53,9 +53,11 @@ kburn_err_t usb_lowlevel_command_send(libusb_device_handle *handle, uint8_t endp
 kburn_err_t usb_lowlevel_status_read(libusb_device_handle *handle, uint8_t endpoint, uint32_t expected_operation_index);
 kburn_err_t usb_lowlevel_error_read(libusb_device_handle *handle, uint8_t endpoint_in, uint8_t endpoint_out);
 
-#define debug_print_libusb_error(msg, err) \
-	if (err < 0)                           \
-		debug_print("%s: %s[%d] %s", msg, libusb_error_name(err), (int)err, libusb_strerror(err));
+#define debug_print_libusb_error(msg, err)                                                         \
+	if (err < 0)                                                                                   \
+	{                                                                                              \
+		debug_print("%s: %s[%d] %s", msg, libusb_error_name(err), (int)err, libusb_strerror(err)); \
+	}
 
 // void debug_print_libusb_error(const char *msg, int libusb_err);
 

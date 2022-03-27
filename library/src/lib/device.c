@@ -28,16 +28,16 @@ void device_instance_collect(KBCTX scope, kburnDeviceNode *instance)
 kburn_err_t create_empty_device_instance(KBCTX scope, kburnDeviceNode **output)
 {
 	kburnDeviceNode n = {
-		.error = KBALLOC(kburnDeviceError),
+		.error = MyAlloc(kburnDeviceError),
 		.chipInfo = NULL,
-		.serial = KBALLOC(kburnSerialDeviceNode),
-		.usb = KBALLOC(kburnUsbDeviceNode),
+		.serial = MyAlloc(kburnSerialDeviceNode),
+		.usb = MyAlloc(kburnUsbDeviceNode),
 		._scope = scope,
 		.destroy_in_progress = false,
 		.bind_id = 0,
 	};
 
-	*output = KBALLOC(kburnDeviceNode);
+	*output = MyAlloc(kburnDeviceNode);
 	memcpy(*output, &n, sizeof(kburnDeviceNode));
 
 	n.serial->parent = *output;

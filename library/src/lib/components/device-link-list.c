@@ -1,47 +1,37 @@
-#include "global.h"
-#include "device-link-list.h"
 #include <string.h>
 #include <stdlib.h>
+#include "global.h"
+#include "device-link-list.h"
+#include "bind-wait-list.h"
 
-static inline bool _should_insert_waitting_list(kburnDeviceNode *node)
+port_link_list *port_link_list_init()
 {
-	return node->serial->init && node->serial->isOpen && node->serial->isSwitchIsp && !node->serial->isUsbBound;
-}
+	DeferEnabled;
 
-static void _recreate_waitting_list(KBCTX scope)
+	port_link_list *ret = calloc(1, sizeof(port_link_list));
+	DeferFree(ret);
+	if (ret == NULL)
+		return NULL;
+
+	ret->exclusion = lock_init();
+	if (ret == NULL)
+		return NULL;
+
+	DeferAbort;
+	return ret;
+}
+DECALRE_DISPOSE(port_link_list_deinit, port_link_list)
 {
-	debug_print("\tportlist::recreate_waitting_list()");
-	port_link_element *curs = NULL;
-
-	lock(&scope->waittingDevice.lock);
-
-	memset(scope->waittingDevice.list, 0, sizeof(scope->waittingDevice.list));
-
-	size_t itr = 0;
-	for (curs = scope->openDeviceList->head; curs != NULL; curs = curs->next)
-	{
-		if (_should_insert_waitting_list(curs->node))
-		{
-			debug_print("\t\t%s", curs->node->serial->path);
-			scope->waittingDevice.list[itr] = curs->node->serial;
-
-			itr++;
-			if (itr >= MAX_WAITTING_DEVICES)
-			{
-				break;
-			}
-		}
-	}
-	debug_print("\t%lu items", itr);
-
-	unlock(&scope->waittingDevice.lock);
+	lock_deinit(&context->exclusion);
+	free(context);
 }
+DECALRE_DISPOSE_END()
 
 void recreate_waitting_list(KBCTX scope)
 {
-	lock(&scope->openDeviceList->exclusion);
+	lock(scope->openDeviceList->exclusion);
 	_recreate_waitting_list(scope);
-	unlock(&scope->openDeviceList->exclusion);
+	unlock(scope->openDeviceList->exclusion);
 }
 
 void add_to_device_list(kburnDeviceNode *target)
@@ -53,7 +43,7 @@ void add_to_device_list(kburnDeviceNode *target)
 	ele->prev = NULL;
 	ele->next = NULL;
 
-	lock(&scope->openDeviceList->exclusion);
+	lock(scope->openDeviceList->exclusion);
 	if (scope->openDeviceList->head)
 	{
 		ele->prev = scope->openDeviceList->tail;
@@ -75,7 +65,7 @@ void add_to_device_list(kburnDeviceNode *target)
 	if (_should_insert_waitting_list(target))
 		_recreate_waitting_list(target->_scope);
 
-	unlock(&scope->openDeviceList->exclusion);
+	unlock(scope->openDeviceList->exclusion);
 }
 
 static void do_delete(KBCTX scope, port_link_element *target)
@@ -107,17 +97,17 @@ bool delete_from_device_list(kburnDeviceNode *target)
 {
 	KBCTX scope = target->_scope;
 	debug_print("delete_from_device_list(0x%p) [size=%d]", (void *)target, scope->openDeviceList->size);
-	lock(&scope->openDeviceList->exclusion);
+	lock(scope->openDeviceList->exclusion);
 	for (port_link_element *curs = scope->openDeviceList->head; curs != NULL; curs = curs->next)
 	{
 		if (curs->node == target)
 		{
 			do_delete(scope, curs);
-			unlock(&scope->openDeviceList->exclusion);
+			unlock(scope->openDeviceList->exclusion);
 			return true;
 		}
 	}
-	unlock(&scope->openDeviceList->exclusion);
+	unlock(scope->openDeviceList->exclusion);
 	debug_print("  - not found");
 	return false;
 }
@@ -126,7 +116,7 @@ static inline port_link_element *find_serial_device(KBCTX scope, const char *pat
 {
 	port_link_element *curs = NULL;
 
-	lock(&scope->openDeviceList->exclusion);
+	lock(scope->openDeviceList->exclusion);
 	for (curs = scope->openDeviceList->head; curs != NULL; curs = curs->next)
 	{
 		if (!curs->node->serial->init)
@@ -134,7 +124,7 @@ static inline port_link_element *find_serial_device(KBCTX scope, const char *pat
 		if (strcmp(curs->node->serial->path, path) == 0)
 			break;
 	}
-	unlock(&scope->openDeviceList->exclusion);
+	unlock(scope->openDeviceList->exclusion);
 	return curs;
 }
 
@@ -142,13 +132,13 @@ static inline port_link_element *find_usb_device_by_vidpidpath(KBCTX scope, uint
 {
 	port_link_element *curs = NULL;
 
-	lock(&scope->openDeviceList->exclusion);
+	lock(scope->openDeviceList->exclusion);
 	for (curs = scope->openDeviceList->head; curs != NULL; curs = curs->next)
 	{
 		if (curs->node->usb->deviceInfo.idVendor == vid && curs->node->usb->deviceInfo.idProduct == pid && strncmp((char *)path, (char *)curs->node->usb->deviceInfo.path, MAX_PATH_LENGTH) == 0)
 			break;
 	}
-	unlock(&scope->openDeviceList->exclusion);
+	unlock(scope->openDeviceList->exclusion);
 	return curs;
 }
 
@@ -180,7 +170,7 @@ void alloc_new_bind_id(kburnDeviceNode *node)
 {
 	uint32_t id = 0;
 
-	lock(&node->_scope->openDeviceList->exclusion);
+	lock(node->_scope->openDeviceList->exclusion);
 
 	do
 	{
@@ -188,5 +178,5 @@ void alloc_new_bind_id(kburnDeviceNode *node)
 	} while (has_bind_id_used(node->_scope, id));
 	node->bind_id = id;
 
-	unlock(&node->_scope->openDeviceList->exclusion);
+	unlock(node->_scope->openDeviceList->exclusion);
 }

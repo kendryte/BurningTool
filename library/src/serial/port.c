@@ -48,9 +48,9 @@ void destroy_serial_port(KBCTX scope, kburnDeviceNode *d)
 	device_instance_collect(scope, d);
 }
 
-kburn_err_t init_serial_port(kburnSerialDeviceNode *serial, const char *path)
+kburn_err_t serial_port_init(kburnSerialDeviceNode *serial, const char *path)
 {
-	debug_print("init_serial_port(0x%p, %s)", (void *)serial, path);
+	debug_print("serial_port_init(0x%p, %s)", (void *)serial, path);
 	serial->path = strdup(path);
 	serial->deviceInfo = driver_get_devinfo(path);
 

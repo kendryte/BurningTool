@@ -1,5 +1,6 @@
-#include "protocol.h"
+#include "bind-wait-list.h"
 #include "global.h"
+#include "protocol.h"
 #include "serial.h"
 
 static void push_buffer(char *tgt, size_t *tgt_i, const char *src, const size_t src_size)
@@ -29,15 +30,6 @@ static bool handle_one_device(kburnSerialDeviceNode *dev)
 
 	if (in_buffer_size == 0)
 		return false;
-
-	// size_t remaining = MAX_BUFF_SIZE - b->buff_i;
-	// if (remaining < in_buffer_size)
-	// {
-	// 	debug_print("serial binding buffer overflow");
-	// 	b->buff_i = 0;
-	// 	if (in_buffer_size > MAX_BUFF_SIZE)
-	// 		in_buffer_size = MAX_BUFF_SIZE;
-	// }
 
 	size_t tbuff_start = b->packet_last;
 	b->packet_last = 0;
@@ -130,9 +122,9 @@ void pair_serial_ports_thread(KBCTX scope, const bool *const quit)
 	{
 		int current_size = 0;
 
-		lock(&scope->waittingDevice.lock);
+		lock(scope->waittingDevice->mutex);
 
-		for (kburnSerialDeviceNode **ptr = scope->waittingDevice.list; *ptr != NULL; ptr++)
+		for (kburnSerialDeviceNode **ptr = scope->waittingDevice->list; *ptr != NULL; ptr++)
 		{
 			kburnSerialDeviceNode *dev = *ptr;
 
@@ -148,7 +140,7 @@ void pair_serial_ports_thread(KBCTX scope, const bool *const quit)
 			current_size++;
 		}
 
-		unlock(&scope->waittingDevice.lock);
+		unlock(scope->waittingDevice->mutex);
 
 		if (need_recreate)
 		{
