@@ -9,9 +9,11 @@ static DECALRE_DISPOSE(_dispose, kburnContext)
 		serial_monitor_pause(context);
 
 		context->monitor_inited = false;
-		usb_subsystem_deinit(context);
-		serial_subsystem_deinit(context);
 	}
+	if (context->serial->subsystem_inited)
+		serial_subsystem_init(context);
+	if (context->usb->subsystem_inited)
+		usb_subsystem_deinit(context);
 }
 DECALRE_DISPOSE_END()
 
@@ -21,29 +23,36 @@ kburn_err_t kburnStartWaitingDevices(KBCTX scope)
 	if (scope->monitor_inited)
 		return KBurnNoErr;
 
+	DeferEnabled;
+
 	kburn_err_t r;
 
-	if (!scope->usb->libusb)
+	if (!scope->usb->subsystem_inited)
+	{
 		usb_subsystem_init(scope);
+		DeferCall(usb_subsystem_deinit, scope);
+	}
 
 	if (!scope->serial->subsystem_inited)
+	{
 		serial_subsystem_init(scope);
+		DeferCall(serial_subsystem_deinit, scope);
+	}
 
 	r = serial_monitor_prepare(scope);
 	if (r != KBurnNoErr)
 		return r;
+	DeferCall(serial_monitor_destroy, scope);
 
 	r = usb_monitor_prepare(scope);
 	if (r != KBurnNoErr)
-	{
-		serial_monitor_destroy(scope);
 		return r;
-	}
 
 	scope->monitor_inited = true;
 
-	global_resource_register(scope, _dispose, scope);
+	dispose_list_add(scope->disposables, toDisposable(_dispose, scope));
 
+	DeferAbort;
 	return kburnWaitDeviceResume(scope);
 }
 

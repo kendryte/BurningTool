@@ -12,7 +12,7 @@ kburn_err_t kburnCreate(KBCTX *ppCtx)
 	DeferEnabled;
 
 	static uint32_t dbg_index = 0;
-	char *comment = DeferFree(CheckNull(sprintf_alloc("context %d", dbg_index++)));
+	char *comment = DeferFree(CheckNull(sprintf_alloc("scope[%d]->disposables", dbg_index++)));
 
 	disposable_list_t *dis = DeferFree(CheckNull(disposable_list_init(comment)));
 	DeferCall(dispose_all, dis);

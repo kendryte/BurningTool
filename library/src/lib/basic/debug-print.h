@@ -32,7 +32,7 @@
 
 #else // DISABLE_TERM_HYPERLINK
 #include <string.h>
-#define FILE_LINE_FORMAT ".%s:%d"
+#define FILE_LINE_FORMAT "%s:%d"
 #define FILE_LINE_VALUE(file_path, file_line) RELATIVE_PATH(file_path), file_line
 
 #ifdef __FILENAME__
@@ -49,7 +49,7 @@
 
 #else // NDEBUG
 
-#define FILE_LINE_FORMAT ".%s:%d"
+#define FILE_LINE_FORMAT "%s:%d"
 #define FILE_LINE_VALUE(file_path, file_line) file_path, file_line
 
 inline static void debug_print_location(const char *file, int UNUSED(line), const char *UNUSED(fmt), ...) { (void)file; }

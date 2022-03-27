@@ -23,7 +23,6 @@ typedef struct kburnContext
 
 typedef kburnContext *KBCTX;
 
-void global_resource_register(KBCTX scope, dispose_function callback, void *userData);
 void global_resource_unregister(KBCTX scope, dispose_function callback, void *userData);
 
 #include "basic/sleep.h"

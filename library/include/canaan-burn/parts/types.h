@@ -19,6 +19,7 @@ typedef struct kburnDeviceNode
 {
 	PCONST kburnDeviceError *const error;
 	PCONST void *chipInfo;
+	PCONST struct disposable_list *disposable_list;
 	kburnSerialDeviceNode *const serial;
 	kburnUsbDeviceNode *const usb;
 	PCONST struct kburnContext *const _scope;

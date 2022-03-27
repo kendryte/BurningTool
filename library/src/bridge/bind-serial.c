@@ -127,6 +127,8 @@ void pair_serial_ports_thread(KBCTX scope, const bool *const quit)
 		for (kburnSerialDeviceNode **ptr = scope->waittingDevice->list; *ptr != NULL; ptr++)
 		{
 			kburnSerialDeviceNode *dev = *ptr;
+			if (!dev->init) // TODO: need lock with deinit
+				continue;
 
 			if (dev->binding == NULL)
 			{

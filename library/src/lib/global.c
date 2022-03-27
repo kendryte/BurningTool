@@ -3,16 +3,6 @@
 #include <string.h>
 #include <stdarg.h>
 
-void global_resource_register(KBCTX scope, dispose_function callback, void *userData)
-{
-	dispose_list_add(scope->disposables, toDisposable(callback, userData));
-}
-
-void global_resource_unregister(KBCTX scope, dispose_function callback, void *userData)
-{
-	dispose_list_cancel(scope->disposables, toDisposable(callback, userData));
-}
-
 #ifndef NDEBUG
 __attribute__((access(read_only, 2, 3))) void __print_buffer(const char *dir, const uint8_t *buff, size_t size, size_t max_dump)
 {

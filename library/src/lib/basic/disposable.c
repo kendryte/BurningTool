@@ -203,7 +203,7 @@ void dispose(disposable target)
 	current->callback(r, current->object);
 
 	// debug_print("  * dispose callback return, size=%d", target->size);
-	m_assert(plength + 1 == r->size, "disposed function not call to dispose_list_delete()");
+	m_assert(plength - 1 == r->size, "not call to dispose_list_delete(): %s at %s:%d", current->__debug.title, current->__debug.file, current->__debug.line);
 }
 
 DECALRE_DISPOSE(free_pointer, void)

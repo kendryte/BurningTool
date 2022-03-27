@@ -12,6 +12,8 @@ typedef struct usb_subsystem_context
 		int pid;
 	} filter;
 
+	bool subsystem_inited;
+
 	struct libusb_context *libusb;
 	bool monitor_prepared;
 	bool monitor_enabled;
@@ -41,12 +43,10 @@ void free_all_unopend_usb_info(kburnUsbDeviceInfo **list);
 int get_all_unopend_usb_info(KBCTX scope, int vid, int pid, kburnUsbDeviceInfo **ret);
 kburn_err_t init_list_all_usb_devices(KBCTX scope);
 
+DECALRE_DISPOSE_HEADER(destroy_usb_port, kburnDeviceNode);
 kburn_err_t open_single_usb_port(KBCTX scope, struct libusb_device *dev);
 kburn_err_t close_single_usb_port(KBCTX scope, kburnDeviceNode *dev);
 kburnDeviceNode *usb_device_find(KBCTX scope, uint16_t vid, uint16_t pid, const uint8_t *serial);
-
-void destroy_usb_port(KBCTX scope, kburnDeviceNode *device);
-kburn_err_t create_usb_port(KBCTX scope, kburnDeviceNode *device);
 
 kburn_err_t usb_lowlevel_command_send(libusb_device_handle *handle, uint8_t endpoint,
 									  const usbIspCommandPacket cdb, uint8_t direction, int data_length, uint32_t operation_index);

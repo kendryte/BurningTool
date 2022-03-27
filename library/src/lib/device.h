@@ -1,6 +1,9 @@
 #pragma once
 
 #include "global.h"
+#include "basic/disposable.h"
+
+DECALRE_DISPOSE_HEADER(destroy_device, kburnDeviceNode);
 
 __attribute__((always_inline)) static inline kburnDeviceNode *__p(kburnDeviceNode *v) { return v; }
 __attribute__((always_inline)) static inline kburnDeviceNode *__s(kburnSerialDeviceNode *v) { return v->parent; }
@@ -25,7 +28,7 @@ kburn_err_t make_error_code(enum kburnErrorKind kind, int32_t code);
 
 void alloc_new_bind_id(kburnDeviceNode *target);
 void add_to_device_list(kburnDeviceNode *target);
-bool delete_from_device_list(kburnDeviceNode *target);
+DECALRE_DISPOSE_HEADER(delete_from_device_list, kburnDeviceNode);
 void recreate_waitting_list(KBCTX scope);
 kburnDeviceNode *get_device_by_serial_port_path(KBCTX scope, const char *path);
 kburnDeviceNode *get_device_by_usb_port_path(KBCTX scope, uint16_t vid, uint8_t pid, const uint8_t *path);

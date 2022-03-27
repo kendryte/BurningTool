@@ -66,28 +66,16 @@ _quit:
 	return ret;
 }
 
-void destroy_usb_port(KBCTX scope, kburnDeviceNode *device)
+DECALRE_DISPOSE(destroy_usb_port, kburnDeviceNode)
 {
-	if (!device->usb->init)
-		return;
-	close_single_usb_port(scope, device);
+	close_single_usb_port(context->_scope, context);
 }
-
-kburn_err_t create_usb_port(KBCTX UNUSED(scope), kburnDeviceNode *device)
-{
-	kburnUsbDeviceNode *usb = device->usb;
-	if (device->usb->init)
-		return KBurnNoErr;
-
-	usb->isOpen = false;
-	usb->isClaim = false;
-	usb->init = true;
-
-	return KBurnNoErr;
-}
+DECALRE_DISPOSE_END()
 
 kburn_err_t open_single_usb_port(KBCTX scope, struct libusb_device *dev)
 {
+	DeferEnabled;
+
 	debug_print("open_single_usb_port(%p)", (void *)dev);
 	m_assert(scope->usb->libusb, "usb subsystem is not inited");
 
@@ -98,6 +86,7 @@ kburn_err_t open_single_usb_port(KBCTX scope, struct libusb_device *dev)
 	kburn_err_t r = create_empty_device_instance(scope, &node);
 	if (r != KBurnNoErr)
 		return r;
+	DeferDispose(scope->disposables, node, destroy_device);
 
 	node->usb->device = dev;
 
@@ -105,13 +94,14 @@ kburn_err_t open_single_usb_port(KBCTX scope, struct libusb_device *dev)
 	if (rusb < LIBUSB_SUCCESS)
 		goto cleanup_single_port;
 
-	rusb = libusb_open(dev, &node->usb->handle); // TODO: leak
+	rusb = libusb_open(dev, &node->usb->handle);
 	if (rusb < LIBUSB_SUCCESS)
 	{
 		debug_print_libusb_error("open_single_usb_port: libusb_open", rusb);
 		goto cleanup_single_port;
 	}
 	node->usb->isOpen = true;
+	DeferDispose(node->disposable_list, node, destroy_usb_port);
 	debug_print("usb port open success");
 
 	rusb = usb_get_device_serial(dev, node->usb->handle, node->usb->deviceInfo.strSerial);

@@ -93,24 +93,25 @@ static void do_delete(KBCTX scope, port_link_element *target)
 	free(target);
 }
 
-bool delete_from_device_list(kburnDeviceNode *target)
+DECALRE_DISPOSE(delete_from_device_list, kburnDeviceNode)
 {
-	KBCTX scope = target->_scope;
-	debug_print("delete_from_device_list(0x%p) [size=%d]", (void *)target, scope->openDeviceList->size);
+	KBCTX scope = context->_scope;
+	debug_print("delete_from_device_list(0x%p) [size=%d]", (void *)context, scope->openDeviceList->size);
 	lock(scope->openDeviceList->exclusion);
 	for (port_link_element *curs = scope->openDeviceList->head; curs != NULL; curs = curs->next)
 	{
-		if (curs->node == target)
+		if (curs->node == context)
 		{
 			do_delete(scope, curs);
 			unlock(scope->openDeviceList->exclusion);
-			return true;
+			return;
 		}
 	}
 	unlock(scope->openDeviceList->exclusion);
 	debug_print("  - not found");
-	return false;
+	return;
 }
+DECALRE_DISPOSE_END()
 
 static inline port_link_element *find_serial_device(KBCTX scope, const char *path)
 {

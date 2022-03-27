@@ -16,6 +16,11 @@ static void thread_libusb_handle_events(KBCTX scope, const bool *const quit)
 void usb_subsystem_deinit(KBCTX scope)
 {
 	debug_print("deinit_libusb()");
+	if (!scope->usb->subsystem_inited)
+	{
+		debug_print("  - already deinited");
+		return;
+	}
 
 	if (scope->usb->libusb_thread)
 	{
@@ -31,12 +36,16 @@ void usb_subsystem_deinit(KBCTX scope)
 		libusb_exit(scope->usb->libusb);
 		scope->usb->libusb = NULL;
 	}
+
+	scope->usb->subsystem_inited = false;
 }
 
 kburn_err_t usb_subsystem_init(KBCTX scope)
 {
+	DeferEnabled;
+
 	debug_print("usb_subsystem_init()");
-	if (scope->usb->libusb)
+	if (scope->usb->subsystem_inited)
 	{
 		debug_print("  - already inited");
 		return KBurnNoErr;
@@ -49,9 +58,9 @@ kburn_err_t usb_subsystem_init(KBCTX scope)
 	if (r < 0)
 	{
 		debug_print_libusb_error("libusb init failed", r);
-		scope->usb->libusb = NULL;
 		return r | KBURN_ERROR_KIND_USB;
 	}
+	DeferCall(libusb_exit, scope->usb->libusb);
 
 	kburn_err_t err = thread_create("libusb events", thread_libusb_handle_events, scope, &scope->usb->libusb_thread);
 	if (err != KBurnNoErr)
@@ -59,5 +68,7 @@ kburn_err_t usb_subsystem_init(KBCTX scope)
 
 	debug_print("libusb init complete");
 
+	scope->usb->subsystem_inited = true;
+	DeferAbort;
 	return KBurnNoErr;
 }

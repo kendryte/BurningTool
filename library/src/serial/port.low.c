@@ -2,7 +2,7 @@
 
 static bool open(kburnSerialDeviceNode *node, ser_opts_t opts)
 {
-	m_assert_ptr(node->m_dev_handle, "duplicate call to serial port open");
+	m_assert(node->m_dev_handle == NULL, "duplicate call to serial port open");
 
 	ser_t *handle = ser_create();
 

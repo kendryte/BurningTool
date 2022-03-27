@@ -27,9 +27,9 @@ typedef struct disposable
 
 #ifndef NDEBUG
 disposable __toDisposable(dispose_function callback, void *userData, const char *debug_title, const char *file, int line);
-#define toDisposable(callback, userData) __extension__({                                                                      \
-	if (0)                                                                                                                    \
-		callback(NULL, userData);                                                                                             \
+#define toDisposable(callback, userData) __extension__({                                                                          \
+	if (0)                                                                                                                        \
+		callback(NULL, userData);                                                                                                 \
 	__toDisposable((dispose_function)(callback), (void *)(userData), "" #callback "(" #userData ") at ", __FILENAME__, __LINE__); \
 })
 #else
@@ -78,6 +78,3 @@ DECALRE_DISPOSE_HEADER(dispose_all_and_deinit, disposable_list_t);
 	dispose_list_add(registry, toDisposable(free_and_unset_pointer, &pointer)); \
 	pointer;                                                                    \
 })
-
-#define dispose_chain(registry, child_registry) \
-	dispose_list_add(registry, toDisposable(dispose_child, child_registry));

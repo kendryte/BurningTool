@@ -51,6 +51,9 @@
 		"cerrno": "c",
 		"iosfwd": "c",
 		"numeric": "c",
-		"iterator": "c"
+		"iterator": "c",
+		"map": "c",
+		"set": "c",
+		"unordered_set": "c"
 	}
 }

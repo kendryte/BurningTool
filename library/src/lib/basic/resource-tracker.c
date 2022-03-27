@@ -26,7 +26,7 @@ void resource_tracker_done(resource_tracker_t *tracker)
 	if (!tracker->successed)
 	{
 		debug_print("function return without confirm, release all resource: (%d)", tracker->size);
-		for (uint8_t i = 0; i < tracker->size; i++)
+		for (int i = tracker->size - 1; i >= 0; i--)
 		{
 			debug_print_location(tracker->element[i].file, tracker->element[i].line, " * %s", tracker->element[i].var);
 			do_cleanup(tracker->element[i]);
@@ -34,7 +34,7 @@ void resource_tracker_done(resource_tracker_t *tracker)
 	}
 	else if (tracker->hasAlways)
 	{
-		for (uint8_t i = 0; i < tracker->size; i++)
+		for (int i = tracker->size - 1; i >= 0; i--)
 		{
 			if (tracker->element[i].force)
 			{
