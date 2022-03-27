@@ -89,7 +89,7 @@ kburn_err_t create_usb_port(KBCTX UNUSED(scope), kburnDeviceNode *device)
 kburn_err_t open_single_usb_port(KBCTX scope, struct libusb_device *dev)
 {
 	debug_print("open_single_usb_port(%p)", (void *)dev);
-	assert(scope->usb->libusb && "usb subsystem is not inited");
+	m_assert(scope->usb->libusb, "usb subsystem is not inited");
 
 	int rusb = 0;
 	kburn_err_t risp = 0;

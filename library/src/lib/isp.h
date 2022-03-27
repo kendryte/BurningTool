@@ -26,3 +26,4 @@ enum kburnIspOperation
 } __attribute__((__packed__));
 
 typedef enum kburnIspOperation kburnIspOperation;
+_Static_assert(sizeof(kburnIspOperation) == 1, "enum must 8bit");

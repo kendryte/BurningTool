@@ -43,6 +43,4 @@ typedef struct kburnErrorDesc
 } __attribute__((__packed__)) kburnErrorDesc;
 kburnErrorDesc kburnSplitErrorCode(kburn_err_t code);
 
-static_assert(sizeof(kburnErrorDesc) == sizeof(uint64_t) + sizeof(int32_t), "kburnErrorDesc must be 96bit");
-
 DEFINE_END

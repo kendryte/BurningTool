@@ -1,6 +1,5 @@
 #include <memory.h>
 #include <stdbool.h>
-#include <assert.h>
 #include <stdint.h>
 #include <stdlib.h>
 #include "resource-tracker.h"
@@ -18,7 +17,7 @@ static inline void do_cleanup(const resource_tracker_element element)
 	}
 	else
 	{
-		assert(false && "invalid cleanup");
+		m_abort("invalid cleanup");
 	}
 }
 
@@ -54,9 +53,9 @@ void keep_resource(resource_tracker_t *tracker)
 }
 void *_track_resource(resource_tracker_t *tracker, void *resource, cleanup_function clean, bool always, const char *var, const char *file, int line)
 {
-	assert((resource != NULL) && "can not track null ptr");
+	m_assert_ptr(resource, "can not track null ptr");
 	uint8_t i = tracker->size++;
-	assert((i < MAX_TRACE) && "resource tracker can not hold too many element");
+	m_assert(i < MAX_TRACE, "resource tracker can not hold too many element");
 	tracker->element[i].callback = clean;
 	tracker->element[i].resource = resource;
 	tracker->element[i].force = always;
@@ -71,9 +70,9 @@ void *_track_resource(resource_tracker_t *tracker, void *resource, cleanup_funct
 
 void *_track_dispose(resource_tracker_t *tracker, disposable d, const char *var, const char *file, int line)
 {
-	assert((d.list != NULL) && "can not track disposable without add it to list");
+	m_assert_ptr(d.list, "can not track disposable without add it to list");
 	uint8_t i = tracker->size++;
-	assert((i < MAX_TRACE) && "resource tracker can not hold too many element");
+	m_assert(i < MAX_TRACE, "resource tracker can not hold too many element");
 	tracker->element[i].callback = NULL;
 	tracker->element[i].resource = NULL;
 	tracker->element[i].dispose_object = d;

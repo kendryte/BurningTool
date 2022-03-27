@@ -1,7 +1,6 @@
 #pragma once
 
-#include <stddef.h>
-#include <assert.h>
+#include "base.h"
 #include <stdio.h>
 #include <string.h>
 #include "canaan-burn/canaan-burn.h"
@@ -57,11 +56,6 @@ prefix(const char *pre, const char *str)
 	return strncmp(pre, str, strlen(pre)) == 0;
 }
 
-#ifdef __GNUC__
-#define UNUSED(x) UNUSED_##x __attribute__((__unused__))
-#else
-#define UNUSED(x) UNUSED_##x
-#endif
 
 #define FREE_WHEN_RETURN(var) var __attribute__((__cleanup__(free_pointer)))
 #define DESTROY_WHEN_RETURN(var, cleanup_function) var __attribute__((__cleanup__(cleanup_function)))

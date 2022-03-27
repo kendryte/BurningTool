@@ -1,6 +1,5 @@
 #define _GNU_SOURCE
 #include <pthread.h>
-#include <assert.h>
 #include <string.h>
 #include <stdbool.h>
 #include <stdint.h>
@@ -38,7 +37,7 @@ pthread_mutex_t *_init_lock()
 void _deinit_lock(pthread_mutex_t **mutex)
 {
 	debug_print("[lock] deinit");
-	assert(pthread_mutex_destroy(*mutex) == 0);
+	m_assert0(pthread_mutex_destroy(*mutex), "unlock fail");
 	free(*mutex);
 	*mutex = NULL;
 }
@@ -46,13 +45,13 @@ void _deinit_lock(pthread_mutex_t **mutex)
 void _lock(pthread_mutex_t *mutex)
 {
 	// print_buffer("  lock", (void *)mutex, sizeof(pthread_mutex_t));
-	assert((pthread_mutex_lock(mutex) == 0) && "pthread_mutex_lock failed");
+	m_assert0(pthread_mutex_lock(mutex), "pthread_mutex_lock failed");
 }
 
 void _unlock(pthread_mutex_t *mutex)
 {
 	// print_buffer("unlock", (void *)mutex, sizeof(pthread_mutex_t));
-	assert((pthread_mutex_unlock(mutex) == 0) && "pthread_mutex_unlock failed");
+	m_assert0(pthread_mutex_unlock(mutex), "pthread_mutex_unlock failed");
 }
 
 kb_mutex_t *__init_lock()
@@ -105,7 +104,7 @@ void __lock(kb_mutex_t *mlock, const char *varname, const char *file, int line)
 	else if (re != 0)
 	{
 		_dbg_ln(strerror(re), varname, file, line);
-		assert(false && "lock error");
+		m_abort("lock error");
 	}
 
 	mlock->file = file;

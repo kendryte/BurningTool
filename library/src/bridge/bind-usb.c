@@ -4,7 +4,7 @@
 kburn_err_t usb_device_serial_bind(kburnDeviceNode *node)
 {
 	debug_print("usb_device_serial_bind:");
-	assert((node->bind_id != 0) && "call alloc_new_bind_id before this");
+	m_assert(node->bind_id != 0, "call alloc_new_bind_id before this");
 
 	char output[512];
 	size_t buff_len = create_pair_protocol(node->bind_id, output, 512);

@@ -55,7 +55,7 @@ void slip_error(kburnSerialDeviceNode *node, slip_error_t err)
 		set_error(node, KBURN_ERROR_KIND_SLIP, err, "SLIP_ERROR_CRC_MISMATCH");
 		break;
 	default:
-		assert("invalid slip error");
+		m_abort("invalid slip error");
 	}
 }
 
@@ -79,6 +79,6 @@ void _serial_isp_command_error(kburnDeviceNode *node, kburnIspErrorCode err)
 		set_error(node, KBURN_ERROR_KIND_ISP, err, "ISP_RET_INVALID_INITIALIZATION");
 		return;
 	default:
-		assert("invalid isp command error");
+		m_abort("invalid isp command error");
 	}
 }

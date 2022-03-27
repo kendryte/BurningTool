@@ -79,7 +79,7 @@ int get_all_unopend_usb_info(KBCTX scope, int vid, int pid, kburnUsbDeviceInfo *
 
 	*ret = calloc(cnt, sizeof(kburnUsbDeviceInfo *));
 	kburnUsbDeviceInfo *info = NULL;
-	assert((*ret != NULL) && "memory error");
+	m_assert_ptr(*ret, "memory error");
 
 	int found = 0;
 	for (int i = 0; i < cnt; i++)

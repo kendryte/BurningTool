@@ -8,12 +8,12 @@ kburn_err_t on_serial_device_attach(KBCTX scope, const char *path)
 	kburnDeviceNode *node;
 
 	err = create_empty_device_instance(scope, &node);
-	assert((err == KBurnNoErr) && "critical memory alloc failed");
+	m_assert_err(err, "critical memory alloc failed");
 	if (err != KBurnNoErr)
 		return err;
 
 	err = serial_port_init(node->serial, path);
-	assert((err == KBurnNoErr) && "serial_port_init now do not return error");
+	m_assert_err(err, "serial_port_init now do not return error");
 	if (err != KBurnNoErr)
 		return err;
 

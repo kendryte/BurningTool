@@ -84,7 +84,7 @@ static void do_delete(KBCTX scope, port_link_element *target)
 	if (target == scope->openDeviceList->tail)
 		scope->openDeviceList->tail = scope->openDeviceList->tail->prev;
 
-	assert((scope->openDeviceList->size > 0) && "delete port from empty list");
+	m_assert(scope->openDeviceList->size > 0, "delete port from empty list");
 	scope->openDeviceList->size--;
 
 	if (_should_insert_waitting_list(target->node))

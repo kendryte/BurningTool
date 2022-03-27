@@ -10,33 +10,27 @@ typedef struct disposable_list_element disposable_list_element_t;
 typedef struct disposable_list disposable_list_t;
 typedef void (*dispose_function)(disposable_list_t *this, void *userData);
 
-#ifndef NDEBUG
 struct disposable_debug
 {
 	const char *title;
 	const char *file;
 	int line;
 };
-#endif
 
 typedef struct disposable
 {
 	void *object;
 	disposable_list_t *list;
 	dispose_function callback;
-#ifndef NDEBUG
 	struct disposable_debug _dbg;
-#endif
 } disposable;
 
 #ifndef NDEBUG
-#define STRINGIZE(x) STRINGIZE2(x)
-#define STRINGIZE2(x) #x
 disposable __toDisposable(dispose_function callback, void *userData, const char *debug_title, const char *file, int line);
 #define toDisposable(callback, userData) __extension__({                                                                      \
 	if (0)                                                                                                                    \
 		callback(NULL, userData);                                                                                             \
-	__toDisposable((dispose_function)(callback), (void *)(userData), "" #callback "(" #userData ") at ", __FILE__, __LINE__); \
+	__toDisposable((dispose_function)(callback), (void *)(userData), "" #callback "(" #userData ") at ", __FILENAME__, __LINE__); \
 })
 #else
 disposable toDisposable(dispose_function callback, void *userData);

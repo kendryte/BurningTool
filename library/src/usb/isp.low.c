@@ -16,7 +16,7 @@ typedef struct usbIspRequestPacket // cbw
 	uint8_t reserved[7];
 } __attribute__((__packed__)) usbIspRequestPacket;
 // checker: char (*__)[sizeof(usbIspRequestPacket)] = 1;
-static_assert(sizeof(usbIspRequestPacket) == 31, "cbw packet must 31bytes");
+_Static_assert(sizeof(usbIspRequestPacket) == 31, "cbw packet must 31bytes");
 
 typedef struct usbIspResponsePacket // CSW
 {
@@ -26,7 +26,7 @@ typedef struct usbIspResponsePacket // CSW
 	uint32_t is_success; // bool
 } __attribute__((__packed__)) usbIspResponsePacket;
 //  char (*__)[sizeof(usbIspResponsePacket)] = 1;
-static_assert(sizeof(usbIspResponsePacket) == 16, "cbw packet must 16bytes");
+_Static_assert(sizeof(usbIspResponsePacket) == 16, "cbw packet must 16bytes");
 
 static inline usbIspRequestPacket create_request(uint32_t operation_tag, uint32_t transfer_data_length, uint8_t flags, const usbIspCommandPacket body)
 {
@@ -87,8 +87,8 @@ kburn_err_t usb_lowlevel_command_send(libusb_device_handle *handle, uint8_t endp
 {
 	debug_print("usb_lowlevel_command_send(%d)", operation_index);
 
-	assert((handle != NULL) && "handle pointer is null!");
-	assert((endpoint_out & LIBUSB_ENDPOINT_IN) == 0 && "cannot send command on IN endpoint"); /* 校验端点的传输方向 */
+	m_assert_ptr(handle, "handle pointer is null!");
+	m_assert0(endpoint_out & LIBUSB_ENDPOINT_IN, "cannot send command on IN endpoint"); /* 校验端点的传输方向 */
 
 	usbIspRequestPacket cbw = create_request(operation_index, data_length, direction, cdb);
 

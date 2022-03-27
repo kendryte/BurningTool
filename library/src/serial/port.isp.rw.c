@@ -96,7 +96,7 @@ isp_response_t *serial_isp_command_send_low(kburnSerialDeviceNode *node, isp_req
 {
 	isp_response_t *ret = NULL;
 
-	assert((!node->serial_isp_busy) && "serial isp is running.");
+	m_assert(!node->serial_isp_busy, "serial isp is running.");
 	node->serial_isp_busy = true;
 	node->isp->has_response = false;
 	node->isp->main_buffer_length = 0;
@@ -138,7 +138,7 @@ isp_response_t *serial_isp_command_send_low(kburnSerialDeviceNode *node, isp_req
 		}
 #endif
 
-		assert(recv == 1);
+		m_assert(recv == 1, "serial port invalid return state");
 		slip_error_t err2 = slip_read_byte(&node->isp->slip, byte);
 		if (err2 != SLIP_NO_ERROR)
 		{

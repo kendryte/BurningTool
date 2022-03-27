@@ -25,7 +25,7 @@ typedef enum usbIspCommand
 	USB_ISP_COMMAND_READ_CAPACITY = 0x01E1,
 	USB_ISP_COMMAND_MAX = UINT16_MAX,
 } __attribute__((__packed__)) usbIspCommand;
-static_assert(sizeof(usbIspCommand) == 2, "enum must 16bit");
+_Static_assert(sizeof(usbIspCommand) == 2, "enum must 16bit");
 
 typedef enum usbIspCommandTaget
 {
@@ -38,7 +38,7 @@ typedef enum usbIspCommandTaget
 
 	MAX_USB_ISP_COMMAND = UINT8_MAX,
 } __attribute__((__packed__)) usbIspCommandTaget;
-static_assert(sizeof(usbIspCommandTaget) == 1, "enum must 8bit");
+_Static_assert(sizeof(usbIspCommandTaget) == 1, "enum must 8bit");
 
 struct usbIspCommandPacketBurnBody
 {
@@ -71,4 +71,4 @@ typedef struct usbIspCommandPacket
 	} __attribute__((__packed__));
 } __attribute__((__packed__)) usbIspCommandPacket;
 // char (*__)[sizeof(usbIspCommandPacket)] = 1; // test
-static_assert(sizeof(usbIspCommandPacket) == 9, "cwd packet must 9bytes");
+_Static_assert(sizeof(usbIspCommandPacket) == 9, "cwd packet must 9bytes");

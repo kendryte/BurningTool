@@ -8,6 +8,7 @@ mark_as_advanced(CMAKE_TOOLCHAIN_FILE)
 
 get_filename_component(PROJECT_ROOT "${CMAKE_CURRENT_LIST_DIR}/.." ABSOLUTE)
 add_compile_definitions("PROJECT_ROOT=\"${PROJECT_ROOT}\"")
+add_compile_definitions("KBURN_ASSERT_SIZE")
 if(${DISABLE_TERM_HYPERLINK})
   add_compile_definitions("DISABLE_TERM_HYPERLINK")
 endif()
@@ -66,6 +67,12 @@ load_binary(canaan_burn "usb_isp_buffer" "${CMAKE_CURRENT_LIST_DIR}/usbisp.bin")
 
 set_target_properties(canaan_burn PROPERTIES LINKER_LANGUAGE C)
 
+get_target_property(MY_PROJECT_SOURCES canaan_burn SOURCES)
+foreach(f IN LISTS MY_PROJECT_SOURCES)
+	file(RELATIVE_PATH rel_path "${CMAKE_CURRENT_LIST_DIR}" "${f}")
+	set_source_files_properties("${f}" PROPERTIES COMPILE_DEFINITIONS "__FILENAME__=\"${rel_path}\"")
+endforeach()
+
 file(GLOB_RECURSE PUBLIC_HEADER "include/canaan-burn/*.h")
 set_target_properties(canaan_burn PROPERTIES PUBLIC_HEADER "${PUBLIC_HEADER}")
 target_include_directories(canaan_burn PUBLIC "${CMAKE_CURRENT_LIST_DIR}/include")
@@ -110,5 +117,5 @@ if(CMAKE_BUILD_TYPE STREQUAL "Debug")
   find_package(Sanitizers REQUIRED)
 
   add_sanitizers(canaan_burn)
-  endif()
-  target_compile_options(canaan_burn PRIVATE -Wall -Wextra -pedantic -Werror)
+endif()
+target_compile_options(canaan_burn PRIVATE -Wall -Wextra -pedantic -Werror)

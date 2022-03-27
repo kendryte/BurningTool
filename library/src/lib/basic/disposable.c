@@ -1,6 +1,5 @@
 #include "global.h"
 #include <stdlib.h>
-#include <assert.h>
 
 typedef struct disposable_list_element
 {
@@ -9,9 +8,7 @@ typedef struct disposable_list_element
 	disposable_list_t *parent;
 	dispose_function callback;
 	struct disposable_list_element *next;
-#ifndef NDEBUG
 	struct disposable_debug __debug;
-#endif
 } disposable_list_element_t;
 
 typedef struct disposable_list
@@ -39,7 +36,7 @@ disposable __toDisposable(dispose_function callback, void *userData, const char 
 	};
 }
 #else
-dispose_callback toDisposable(dispose_function callback, void *userData)
+disposable toDisposable(dispose_function callback, void *userData)
 {
 	return (disposable){.object = userData, .callback = callback, .list = NULL};
 }
@@ -63,12 +60,12 @@ void disposable_list_deinit(disposable_list_t *list)
 
 disposable dispose_list_add(disposable_list_t *r, disposable e)
 {
-	assert((r != NULL) && "dispose: got null ptr");
-	assert((e.list == NULL) && "dispose: already add to other list");
-	assert(!r->disposed && "dispose: is disposed");
+	m_assert_ptr(r, "dispose: got null ptr");
+	m_assert(e.list == NULL, "dispose: already add to other list");
+	m_assert(!r->disposed, "dispose: is disposed");
 
 	if ((void *)r == (void *)e.object)
-		assert((r->size == 0) && "free self must at first element");
+		m_assert(r->size == 0, "free self must at first element");
 
 	lock(r->mutex);
 
@@ -121,9 +118,9 @@ void dispose_list_cancel(disposable_list_t *r, disposable e)
 {
 	if (r == NULL)
 		r = e.list;
-	assert((r != NULL) && "dispose: no list information");
+	m_assert_ptr(r, "dispose: no list information");
 
-	assert((r->mutex != NULL) && "dispose: not init");
+	m_assert_ptr(r->mutex, "dispose: not init");
 
 	if (!r->disposed)
 		lock(r->mutex);
@@ -143,7 +140,7 @@ void dispose_list_cancel(disposable_list_t *r, disposable e)
 	if (!found)
 	{
 		debug_print(RED("dispose_list_delete") "(<%s>[%d]): %s", NULLSTR(r->comment), r->size, NULLSTR(r->comment));
-		assert(false && "dispose not found object");
+		m_abort("dispose not found object");
 	}
 
 	if (!r->disposed)
@@ -152,8 +149,8 @@ void dispose_list_cancel(disposable_list_t *r, disposable e)
 
 void dispose_all(disposable_list_t *r)
 {
-	assert((r != NULL) && "dispose: got null ptr");
-	assert(!r->disposed && "dispose twice");
+	m_assert_ptr(r, "dispose: got null ptr");
+	m_assert(!r->disposed, "dispose twice");
 
 	r->disposed = true;
 	lock(r->mutex);
@@ -180,7 +177,7 @@ void dispose_all(disposable_list_t *r)
 			if (current == r->tail)
 			{
 				debug_print(RED("dispose") " %s @ " FILE_LINE_FORMAT, NULLSTR(current->__debug.title), FILE_LINE_VALUE(current->__debug.file, current->__debug.line));
-				assert(false && "disposed function not call to dispose_list_delete()");
+				m_abort("disposed function not call to dispose_list_delete()");
 			}
 		}
 	}
@@ -192,11 +189,10 @@ void dispose(disposable target)
 {
 	disposable_list_t *r = target.list;
 
-	assert((r != NULL) && "dispose object not in a list");
-	assert(!r->disposed && "dispose twice");
+	m_assert_ptr(r, "dispose object not in a list");
+	m_assert(!r->disposed, "dispose twice");
 
-	bool selfDisposing = target.callback == free_pointer && target.object == r;
-	assert(!selfDisposing && "can not dispose self");
+	m_assert(!(target.callback == free_pointer && target.object == r), "can not dispose self");
 
 	if (r->size == 0)
 		return;
@@ -207,7 +203,7 @@ void dispose(disposable target)
 	current->callback(r, current->object);
 
 	// debug_print("  * dispose callback return, size=%d", target->size);
-	assert((plength + 1 == r->size) && "disposed function not call to dispose_list_delete()");
+	m_assert(plength + 1 == r->size, "disposed function not call to dispose_list_delete()");
 }
 
 DECALRE_DISPOSE(free_pointer, void)

@@ -26,5 +26,4 @@
 #else
 #define DEFINE_START
 #define DEFINE_END
-#include <assert.h>
 #endif

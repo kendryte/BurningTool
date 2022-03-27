@@ -38,7 +38,7 @@ void kburnSetSerialByteSize(enum KBurnSerialConfigByteSize byteSize)
 		opts.bytesz = SER_BYTESZ_5;
 		break;
 	default:
-		assert("byteSize is invalid");
+		m_abort("byteSize is invalid");
 	}
 }
 void kburnSetSerialParity(enum KBurnSerialConfigParity parity)
@@ -62,7 +62,7 @@ void kburnSetSerialParity(enum KBurnSerialConfigParity parity)
 		break;
 
 	default:
-		assert("parity is invalid");
+		m_abort("parity is invalid");
 	}
 }
 void kburnSetSerialStopBits(enum KBurnSerialConfigStopBits stopBits)
@@ -79,7 +79,7 @@ void kburnSetSerialStopBits(enum KBurnSerialConfigStopBits stopBits)
 		opts.stopbits = SER_STOPB_TWO;
 		break;
 	default:
-		assert("stopBits is invalid");
+		m_abort("stopBits is invalid");
 	}
 }
 void kburnSetSerialReadTimeout(int32_t readTimeout)

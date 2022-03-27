@@ -141,7 +141,7 @@ kburn_err_t usb_monitor_prepare(KBCTX scope)
 	}
 	else
 	{
-		assert(false && "TODO: polling");
+		m_abort("TODO: polling");
 		init_list_all_usb_devices(scope);
 	}
 	debug_print("usb_monitor_prepare() DONE");
