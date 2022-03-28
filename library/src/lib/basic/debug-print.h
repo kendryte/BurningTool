@@ -3,15 +3,14 @@
 #include "base.h"
 
 #define HYPERLINK "\x1B]8;;%s\a%s\x1B]8;;\a" // url, text
+#define BASENAME(name) (strrchr(name, PATH_SEPARATOR) ? strrchr(name, PATH_SEPARATOR) + 1 : name)
+#define gt_zero(val) __extension__({ int x=val; x > 0 ? x : 0; })
 
 #if defined(WIN32) || defined(_WIN32)
 #define PATH_SEPARATOR '\\'
 #else
 #define PATH_SEPARATOR '/'
 #endif
-
-#define BASENAME(name) (strrchr(name, PATH_SEPARATOR) ? strrchr(name, PATH_SEPARATOR) + 1 : name)
-#define gt_zero(val) __extension__({ int x=val; x > 0 ? x : 0; })
 
 #ifndef NDEBUG
 
@@ -97,3 +96,14 @@ _Noreturn void m_assert_print_abort(const char *ncondition_str, const char *file
 	kburnErrorDesc e = kburnSplitErrorCode(value);                                                     \
 	m_assert(e.kind == 0 && e.code == 0, "Error [kind=%d, code=%d]: %s", e.kind >> 32, e.code, exmsg); \
 })
+
+struct debug_bundle
+{
+	char _null;
+	const char *func;
+	const char *title;
+	const char *file;
+	int line;
+};
+// debug_print_bundle("some thing %s is $b", str, (struct debug_bundle)debug_data);
+void debug_print_bundle(const char *fmt, struct debug_bundle debug, ...) __attribute__((format(printf, 1, 3)));

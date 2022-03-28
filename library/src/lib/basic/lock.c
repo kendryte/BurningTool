@@ -21,7 +21,7 @@ typedef struct kb_mutex
 
 pthread_mutex_t *_init_lock()
 {
-	debug_print("[lock] init");
+	// debug_print("[lock] init");
 	pthread_mutexattr_t attr;
 	pthread_mutex_t *ret = calloc(1, sizeof(pthread_mutex_t));
 	if (ret == NULL)

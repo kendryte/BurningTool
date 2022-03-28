@@ -32,34 +32,36 @@ int usb_get_device_path(struct libusb_device *dev, uint8_t *path)
 
 int usb_get_device_serial(libusb_device *dev, libusb_device_handle *handle, uint8_t *output)
 {
+	debug_print("usb_get_device_serial()");
 	struct libusb_device_descriptor desc;
-	int r = libusb_get_device_descriptor(dev, &desc);
-	if (r < LIBUSB_SUCCESS)
-	{
-		debug_print_libusb_error("libusb_get_device_descriptor()", r);
-		return r;
-	}
+	CheckLibusbError(
+		libusb_get_device_descriptor(dev, &desc));
 
 	memset(output, 0, MAX_SERIAL_LENGTH);
 
 	if (desc.iSerialNumber == 0)
+	{
+		debug_print("  - device do not have serial.");
 		return LIBUSB_SUCCESS;
+	}
 
-	int try = 5;
+	int try = 5, r = 0;
 	while (try-- > 0)
 	{
 		r = libusb_get_string_descriptor_ascii(handle, desc.iSerialNumber, output, MAX_SERIAL_LENGTH);
 		if (r != LIBUSB_ERROR_BUSY)
 			break;
-		debug_print_libusb_error("libusb_get_string_descriptor_ascii()", r);
+
+		debug_print_libusb_error("  - libusb_get_string_descriptor_ascii()", r);
 		do_sleep(1000);
 	}
 
-	if (r < LIBUSB_SUCCESS)
-	{
-		debug_print_libusb_error("libusb_get_string_descriptor_ascii()", r);
-		return r;
-	}
+	if (r >= LIBUSB_SUCCESS)
+		debug_print("serial: %s", output);
+	else if (r == LIBUSB_ERROR_BUSY)
+		debug_print("abort try to get serial number");
+	else
+		debug_print_libusb_error("  - libusb_get_string_descriptor_ascii()", r);
 
-	return LIBUSB_SUCCESS;
+	return r;
 }

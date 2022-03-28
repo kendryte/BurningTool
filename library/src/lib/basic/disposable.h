@@ -5,25 +5,20 @@
 #include <stdlib.h>
 
 #include "lock.h"
+#include "debug-print.h"
 
 typedef struct disposable_list_element disposable_list_element_t;
 typedef struct disposable_list disposable_list_t;
 typedef void (*dispose_function)(disposable_list_t *this, void *userData);
 
-struct disposable_debug
-{
-	const char *func;
-	const char *title;
-	const char *file;
-	int line;
-};
+typedef struct debug_bundle disposable_debug;
 
 typedef struct disposable
 {
 	void *object;
 	disposable_list_t *list;
 	dispose_function callback;
-	struct disposable_debug _dbg;
+	disposable_debug _dbg;
 } disposable;
 
 #ifndef NDEBUG

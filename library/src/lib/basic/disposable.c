@@ -8,7 +8,7 @@ typedef struct disposable_list_element
 	disposable_list_t *parent;
 	dispose_function callback;
 	struct disposable_list_element *next;
-	struct disposable_debug __debug;
+	disposable_debug __debug;
 } disposable_list_element_t;
 
 typedef struct disposable_list
@@ -28,7 +28,7 @@ disposable __toDisposable(dispose_function callback, void *userData, const char 
 		.object = userData,
 		.callback = callback,
 		.list = NULL,
-		._dbg = (struct disposable_debug){
+		._dbg = (disposable_debug){
 			.title = debug_title,
 			.func = func,
 			.file = file,
@@ -104,7 +104,8 @@ static void debug_list_content(const disposable_list_t *r)
 	int index = 0;
 	for (disposable_list_element_t *curs = r->head; curs != NULL; curs = curs->next)
 	{
-		debug_print_location(curs->__debug.file, curs->__debug.line, GREY(" [%02d] %s::%s {%p}"), index, NULLSTR(curs->__debug.func), NULLSTR(curs->__debug.title), (void *)curs->object);
+		debug_print_bundle(GREY(" [%02d] $b {%p}"), curs->__debug, index, (void *)curs->object);
+		// debug_print_location(curs->__debug.file, curs->__debug.line, GREY(" [%02d] %s::%s {%p}"), index, NULLSTR(curs->__debug.func), NULLSTR(curs->__debug.title), (void *)curs->object);
 		index++;
 	}
 }

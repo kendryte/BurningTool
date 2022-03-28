@@ -4,7 +4,7 @@ kburn_err_t on_serial_device_attach(KBCTX scope, const char *path)
 {
 	DeferEnabled;
 
-	debug_print("on_serial_device_attach(%s)", path);
+	debug_print(GREEN("on_serial_device_attach") "(%s)", path);
 
 	kburnDeviceNode *node = NULL;
 
@@ -46,5 +46,6 @@ kburn_err_t on_serial_device_attach(KBCTX scope, const char *path)
 	add_to_device_list(node);
 
 	scope->serial->handler_callback(node, scope->serial->handler_callback_ctx);
+	DeferAbort;
 	return KBurnNoErr;
 }

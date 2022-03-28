@@ -83,9 +83,10 @@ kburn_err_t open_single_usb_port(KBCTX scope, struct libusb_device *dev)
 {
 	DeferEnabled;
 
-	debug_print("open_single_usb_port(%p)", (void *)dev);
+	debug_print(GREEN("open_single_usb_port") "(%p)", (void *)dev);
 	m_assert(scope->usb->libusb, "usb subsystem is not inited");
 
+	int r;
 	kburnDeviceNode *node;
 	IfErrorReturn(
 		create_empty_device_instance(scope, &node));
@@ -103,8 +104,14 @@ kburn_err_t open_single_usb_port(KBCTX scope, struct libusb_device *dev)
 	node->usb->isOpen = true;
 	debug_print("usb port open success, handle=%p", (void *)node->usb->handle);
 
-	IfUsbErrorReturn(
-		usb_get_device_serial(dev, node->usb->handle, node->usb->deviceInfo.strSerial));
+	r = libusb_detach_kernel_driver(node->usb->handle, 0);
+	if (r < LIBUSB_SUCCESS)
+	{
+		debug_print_libusb_error("open_single_usb_port: system not support detach kernel driver", r);
+		// no return here
+	}
+
+	usb_get_device_serial(dev, node->usb->handle, node->usb->deviceInfo.strSerial);
 
 	IfUsbErrorReturn(
 		get_endpoint(dev, &node->usb->deviceInfo.endpoint_in, &node->usb->deviceInfo.endpoint_out));
@@ -118,13 +125,6 @@ kburn_err_t open_single_usb_port(KBCTX scope, struct libusb_device *dev)
 	IfErrorReturn(
 		usb_device_hello(node));
 	debug_print("hello success.");
-
-	int r = libusb_detach_kernel_driver(node->usb->handle, 0);
-	if (r < LIBUSB_SUCCESS)
-	{
-		debug_print_libusb_error("open_single_usb_port: system not support detach kernel driver", r);
-		// no return here
-	}
 
 	add_to_device_list(node);
 

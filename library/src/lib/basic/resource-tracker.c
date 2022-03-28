@@ -25,10 +25,10 @@ void resource_tracker_done(resource_tracker_t *tracker)
 {
 	if (!tracker->successed)
 	{
-		debug_print("function return without confirm, release all resource: (%d)", tracker->size);
+		debug_print_bundle("function return without confirm, release all resource: $b(%d)", tracker->__debug, tracker->size);
 		for (int i = tracker->size - 1; i >= 0; i--)
 		{
-			debug_print_location(tracker->element[i].file, tracker->element[i].line, " * %s", tracker->element[i].var);
+			debug_print_bundle(" * $b", tracker->element[i].__debug);
 			do_cleanup(tracker->element[i]);
 		}
 	}
@@ -38,7 +38,7 @@ void resource_tracker_done(resource_tracker_t *tracker)
 		{
 			if (tracker->element[i].force)
 			{
-				debug_print_location(tracker->element[i].file, tracker->element[i].line, "delete resource [force] %s", tracker->element[i].var);
+				debug_print_bundle(" * [force] $b", tracker->element[i].__debug);
 				tracker->element[i].callback(*(void **)tracker->element[i].resource);
 				do_cleanup(tracker->element[i]);
 			}
@@ -59,9 +59,9 @@ void *_track_resource(resource_tracker_t *tracker, void *resource, cleanup_funct
 	tracker->element[i].callback = clean;
 	tracker->element[i].resource = resource;
 	tracker->element[i].force = always;
-	tracker->element[i].file = file;
-	tracker->element[i].line = line;
-	tracker->element[i].var = var;
+	tracker->element[i].__debug.file = file;
+	tracker->element[i].__debug.line = line;
+	tracker->element[i].__debug.title = var;
 	if (always)
 		tracker->hasAlways = true;
 
@@ -77,9 +77,9 @@ void *_track_dispose(resource_tracker_t *tracker, disposable d, const char *var,
 	tracker->element[i].resource = NULL;
 	tracker->element[i].dispose_object = d;
 	tracker->element[i].force = false;
-	tracker->element[i].file = file;
-	tracker->element[i].line = line;
-	tracker->element[i].var = var;
+	tracker->element[i].__debug.file = file;
+	tracker->element[i].__debug.line = line;
+	tracker->element[i].__debug.title = var;
 
 	return d.object;
 }

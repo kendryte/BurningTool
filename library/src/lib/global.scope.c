@@ -6,19 +6,19 @@
 #include "bind-wait-list.h"
 
 disposable_list_t *lib_global_scope;
+uint32_t dbg_index = 0;
 
 kburn_err_t kburnCreate(KBCTX *ppCtx)
 {
 	DeferEnabled;
 
-	static uint32_t dbg_index = 0;
 	dbg_index++;
 
-	char *comment1 = DeferFree(CheckNull(sprintf_alloc("scope[%d]->disposables", dbg_index)));
+	char *comment1 = DeferFree(CheckNull(sprintf_alloc("scope[%d].disposables", dbg_index)));
 	disposable_list_t *dis = DeferFree(CheckNull(disposable_list_init(comment1)));
 	DeferCall(dispose_all, dis);
 
-	char *comment2 = DeferFree(CheckNull(sprintf_alloc("scope[%d]->threads", dbg_index)));
+	char *comment2 = DeferFree(CheckNull(sprintf_alloc("scope[%d].threads", dbg_index)));
 	disposable_list_t *threads = DeferFree(CheckNull(disposable_list_init(comment2)));
 	DeferCall(dispose_all, threads);
 

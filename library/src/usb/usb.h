@@ -65,6 +65,16 @@ kburn_err_t usb_lowlevel_error_read(libusb_device_handle *handle, uint8_t endpoi
 	_err;                                        \
 })
 
+#define CheckLibusbError(action) __extension__({             \
+	int _err = action;                                       \
+	if (_err < LIBUSB_SUCCESS)                               \
+	{                                                        \
+		debug_print_libusb_error(#action " - failed", _err); \
+		return _err;                                         \
+	}                                                        \
+	_err;                                                    \
+})
+
 #define IfUsbErrorLogReturn(action) __extension__({          \
 	int _err = action;                                       \
 	if (_err < LIBUSB_SUCCESS)                               \
