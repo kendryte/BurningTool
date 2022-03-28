@@ -2,6 +2,8 @@
 
 DEFINE_START
 
+typedef uint64_t kburn_err_t;
+
 enum KBurnCommonError
 {
 	KBurnNoErr = 0,
@@ -12,6 +14,7 @@ enum KBurnCommonError
 	KBurnSerialDriverUnsupportChange,
 	KBurnSerialMonitorFailStart,
 	KBurnSerialFailListDevice,
+	KBurnSerialAlreadyBound,
 	KBurnUsbMonitorFailStart,
 	KBurnUsbDeviceNotFound,
 	KBurnUsbReadSizeMismatch,

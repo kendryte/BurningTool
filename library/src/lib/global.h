@@ -16,6 +16,7 @@ typedef struct kburnContext
 	struct serial_subsystem_context *const serial;
 	struct usb_subsystem_context *const usb;
 	disposable_list_t *const disposables;
+	disposable_list_t *const threads;
 	struct port_link_list *const openDeviceList;
 	struct waiting_list *const waittingDevice;
 	bool monitor_inited;
@@ -30,8 +31,6 @@ void global_resource_unregister(KBCTX scope, dispose_function callback, void *us
 typedef void (*thread_function)(KBCTX scope, const bool *const quit);
 typedef struct thread_passing_object *kbthread;
 kburn_err_t thread_create(const char *debug_title, thread_function start_routine, KBCTX scope, kbthread *out_thread);
-void thread_tell_quit(kbthread thread);
-void thread_wait_quit(kbthread thread);
 
 typedef struct queue_info *queue_t;
 kburn_err_t queue_create(queue_t *queue);
@@ -55,9 +54,14 @@ prefix(const char *pre, const char *str)
 	return strncmp(pre, str, strlen(pre)) == 0;
 }
 
-
 #define FREE_WHEN_RETURN(var) var __attribute__((__cleanup__(free_pointer)))
 #define DESTROY_WHEN_RETURN(var, cleanup_function) var __attribute__((__cleanup__(cleanup_function)))
+#define IfErrorReturn(action) __extension__({ \
+	kburn_err_t _err = action;                \
+	if (_err != KBurnNoErr)                   \
+		return _err;                          \
+	_err;                                     \
+})
 
 #include "basic/alloc.h"
 #include "basic/endian.h"

@@ -245,16 +245,19 @@ static bool set_speed(kburnSerialDeviceNode *node, int fd, uint32_t br, struct t
 bool hackdev_serial_low_switch_baudrate(kburnSerialDeviceNode *node, uint32_t speed)
 {
 	debug_print("hackdev_serial_low_switch_baudrate(node[%s], %d)", node->path, speed);
+	autolock(node->mutex);
 	struct ser *ser = node->m_dev_handle;
 	struct termios new_termios;
 	if (tcgetattr(ser->fd, &new_termios) < 0)
 	{
 		set_error(node, KBURN_ERROR_KIND_COMMON, KBurnSerialDriverAttrReadErr, "failed read driver attr");
+		unlock(node->mutex);
 		return false;
 	}
 
 	if (!set_speed(node, ser->fd, speed, &new_termios))
 	{
+		unlock(node->mutex);
 		return false;
 	}
 

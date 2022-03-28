@@ -12,18 +12,20 @@ static inline void free_handle(void *handle)
 		free(handle);
 }
 
-void destroy_serial_port(KBCTX scope, kburnDeviceNode *d)
+DECALRE_DISPOSE(destroy_serial_port, kburnDeviceNode)
 {
-	kburnSerialDeviceNode *serial = d->serial;
+	kburnSerialDeviceNode *serial = context->serial;
 	if (!serial->init)
 		return;
 
+	lock(serial->mutex);
+
 	debug_print("destroy_serial_port(%p[%s])", (void *)serial, serial->path);
 
-	if (scope->serial->disconnect_callback)
+	if (context->_scope->serial->disconnect_callback)
 	{
 		debug_print("\tdisconnect_callback()");
-		scope->serial->disconnect_callback(d, scope->serial->disconnect_callback_ctx);
+		context->_scope->serial->disconnect_callback(context, context->_scope->serial->disconnect_callback_ctx);
 	}
 
 	serial_isp_delete(serial);
@@ -45,14 +47,20 @@ void destroy_serial_port(KBCTX scope, kburnDeviceNode *d)
 	driver_get_devinfo_free(serial->deviceInfo);
 	serial->init = false;
 
-	device_instance_collect(scope, d);
+	unlock(serial->mutex);
+	lock_deinit(&serial->mutex);
+	device_instance_collect(context->_scope, context);
 }
+DECALRE_DISPOSE_END()
 
 kburn_err_t serial_port_init(kburnSerialDeviceNode *serial, const char *path)
 {
+	m_assert(!serial->init, "serial port must not already inited");
+
 	debug_print("serial_port_init(0x%p, %s)", (void *)serial, path);
-	serial->path = strdup(path);
+	serial->path = CheckNull(strdup(path));
 	serial->deviceInfo = driver_get_devinfo(path);
+	serial->mutex = CheckNull(lock_init());
 
 	serial_isp_open(serial);
 

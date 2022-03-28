@@ -12,12 +12,17 @@ typedef struct thread_passing_object
 	const char *debug_title;
 } thread_passing_object;
 
+static void thread_tell_quit(thread_passing_object *thread)
+{
+	thread->quit = true;
+}
+
 DECALRE_DISPOSE(destroy_thread, thread_passing_object)
 {
-	context->quit = true;
-	if (context->running)
-		pthread_cancel(context->thread);
-
+	debug_print(YELLO("[thread]") " wait quit: %s", context->debug_title);
+	thread_tell_quit(context);
+	pthread_join(context->thread, NULL);
+	debug_print(GREEN("[thread]") " %s quit success", context->debug_title);
 	free(context);
 }
 DECALRE_DISPOSE_END()
@@ -46,6 +51,12 @@ static void *start_routine_wrapper(void *_ctx)
 	return NULL;
 }
 
+static DECALRE_DISPOSE(set_null, thread_passing_object *)
+{
+	*context = NULL;
+}
+DECALRE_DISPOSE_END()
+
 kburn_err_t thread_create(const char *debug_title, thread_function start_routine, KBCTX scope, thread_passing_object **out_thread)
 {
 	thread_passing_object *thread = MyAlloc(thread_passing_object);
@@ -66,19 +77,8 @@ kburn_err_t thread_create(const char *debug_title, thread_function start_routine
 		return KBURN_ERROR_KIND_SYSCALL | thread_ret;
 	}
 
-	dispose_list_add(scope->disposables, toDisposable(destroy_thread, thread));
+	dispose_list_add(scope->threads, toDisposable(destroy_thread, thread));
+	dispose_list_add(scope->threads, toDisposable(set_null, out_thread));
 
 	return KBurnNoErr;
-}
-
-void thread_tell_quit(thread_passing_object *thread)
-{
-	thread->quit = true;
-}
-
-void thread_wait_quit(thread_passing_object *thread)
-{
-	debug_print("[thread] wait quit: %s", thread->debug_title);
-	thread_tell_quit(thread);
-	pthread_join(thread->thread, NULL);
 }

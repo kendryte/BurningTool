@@ -13,7 +13,7 @@ static void on_event(void *ctx, ser_dev_evt_t evt, const ser_dev_t *dev)
 		debug_print("[monitor] remove : %s", dev->path);
 		kburnDeviceNode *device = get_device_by_serial_port_path(scope, dev->path);
 		if (device)
-			destroy_serial_port(scope, device);
+			destroy_serial_port(device->disposable_list, device);
 
 		break;
 	}
@@ -69,13 +69,6 @@ void serial_monitor_destroy(KBCTX scope)
 	{
 		ser_dev_monitor_stop(scope->serial->monitor_instance);
 		scope->serial->monitor_instance = NULL;
-	}
-
-	if (scope->serial->init_list_thread)
-	{
-		thread_tell_quit(scope->serial->init_list_thread);
-		thread_wait_quit(scope->serial->init_list_thread);
-		scope->serial->init_list_thread = NULL;
 	}
 
 	scope->serial->monitor_prepared = false;

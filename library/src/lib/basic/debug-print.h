@@ -41,9 +41,9 @@
 #define RELATIVE_PATH(file_path) (&file_path[strlen(PROJECT_ROOT)])
 #endif
 #define debug_print_location(file_path, file_line, fmt, ...) \
-	fprintf(stderr, "\x1B[2m[" FILE_LINE_FORMAT "%*s]\x1B[0m " fmt "\n", FILE_LINE_VALUE(file_path, file_line), (int)gt_zero(42 - strlen(RELATIVE_PATH(file_path)) - strlen(STRINGIZE(file_line))), "" __VA_OPT__(, ) __VA_ARGS__)
+	fprintf(stderr, "\x1B[2m[" FILE_LINE_FORMAT "%*s]\x1B[0m " fmt "\n", FILE_LINE_VALUE(file_path, file_line), (int)gt_zero(42 - strlen(RELATIVE_PATH(file_path)) - snprintf(0, 0, "%+d", file_line) - 1), "" __VA_OPT__(, ) __VA_ARGS__)
 #define debug_print_head_location(file_path, file_line, title) \
-	fprintf(stderr, "\x1B[2m[" FILE_LINE_FORMAT "%*s]\x1B[0m%s", FILE_LINE_VALUE(file_path, file_line), (int)gt_zero(42 - strlen(RELATIVE_PATH(file_path)) - strlen(STRINGIZE(file_line))), "", title)
+	fprintf(stderr, "\x1B[2m[" FILE_LINE_FORMAT "%*s]\x1B[0m%s", FILE_LINE_VALUE(file_path, file_line), (int)gt_zero(42 - strlen(RELATIVE_PATH(file_path)) - snprintf(0, 0, "%+d", file_line) - 1), "", title)
 
 #endif // DISABLE_TERM_HYPERLINK
 

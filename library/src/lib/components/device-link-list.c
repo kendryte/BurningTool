@@ -62,6 +62,8 @@ void add_to_device_list(kburnDeviceNode *target)
 		scope->openDeviceList->size++;
 	}
 
+	dispose_list_add(target->disposable_list, toDisposable(delete_from_device_list, target));
+
 	if (_should_insert_waitting_list(target))
 		_recreate_waitting_list(target->_scope);
 

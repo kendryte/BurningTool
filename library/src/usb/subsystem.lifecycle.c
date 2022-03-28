@@ -22,13 +22,6 @@ void usb_subsystem_deinit(KBCTX scope)
 		return;
 	}
 
-	if (scope->usb->libusb_thread)
-	{
-		thread_tell_quit(scope->usb->libusb_thread);
-		thread_wait_quit(scope->usb->libusb_thread);
-		scope->usb->libusb_thread = NULL;
-	}
-
 	usb_monitor_destroy(scope);
 
 	if (scope->usb->libusb)

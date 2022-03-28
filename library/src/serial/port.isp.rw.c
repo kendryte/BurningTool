@@ -76,23 +76,7 @@ slip_error_t _serial_isp_slip_send_request(kburnSerialDeviceNode *node, isp_requ
 	return ret;
 }
 
-isp_response_t *serial_isp_command_send_low_retry(kburnSerialDeviceNode *node, isp_request_t *command, int tries)
-{
-	for (int curr = 1; curr < tries; curr++)
-	{
-		isp_response_t *r = serial_isp_command_send_low(node, command);
-		if (r)
-			return r;
-
-		debug_print("failed retry: %d/%d", curr + 1, tries);
-		bool isWiredState = error_compare(node, KBURN_ERROR_KIND_COMMON, KBurnProtocolOpMismatch);
-		clear_error(node);
-		serial_low_output_nulls(node, isWiredState && (curr % 2 == 1));
-	}
-	return serial_isp_command_send_low(node, command);
-}
-
-isp_response_t *serial_isp_command_send_low(kburnSerialDeviceNode *node, isp_request_t *command)
+static isp_response_t *serial_isp_command_send_low(kburnSerialDeviceNode *node, isp_request_t *command)
 {
 	isp_response_t *ret = NULL;
 
@@ -169,4 +153,34 @@ exit:
 	serial_low_drain_input(node);
 	node->serial_isp_busy = false;
 	return ret;
+}
+
+isp_response_t *serial_isp_command_send_low_retry(kburnSerialDeviceNode *node, isp_request_t *command, int tries)
+{
+	isp_response_t *r;
+
+	autolock(node->mutex);
+	for (int curr = 1; curr < tries; curr++)
+	{
+		if (node->isSwitchIsp || node->isUsbBound)
+		{
+			debug_print("this port is already binded");
+			static isp_response_t bounded = {
+				.op = -1,
+				.status = KBURN_ERROR_KIND_COMMON | KBurnSerialAlreadyBound,
+			};
+			return &bounded;
+		}
+
+		r = serial_isp_command_send_low(node, command);
+		if (r)
+			return r;
+
+		debug_print("failed retry: %d/%d", curr + 1, tries);
+		bool isWiredState = error_compare(node, KBURN_ERROR_KIND_COMMON, KBurnProtocolOpMismatch);
+		clear_error(node);
+		serial_low_output_nulls(node, isWiredState && (curr % 2 == 1));
+	}
+
+	return serial_isp_command_send_low(node, command);
 }

@@ -33,4 +33,6 @@ typedef struct kburnUsbDeviceNode
 
 	PCONST struct libusb_device *device;
 	PCONST struct libusb_device_handle *handle;
+
+	PCONST struct kb_mutex *mutex;
 } kburnUsbDeviceNode;

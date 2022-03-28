@@ -22,7 +22,7 @@ typedef struct disposable_list
 } disposable_list_t;
 // FILE_LINE_FORMAT FILE_LINE_VALUE
 #ifndef NDEBUG
-disposable __toDisposable(dispose_function callback, void *userData, const char *debug_title, const char *file, int line)
+disposable __toDisposable(dispose_function callback, void *userData, const char *debug_title, const char *func, const char *file, int line)
 {
 	return (disposable){
 		.object = userData,
@@ -30,6 +30,7 @@ disposable __toDisposable(dispose_function callback, void *userData, const char 
 		.list = NULL,
 		._dbg = (struct disposable_debug){
 			.title = debug_title,
+			.func = func,
 			.file = file,
 			.line = line,
 		},
@@ -62,7 +63,9 @@ disposable dispose_list_add(disposable_list_t *r, disposable e)
 {
 	m_assert_ptr(r, "dispose: got null ptr");
 	m_assert(e.list == NULL, "dispose: already add to other list");
-	m_assert(!r->disposed, "dispose: is disposed");
+	m_assert_ptr(e.object, "dispose: missing object (or NULL)");
+	m_assert_ptr(e.callback, "dispose: missing callback (or NULL)");
+	m_assert(!r->disposed, "dispose: list is disposed");
 
 	if ((void *)r == (void *)e.object)
 		m_assert(r->size == 0, "free self must at first element");
@@ -95,6 +98,17 @@ disposable dispose_list_add(disposable_list_t *r, disposable e)
 	return e;
 }
 
+static void debug_list_content(const disposable_list_t *r)
+{
+	debug_print("current dispose list:");
+	int index = 0;
+	for (disposable_list_element_t *curs = r->head; curs != NULL; curs = curs->next)
+	{
+		debug_print_location(curs->__debug.file, curs->__debug.line, GREY(" [%02d] %s::%s {%p}"), index, NULLSTR(curs->__debug.func), NULLSTR(curs->__debug.title), (void *)curs->object);
+		index++;
+	}
+}
+
 static void do_delete(disposable_list_t *r, disposable_list_element_t *target)
 {
 	if (target->prev)
@@ -104,10 +118,10 @@ static void do_delete(disposable_list_t *r, disposable_list_element_t *target)
 		target->next->prev = target->prev;
 
 	if (target == r->head)
-		r->head = r->head->next;
+		r->head = target->next;
 
 	if (target == r->tail)
-		r->tail = r->tail->prev;
+		r->tail = target->prev;
 
 	r->size--;
 
@@ -118,28 +132,32 @@ void dispose_list_cancel(disposable_list_t *r, disposable e)
 {
 	if (r == NULL)
 		r = e.list;
-	m_assert_ptr(r, "dispose: no list information");
 
+	m_assert_ptr(r, "dispose: no list information");
 	m_assert_ptr(r->mutex, "dispose: not init");
+
+	debug_print(GREY("dispose_list_cancel(%s[%d], %s @ " FILE_LINE_FORMAT "):"), NULLSTR(r->comment), r->size, NULLSTR(e._dbg.title), FILE_LINE_VALUE(e._dbg.file, e._dbg.line));
 
 	if (!r->disposed)
 		lock(r->mutex);
 
 	bool found = false;
+	int index = 0;
 	for (disposable_list_element_t *curs = r->head; curs != NULL; curs = curs->next)
 	{
 		if (curs->callback == e.callback && curs->object == e.object)
 		{
-			debug_print("\t" GREY("<%s>[%d]): %s @ " FILE_LINE_FORMAT), NULLSTR(r->comment), r->size, NULLSTR(curs->__debug.title), FILE_LINE_VALUE(curs->__debug.file, curs->__debug.line));
+			debug_print(" [%02d] " GREY("<%s>[%d]") ": %s @ " FILE_LINE_FORMAT, index, NULLSTR(r->comment), r->size, NULLSTR(curs->__debug.title), FILE_LINE_VALUE(curs->__debug.file, curs->__debug.line));
 			do_delete(r, curs);
 			found = true;
 			break;
 		}
+		index++;
 	}
 
 	if (!found)
 	{
-		debug_print(RED("dispose_list_delete") "(<%s>[%d]): %s", NULLSTR(r->comment), r->size, NULLSTR(r->comment));
+		debug_list_content(r);
 		m_abort("dispose not found object");
 	}
 
@@ -157,6 +175,8 @@ void dispose_all(disposable_list_t *r)
 
 	bool selfDisposing = r->size > 0 && r->head->callback == free_pointer && r->head->object == r;
 	debug_print("dispose_all(%s) [size=%d, selfDisposing=%d]", NULLSTR(r->comment), r->size, selfDisposing);
+	debug_list_content(r);
+
 	bool selfLast = false;
 
 	while (r->tail)
@@ -176,6 +196,7 @@ void dispose_all(disposable_list_t *r)
 		{
 			if (current == r->tail)
 			{
+				debug_list_content(r);
 				debug_print(RED("dispose") " %s @ " FILE_LINE_FORMAT, NULLSTR(current->__debug.title), FILE_LINE_VALUE(current->__debug.file, current->__debug.line));
 				m_abort("disposed function not call to dispose_list_delete()");
 			}

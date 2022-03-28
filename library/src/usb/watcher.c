@@ -44,7 +44,7 @@ static int on_event_sync(struct libusb_context *UNUSED(ctx), struct libusb_devic
 
 		kburnDeviceNode *node = usb_device_find(scope, vid, pid, path);
 		if (node != NULL)
-			close_single_usb_port(scope, node);
+			destroy_usb_port(node->disposable_list, node->usb);
 	}
 	else
 	{
@@ -92,13 +92,6 @@ static void thread_event_process(KBCTX scope, const bool *const quit)
 
 void usb_monitor_destroy(KBCTX scope)
 {
-	if (scope->usb->event_thread)
-	{
-		thread_tell_quit(scope->usb->event_thread);
-		thread_wait_quit(scope->usb->event_thread);
-		scope->usb->event_thread = NULL;
-	}
-
 	if (scope->usb->queue)
 	{
 		queue_destroy(scope->usb->queue);

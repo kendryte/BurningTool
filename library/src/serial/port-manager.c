@@ -2,27 +2,25 @@
 
 kburn_err_t on_serial_device_attach(KBCTX scope, const char *path)
 {
-	kburn_err_t err;
+	DeferEnabled;
+
 	debug_print("on_serial_device_attach(%s)", path);
 
-	kburnDeviceNode *node;
+	kburnDeviceNode *node = NULL;
 
-	err = create_empty_device_instance(scope, &node);
-	m_assert_err(err, "critical memory alloc failed");
-	if (err != KBurnNoErr)
-		return err;
+	IfErrorReturn(
+		create_empty_device_instance(scope, &node));
+	DeferDispose(scope->disposables, node, destroy_device);
 
-	err = serial_port_init(node->serial, path);
-	m_assert_err(err, "serial_port_init now do not return error");
-	if (err != KBurnNoErr)
-		return err;
+	IfErrorReturn(
+		serial_port_init(node->serial, path));
+	dispose_list_add(node->disposable_list, toDisposable(destroy_serial_port, node));
 
 	if (scope->serial->verify_callback != NULL)
 	{
 		if (!scope->serial->verify_callback(node, scope->serial->verify_callback_ctx))
 		{
 			debug_print("verify return false");
-			destroy_serial_port(scope, node);
 			return KBURN_ERROR_KIND_COMMON | KBurnUserCancel;
 		}
 	}
@@ -31,10 +29,8 @@ kburn_err_t on_serial_device_attach(KBCTX scope, const char *path)
 	{
 		if (!serial_low_open(node->serial))
 		{
-			err = node->error->code;
 			debug_print("open failed");
-			destroy_serial_port(scope, node);
-			return err;
+			return node->error->code;
 		}
 	}
 
@@ -42,13 +38,13 @@ kburn_err_t on_serial_device_attach(KBCTX scope, const char *path)
 	{
 		if (!confirm_port_is_ready(node->serial))
 		{
-			err = node->error->code;
 			debug_print("confirm failed");
-			destroy_serial_port(scope, node);
-			return err;
+			return node->error->code;
 		}
 	}
 
+	add_to_device_list(node);
+
 	scope->serial->handler_callback(node, scope->serial->handler_callback_ctx);
-	return err;
+	return KBurnNoErr;
 }

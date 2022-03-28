@@ -43,9 +43,8 @@ void free_all_unopend_usb_info(kburnUsbDeviceInfo **list);
 int get_all_unopend_usb_info(KBCTX scope, int vid, int pid, kburnUsbDeviceInfo **ret);
 kburn_err_t init_list_all_usb_devices(KBCTX scope);
 
-DECALRE_DISPOSE_HEADER(destroy_usb_port, kburnDeviceNode);
+DECALRE_DISPOSE_HEADER(destroy_usb_port, kburnUsbDeviceNode);
 kburn_err_t open_single_usb_port(KBCTX scope, struct libusb_device *dev);
-kburn_err_t close_single_usb_port(KBCTX scope, kburnDeviceNode *dev);
 kburnDeviceNode *usb_device_find(KBCTX scope, uint16_t vid, uint16_t pid, const uint8_t *serial);
 
 kburn_err_t usb_lowlevel_command_send(libusb_device_handle *handle, uint8_t endpoint,
@@ -58,6 +57,23 @@ kburn_err_t usb_lowlevel_error_read(libusb_device_handle *handle, uint8_t endpoi
 	{                                                                                              \
 		debug_print("%s: %s[%d] %s", msg, libusb_error_name(err), (int)err, libusb_strerror(err)); \
 	}
+
+#define IfUsbErrorReturn(action) __extension__({ \
+	int _err = action;                           \
+	if (_err < LIBUSB_SUCCESS)                   \
+		return KBURN_ERROR_KIND_USB | _err;      \
+	_err;                                        \
+})
+
+#define IfUsbErrorLogReturn(action) __extension__({          \
+	int _err = action;                                       \
+	if (_err < LIBUSB_SUCCESS)                               \
+	{                                                        \
+		debug_print_libusb_error(#action " - failed", _err); \
+		return KBURN_ERROR_KIND_USB | _err;                  \
+	}                                                        \
+	_err;                                                    \
+})
 
 // void debug_print_libusb_error(const char *msg, int libusb_err);
 

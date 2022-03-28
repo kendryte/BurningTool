@@ -20,11 +20,4 @@ void serial_subsystem_deinit(KBCTX scope)
 	if (!scope->serial->subsystem_inited)
 		return;
 	scope->serial->subsystem_inited = false;
-
-	if (scope->serial->pairing_thread)
-	{
-		thread_tell_quit(scope->serial->pairing_thread);
-		thread_wait_quit(scope->serial->pairing_thread);
-		scope->serial->pairing_thread = NULL;
-	}
 }

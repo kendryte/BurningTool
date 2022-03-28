@@ -12,12 +12,18 @@ kburn_err_t kburnCreate(KBCTX *ppCtx)
 	DeferEnabled;
 
 	static uint32_t dbg_index = 0;
-	char *comment = DeferFree(CheckNull(sprintf_alloc("scope[%d]->disposables", dbg_index++)));
+	dbg_index++;
 
-	disposable_list_t *dis = DeferFree(CheckNull(disposable_list_init(comment)));
+	char *comment1 = DeferFree(CheckNull(sprintf_alloc("scope[%d]->disposables", dbg_index)));
+	disposable_list_t *dis = DeferFree(CheckNull(disposable_list_init(comment1)));
 	DeferCall(dispose_all, dis);
 
-	register_dispose_pointer(dis, comment);
+	char *comment2 = DeferFree(CheckNull(sprintf_alloc("scope[%d]->threads", dbg_index)));
+	disposable_list_t *threads = DeferFree(CheckNull(disposable_list_init(comment2)));
+	DeferCall(dispose_all, threads);
+
+	register_dispose_pointer(dis, comment1);
+	register_dispose_pointer(dis, comment2);
 
 	*ppCtx = MyAlloc(kburnContext);
 	register_dispose_pointer(dis, *ppCtx);
@@ -42,6 +48,7 @@ kburn_err_t kburnCreate(KBCTX *ppCtx)
 					   .openDeviceList = odlist,
 					   .waittingDevice = wlist,
 					   .disposables = dis,
+					   .threads = threads,
 					   .monitor_inited = false,
 				   },
 		   sizeof(kburnContext));
@@ -50,6 +57,7 @@ kburn_err_t kburnCreate(KBCTX *ppCtx)
 		lib_global_scope = disposable_list_init("library global");
 
 	dispose_list_add(lib_global_scope, toDisposable(dispose_all_and_deinit, dis));
+	dispose_list_add(lib_global_scope, toDisposable(dispose_all_and_deinit, threads));
 
 	DeferAbort;
 	return 0;
@@ -60,9 +68,13 @@ void kburnGlobalDestroy()
 	debug_print("kburnGlobalDestroy()");
 	dispose_all(lib_global_scope);
 	disposable_list_deinit(lib_global_scope);
+	debug_print("kburnGlobalDestroy() DONE");
 }
 
 void kburnDestroy(KBCTX scope)
 {
+	debug_print("kburnDestroy(%p)", (void *)scope);
+	dispose(bindToList(lib_global_scope, toDisposable(dispose_all_and_deinit, scope->threads)));
 	dispose(bindToList(lib_global_scope, toDisposable(dispose_all_and_deinit, scope->disposables)));
+	debug_print("kburnDestroy(%p) DONE", (void *)scope);
 }

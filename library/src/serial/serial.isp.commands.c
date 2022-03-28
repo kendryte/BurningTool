@@ -5,6 +5,7 @@ slip_error_t _serial_isp_slip_send_request(kburnSerialDeviceNode *node, isp_requ
 static bool greeting(kburnSerialDeviceNode *node, bool auto_switch)
 {
 	debug_print("greeting:");
+
 	make_serial_isp_packet(hello_pkt, 0);
 
 	hello_pkt->op = ISP_NOP;

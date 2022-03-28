@@ -12,6 +12,7 @@ typedef void (*dispose_function)(disposable_list_t *this, void *userData);
 
 struct disposable_debug
 {
+	const char *func;
 	const char *title;
 	const char *file;
 	int line;
@@ -26,11 +27,12 @@ typedef struct disposable
 } disposable;
 
 #ifndef NDEBUG
-disposable __toDisposable(dispose_function callback, void *userData, const char *debug_title, const char *file, int line);
-#define toDisposable(callback, userData) __extension__({                                                                          \
-	if (0)                                                                                                                        \
-		callback(NULL, userData);                                                                                                 \
-	__toDisposable((dispose_function)(callback), (void *)(userData), "" #callback "(" #userData ") at ", __FILENAME__, __LINE__); \
+disposable __toDisposable(dispose_function callback, void *userData, const char *debug_title, const char *func, const char *file, int line);
+#define toDisposable(callback, userData) __extension__({                                                    \
+	if (0)                                                                                                  \
+		callback((disposable_list_t *)NULL, userData);                                                      \
+	__toDisposable((dispose_function)(callback), (void *)(userData), #callback "(" #userData ")", __func__, \
+				   __FILENAME__, __LINE__);                                                                 \
 })
 #else
 disposable toDisposable(dispose_function callback, void *userData);
@@ -49,16 +51,16 @@ void dispose_list_cancel(disposable_list_t *source, disposable element);
 void dispose_all(disposable_list_t *target);
 void dispose(disposable target);
 
-#define DECALRE_DISPOSE(function_name, context_type)                                                   \
-	DECALRE_DISPOSE_HEADER(function_name, context_type)                                                \
-	{                                                                                                  \
-		debug_print("[dispose] \x1B[38;5;11m" #function_name "\x1B[0m(" #context_type " [%p])", _ctx); \
-		dispose_list_cancel(this, toDisposable(function_name, _ctx));                                  \
-		context_type *context = _ctx;                                                                  \
+#define DECALRE_DISPOSE(function_name, context_type)                                         \
+	DECALRE_DISPOSE_HEADER(function_name, context_type)                                      \
+	{                                                                                        \
+		debug_print("[dispose] - " #function_name "(" #context_type " [%p])", (void *)_ctx); \
+		dispose_list_cancel(this, toDisposable(function_name, _ctx));                        \
+		context_type *context = _ctx;                                                        \
 		if (1)
 
 #define DECALRE_DISPOSE_HEADER(function_name, context_type) \
-	void function_name(disposable_list_t *this, void *_ctx)
+	void function_name(disposable_list_t *this, context_type *_ctx)
 
 #define DECALRE_DISPOSE_END() \
 	}

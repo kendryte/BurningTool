@@ -66,7 +66,7 @@ typedef struct isp_response_t
 extern uint32_t baudrateHighValue;
 
 kburn_err_t serial_port_init(kburnSerialDeviceNode *serial, const char *path);
-void destroy_serial_port(KBCTX scope, kburnDeviceNode *node);
+DECALRE_DISPOSE_HEADER(destroy_serial_port, kburnDeviceNode);
 kburn_err_t on_serial_device_attach(KBCTX scope, const char *path);
 
 bool serial_low_open(kburnSerialDeviceNode *node);
@@ -84,7 +84,6 @@ void serial_isp_open(kburnSerialDeviceNode *node);
 void serial_isp_delete(kburnSerialDeviceNode *node);
 
 isp_response_t *serial_isp_command_send_low_retry(kburnSerialDeviceNode *node, isp_request_t *command, int tries);
-isp_response_t *serial_isp_command_send_low(kburnSerialDeviceNode *node, isp_request_t *command);
 
 isp_request_t *new_serial_isp_packet(uint32_t data_length);
 bool serial_isp_verify_checksum(isp_request_t *packet);
