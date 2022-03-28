@@ -122,13 +122,18 @@ bool kburnSerialIspBootMemory(kburnSerialDeviceNode *node, kburn_address_t addre
 	packet->op = ISP_MEMORY_BOOT;
 	packet->address = address;
 
-	if (_serial_isp_slip_send_request(node, packet) != SLIP_NO_ERROR)
+	do_sleep(1000);
+	for (int i = 0; i < 5; i++)
 	{
-		debug_print("kburnSerialIspBootMemory: failed send");
-		return false;
+		if (_serial_isp_slip_send_request(node, packet) != SLIP_NO_ERROR)
+		{
+			debug_print("kburnSerialIspBootMemory: failed send");
+			return false;
+		}
+		do_sleep(50);
 	}
 
-	debug_print("kburnSerialIspBootMemory: command sent, now switch to usb protocol!\n\n");
+	debug_print("kburnSerialIspBootMemory: command sent (5 times), now switch to usb protocol!\n\n");
 
 	if (hackdev_serial_low_switch_baudrate(node, KBURN_K510_BAUDRATE_USBISP))
 	{

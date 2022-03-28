@@ -61,6 +61,12 @@ static int retry_libusb_bulk_transfer(libusb_device_handle *dev_handle,
 			libusb_clear_halt(dev_handle, endpoint);
 			continue;
 		}
+		else if (r == LIBUSB_ERROR_BUSY)
+		{
+			debug_print_libusb_error("libusb_bulk_transfer", r);
+			do_sleep(1000);
+			continue;
+		}
 		else
 		{
 			debug_print_libusb_error("libusb_bulk_transfer", r);
