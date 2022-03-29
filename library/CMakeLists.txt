@@ -41,7 +41,7 @@ set_property(TARGET canaan_burn PROPERTY C_STANDARD 11)
 macro(load_binary target variable src)
   file(RELATIVE_PATH rel_path "${CMAKE_CURRENT_LIST_DIR}" "${src}")
   set(tgt "${CMAKE_CURRENT_BINARY_DIR}/${rel_path}.generate.c")
-  set(tgt_hdr "${CMAKE_CURRENT_BINARY_DIR}/ginclude/${variable}.h")
+  set(tgt_hdr "${CMAKE_CURRENT_BINARY_DIR}/gen-include/generated.${variable}.h")
 
   if("${src}" IS_NEWER_THAN "${tgt}")
     file(READ "${src}" content HEX)
@@ -60,7 +60,7 @@ macro(load_binary target variable src)
   endif()
 
   target_include_directories("${target}"
-                             PRIVATE "${CMAKE_CURRENT_BINARY_DIR}/ginclude")
+                             PRIVATE "${CMAKE_CURRENT_BINARY_DIR}/gen-include")
   target_sources("${target}" PRIVATE "${tgt}")
 endmacro()
 load_binary(canaan_burn "usb_isp_buffer" "${CMAKE_CURRENT_LIST_DIR}/usbisp.bin")
@@ -75,12 +75,15 @@ endforeach()
 
 file(GLOB_RECURSE PUBLIC_HEADER "include/canaan-burn/*.h")
 set_target_properties(canaan_burn PROPERTIES PUBLIC_HEADER "${PUBLIC_HEADER}")
-target_include_directories(canaan_burn PUBLIC "${CMAKE_CURRENT_LIST_DIR}/include")
 
 target_include_directories(canaan_burn PRIVATE "${CMAKE_CURRENT_LIST_DIR}/src/bridge")
 target_include_directories(canaan_burn PRIVATE "${CMAKE_CURRENT_LIST_DIR}/src/lib")
 target_include_directories(canaan_burn PRIVATE "${CMAKE_CURRENT_LIST_DIR}/src/serial")
 target_include_directories(canaan_burn PRIVATE "${CMAKE_CURRENT_LIST_DIR}/src/usb")
+
+target_include_directories(canaan_burn PUBLIC "${CMAKE_CURRENT_LIST_DIR}/include")
+target_include_directories(canaan_burn PUBLIC "${CMAKE_CURRENT_LIST_DIR}/include/canaan-burn/parts")
+
 # ##############################################################################
 
 find_package(libusb CONFIG REQUIRED)

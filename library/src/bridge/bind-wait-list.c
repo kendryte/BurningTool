@@ -1,3 +1,4 @@
+#include "context.h"
 #include "bind-wait-list.h"
 #include "components/device-link-list.h"
 #include "global.h"

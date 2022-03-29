@@ -4,6 +4,7 @@
 #include <stdio.h>
 
 #include "global.h"
+#include "thread.h"
 
 #include <sercomm/sercomm.h>
 #include "slip.h"

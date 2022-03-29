@@ -1,5 +1,7 @@
 #pragma once
 
+#include "./prefix.h"
+
 DEFINE_START
 
 enum kburnIspErrorCode

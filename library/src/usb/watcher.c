@@ -1,5 +1,6 @@
 #include "usb.h"
 #include <pthread.h>
+#include "basic/event-queue.h"
 
 bool libUsbHasWathcer = false;
 
@@ -71,12 +72,17 @@ static int on_event_threaded(struct libusb_context *ctx, struct libusb_device *d
 		debug_print("Unhandled event %d\n", event);
 	}
 
-	struct passing_data *data = malloc(sizeof(struct passing_data));
+	struct passing_data *data = calloc(1, sizeof(struct passing_data));
+	if (data == NULL)
+	{
+		debug_print("memory error in libusb event thread");
+		return 0;
+	}
 	data->ctx = ctx;
 	data->dev = dev;
 	data->event = event;
 	data->user_data = user_data;
-	queue_push(scope->usb->queue, data, true);
+	queue_push(scope->usb->queue, data);
 
 	return 0;
 }

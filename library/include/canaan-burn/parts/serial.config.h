@@ -1,5 +1,7 @@
 #pragma once
 
+#include "./prefix.h"
+
 DEFINE_START
 
 PUBLIC void kburnSetSerialBaudrate(uint32_t baudrate);

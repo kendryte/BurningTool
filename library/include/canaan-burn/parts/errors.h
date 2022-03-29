@@ -1,5 +1,8 @@
 #pragma once
 
+#include <stdint.h>
+#include "./prefix.h"
+
 DEFINE_START
 
 typedef uint64_t kburn_err_t;

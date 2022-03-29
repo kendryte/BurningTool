@@ -1,5 +1,7 @@
 #pragma once
 
+#include "./prefix.h"
+
 enum KBurnSerialConfigByteSize
 {
 	KBurnSerialConfigByteSize_8,

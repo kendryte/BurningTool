@@ -1,5 +1,7 @@
 #pragma once
 
+#include "./prefix.h"
+
 DEFINE_START
 
 #define KBURN_PROGRAM_BASE_ADDR 0x80080000

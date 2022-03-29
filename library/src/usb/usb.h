@@ -2,6 +2,7 @@
 
 #include <stdlib.h>
 #include "global.h"
+#include "thread.h"
 #include "usb.types.h"
 
 typedef struct usb_subsystem_context
@@ -22,7 +23,7 @@ typedef struct usb_subsystem_context
 
 	kbthread libusb_thread;
 
-	queue_t queue;
+	struct queue_info *queue;
 	kbthread event_thread;
 } usb_subsystem_context;
 

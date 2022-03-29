@@ -15,7 +15,7 @@ static void thread_libusb_handle_events(KBCTX scope, const bool *const quit)
 
 void usb_subsystem_deinit(KBCTX scope)
 {
-	debug_print("deinit_libusb()");
+	debug_print("usb_subsystem_deinit()");
 	if (!scope->usb->subsystem_inited)
 	{
 		debug_print("  - already deinited");

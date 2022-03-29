@@ -1,5 +1,6 @@
 #define _GNU_SOURCE
 #include <pthread.h>
+#include "thread.h"
 #include "global.h"
 
 typedef struct thread_passing_object

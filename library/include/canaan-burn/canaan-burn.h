@@ -4,17 +4,12 @@
 #include <stdint.h>
 #include <stddef.h>
 
-#include "parts/prefix.h"
-#include "parts/errors.h"
-#include "parts/types.h"
+#include "./parts/prefix.h"
+#include "./parts/errors.h"
+#include "./parts/types.h"
+#include "./parts/context.h"
 
 DEFINE_START
-
-#ifndef kburn_scope
-#define kburn_scope
-typedef struct kburnContext kburnContext;
-typedef kburnContext *KBCTX;
-#endif
 
 /**
  * 初始化模块需要的内存
@@ -106,9 +101,9 @@ PUBLIC kburn_err_t kburnPollUSB(KBCTX scope);
 
 DEFINE_END
 
-#include "parts/serial.config.h"
-#include "parts/serial.isp.h"
+#include "./parts/serial.config.h"
+#include "./parts/serial.isp.h"
 
 #ifdef KBURN_ASSERT_SIZE
-#include "parts/static-assert.h"
+#include "./parts/static-assert.h"
 #endif

@@ -27,14 +27,10 @@ kburn_err_t queue_create(queue_info **queue_ptr)
 	return KBurnNoErr;
 }
 
-static void *_queue_shift(queue_info *queue, bool lock)
+static void *_queue_shift(queue_info *queue)
 {
-	if (lock)
-		lock(queue->mutex);
 	if (queue->first == NULL)
 	{
-		if (lock)
-			unlock(queue->mutex);
 		return NULL;
 	}
 	queue_struct *old = queue->first;
@@ -43,9 +39,6 @@ static void *_queue_shift(queue_info *queue, bool lock)
 		queue->last = NULL;
 	queue->first = old->next;
 
-	if (lock)
-		unlock(queue->mutex);
-
 	return old->data;
 }
 
@@ -53,20 +46,23 @@ void queue_destroy(queue_info *queue)
 {
 	lock(queue->mutex);
 	void *ele;
-	while ((ele = _queue_shift(queue, false)) != NULL)
+	while ((ele = _queue_shift(queue)) != NULL)
+	{
 		free(ele);
-	unlock(queue->mutex);
-	lock_deinit(&queue->mutex);
+	}
+	kb_mutex_t mutex = queue->mutex;
 	free(queue);
+	unlock(mutex);
+	lock_deinit(&mutex);
 }
 
-kburn_err_t queue_push(queue_info *queue, void *data, bool free_when_destroy)
+kburn_err_t queue_push(queue_info *queue, void *data)
 {
 	queue_struct *new = MyAlloc(queue_struct);
 	new->data = data;
-	new->free_when_destroy = free_when_destroy;
 
 	lock(queue->mutex);
+	// TODO: 当此处刚好与queue_destroy同时运行时，queue已经被释放，下面的读写都会造成崩溃
 	if (queue->first == NULL)
 	{
 		queue->first = new;
@@ -84,5 +80,6 @@ kburn_err_t queue_push(queue_info *queue, void *data, bool free_when_destroy)
 
 void *queue_shift(queue_info *queue)
 {
-	return _queue_shift(queue, true);
+	autolock(queue->mutex);
+	return _queue_shift(queue);
 }

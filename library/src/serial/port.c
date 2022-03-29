@@ -1,4 +1,5 @@
 #include "serial.h"
+#include "driver.h"
 
 void kburnOnSerialDisconnect(KBCTX scope, on_device_remove callback, void *ctx)
 {
