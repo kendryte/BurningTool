@@ -104,23 +104,60 @@ kburn_err_t open_single_usb_port(KBCTX scope, struct libusb_device *dev)
 	node->usb->isOpen = true;
 	debug_print("usb port open success, handle=%p", (void *)node->usb->handle);
 
-	r = libusb_detach_kernel_driver(node->usb->handle, 0);
-	if (r < LIBUSB_SUCCESS)
+	r = libusb_kernel_driver_active(node->usb->handle, 0);
+	if (r == 0)
+	{
+		debug_print("libusb kernel driver is already set to this device");
+	}
+	else if (r == 1)
+	{
+		r = libusb_detach_kernel_driver(node->usb->handle, 0);
+		if (r != LIBUSB_ERROR_NOT_FOUND && r != 0)
+		{
+			debug_print_libusb_error("libusb_detach_kernel_driver", r);
+			return KBURN_ERROR_KIND_USB | r;
+		}
+		debug_print("libusb kernel driver switch ok");
+
+		libusb_close(node->usb->handle);
+		node->usb->isOpen = false;
+		node->usb->handle = NULL;
+
+		IfUsbErrorLogReturn(
+			libusb_open(dev, &node->usb->handle));
+		node->usb->isOpen = true;
+		debug_print("usb port re-open success, handle=%p", (void *)node->usb->handle);
+	}
+	else if (r == LIBUSB_ERROR_NOT_SUPPORTED)
 	{
 		debug_print_libusb_error("open_single_usb_port: system not support detach kernel driver", r);
-		// no return here
+		return KBURN_ERROR_KIND_USB | r;
 	}
+
+	libusb_clear_halt(node->usb->handle, 0);
+	int lastr = -1;
+	for (int i = 0; i < 20; i++)
+	{
+		r = libusb_claim_interface(node->usb->handle, 0);
+		if (r == 0)
+		{
+			debug_print("claim interface success, tried %d times", i + 1);
+			break;
+		}
+		if (lastr != r)
+		{
+			lastr = r;
+			debug_print_libusb_error("libusb_claim_interface", r);
+		}
+		do_sleep(500);
+	}
+	node->usb->isClaim = true;
+	debug_print("libusb_claim_interface success");
 
 	usb_get_device_serial(dev, node->usb->handle, node->usb->deviceInfo.strSerial);
 
 	IfUsbErrorReturn(
 		get_endpoint(dev, &node->usb->deviceInfo.endpoint_in, &node->usb->deviceInfo.endpoint_out));
-
-	libusb_clear_halt(node->usb->handle, 0);
-	IfUsbErrorLogReturn(
-		libusb_claim_interface(node->usb->handle, 0));
-	node->usb->isClaim = true;
-	debug_print("libusb_claim_interface success");
 
 	IfErrorReturn(
 		usb_device_hello(node));

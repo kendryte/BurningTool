@@ -44,6 +44,9 @@ kburn_err_t usb_subsystem_init(KBCTX scope)
 		return KBurnNoErr;
 	}
 
+	scope->usb->detach_kernel_driver = libusb_has_capability(LIBUSB_CAP_SUPPORTS_DETACH_KERNEL_DRIVER);
+	debug_print("libusb can detach kernel driver: %d", scope->usb->detach_kernel_driver);
+
 	const struct libusb_version *version = libusb_get_version();
 	debug_print("\tlibusb v%d.%d.%d.%d\n\n", version->major, version->minor, version->micro, version->nano);
 

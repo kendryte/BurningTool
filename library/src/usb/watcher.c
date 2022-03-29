@@ -58,6 +58,19 @@ static int on_event_threaded(struct libusb_context *ctx, struct libusb_device *d
 {
 	KBCTX scope = user_data;
 
+	if (LIBUSB_HOTPLUG_EVENT_DEVICE_ARRIVED == event)
+	{
+		debug_print("libusb event: " GREEN("ARRIVED"));
+	}
+	else if (LIBUSB_HOTPLUG_EVENT_DEVICE_LEFT == event)
+	{
+		debug_print("libusb event: " YELLO("LEFT"));
+	}
+	else
+	{
+		debug_print("Unhandled event %d\n", event);
+	}
+
 	struct passing_data *data = malloc(sizeof(struct passing_data));
 	data->ctx = ctx;
 	data->dev = dev;
@@ -166,7 +179,7 @@ kburn_err_t usb_monitor_resume(KBCTX scope)
 			return r;
 	}
 
-	debug_print("\tlibusb_hotplug_register_callback: [%04x:%04x]", scope->usb->filter.vid, scope->usb->filter.pid);
+	debug_print("\tlibusb_hotplug_register_callback: [%04x:%04x] libUsbHasWathcer=%d", scope->usb->filter.vid, scope->usb->filter.pid, libUsbHasWathcer);
 	int ret = libusb_hotplug_register_callback(
 		scope->usb->libusb,
 		LIBUSB_HOTPLUG_EVENT_DEVICE_ARRIVED | LIBUSB_HOTPLUG_EVENT_DEVICE_LEFT,
@@ -174,7 +187,7 @@ kburn_err_t usb_monitor_resume(KBCTX scope)
 		scope->usb->filter.vid == KBURN_VIDPID_FILTER_ANY ? LIBUSB_HOTPLUG_MATCH_ANY : scope->usb->filter.vid,
 		scope->usb->filter.pid == KBURN_VIDPID_FILTER_ANY ? LIBUSB_HOTPLUG_MATCH_ANY : scope->usb->filter.pid,
 		LIBUSB_HOTPLUG_MATCH_ANY,
-		libUsbHasWathcer ? on_event_sync : on_event_threaded,
+		libUsbHasWathcer ? on_event_threaded : on_event_sync,
 		scope,
 		&scope->usb->monitor_handle);
 
