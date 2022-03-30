@@ -5,7 +5,7 @@
 
 DEFINE_START
 
-typedef uint64_t kburn_err_t;
+typedef int64_t kburn_err_t;
 
 enum KBurnCommonError
 {
@@ -20,11 +20,13 @@ enum KBurnCommonError
 	KBurnSerialAlreadyBound,
 	KBurnUsbMonitorFailStart,
 	KBurnUsbDeviceNotFound,
-	KBurnUsbReadSizeMismatch,
+	KBurnUsbSizeMismatch,
 	KBurnUsbReadIndexMismatch,
 	KBurnUsbErrorSense,
 	KBurnUsbProtocolWrong,
 	KBurnProtocolOpMismatch,
+	KBurnSizeNotAlign,
+	KBurnAddressNotAlign,
 	KBurnUserCancel,
 };
 

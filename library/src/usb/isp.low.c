@@ -1,3 +1,4 @@
+#include "isp.low.h"
 #include "usb.h"
 #include "isp.h"
 
@@ -22,11 +23,11 @@ typedef struct usbIspResponsePacket // CSW
 {
 	uint8_t signature[4];
 	uint32_t operation_tag;
-	uint32_t __reserved1;
-	uint32_t is_success; // bool
+	uint32_t __data_residue;
+	uint8_t is_success; // bool
 } __attribute__((__packed__)) usbIspResponsePacket;
 //  char (*__)[sizeof(usbIspResponsePacket)] = 1;
-_Static_assert(sizeof(usbIspResponsePacket) == 16, "cbw packet must 16bytes");
+_Static_assert(sizeof(usbIspResponsePacket) == 13, "cbw packet must 13bytes");
 
 static inline usbIspRequestPacket create_request(uint32_t operation_tag, uint32_t transfer_data_length, uint8_t flags, const usbIspCommandPacket body)
 {
@@ -40,6 +41,8 @@ static inline usbIspRequestPacket create_request(uint32_t operation_tag, uint32_
 		.body = body,
 		.reserved = {0xFF},
 	};
+
+	r.body.command = htobe16(r.body.command);
 
 	return r;
 }
@@ -103,21 +106,46 @@ kburn_err_t usb_lowlevel_command_send(libusb_device_handle *handle, uint8_t endp
 	int written_size = 0;
 	int r = retry_libusb_bulk_transfer(handle, endpoint_out, &cbw, sizeof(usbIspRequestPacket), &written_size, 1000);
 	if (r < LIBUSB_SUCCESS)
-		return KBURN_ERROR_KIND_USB | r;
+		return make_error_code(KBURN_ERROR_KIND_USB, r);
 
 	debug_print("      %d bytes sent", written_size);
 
 	return KBurnNoErr;
 }
 
-/************************************************************
-Function: usb_lowlevel_status_read
-Description: 获取CSW响应指令,一共13个字节。
-param1 : libusb_device_handle *handle          usb设备句柄
-param2 : uint8_t endpoint                      端点I/O
-param3 : expected_operation_index
-Return: 返回负数说明函数执行失败，返回0为成功
-*************************************************************/
+static bool is_packet_type_csw(const void *buff)
+{
+	return memcmp(buff, "USBS", 4) == 0;
+}
+
+static kburn_err_t csw_status_parse(const void *buff, uint32_t expected_operation_index)
+{
+	if (!is_packet_type_csw(buff))
+	{
+		debug_print("mismatched signature: %.4s (expected USBS)", (char *)buff);
+		return make_error_code(KBURN_ERROR_KIND_COMMON, KBurnUsbReadIndexMismatch);
+	}
+
+	const usbIspResponsePacket *csw = buff;
+
+	if (expected_operation_index && csw->operation_tag != expected_operation_index)
+	{
+		debug_print("mismatched tags: %d (expected %d)", csw->operation_tag, expected_operation_index);
+		return make_error_code(KBURN_ERROR_KIND_COMMON, KBurnUsbReadIndexMismatch);
+	}
+
+	debug_print("mass storage status: %X (%s)", csw->is_success, csw->is_success ? "FAILED" : "success");
+	if (csw->is_success)
+	{
+		// 状态值为1说明有错误出现，应该使用GetSense获取错误原因。状态值大于等于2说明设备没有识别CWB命令是啥
+		if (csw->is_success == 1)
+			return make_error_code(KBURN_ERROR_KIND_COMMON, KBurnUsbErrorSense);
+		else
+			return make_error_code(KBURN_ERROR_KIND_COMMON, KBurnProtocolOpMismatch);
+	}
+	return KBurnNoErr;
+}
+
 kburn_err_t usb_lowlevel_status_read(libusb_device_handle *handle, uint8_t endpoint_in, uint32_t expected_operation_index)
 {
 	debug_print("usb_lowlevel_status_read(%d)", expected_operation_index);
@@ -128,7 +156,7 @@ kburn_err_t usb_lowlevel_status_read(libusb_device_handle *handle, uint8_t endpo
 	int readed_size = 0;
 	int r = retry_libusb_bulk_transfer(handle, endpoint_in, &csw, sizeof(usbIspResponsePacket), &readed_size, 1000);
 	if (r < LIBUSB_SUCCESS)
-		return KBURN_ERROR_KIND_USB | r;
+		return make_error_code(KBURN_ERROR_KIND_USB, r);
 
 	print_buffer("csw", (void *)&csw, sizeof(usbIspResponsePacket));
 
@@ -137,28 +165,47 @@ kburn_err_t usb_lowlevel_status_read(libusb_device_handle *handle, uint8_t endpo
 		debug_print("usb_lowlevel_status_read: received %d bytes (expected %ld)", readed_size, sizeof(usbIspResponsePacket));
 	}
 
-	if (strncmp((void *)csw.signature, "USBS", 4))
-	{
-		debug_print("usb_lowlevel_status_read: mismatched signature: %.4s (expected USBS)", csw.signature);
-		return KBURN_ERROR_KIND_COMMON | KBurnUsbReadIndexMismatch;
-	}
-
-	if (csw.operation_tag != expected_operation_index)
-	{
+	kburn_err_t ret = csw_status_parse(&csw, expected_operation_index);
+	if (ret == make_error_code(KBURN_ERROR_KIND_COMMON, KBurnUsbReadIndexMismatch))
 		return usb_lowlevel_status_read(handle, endpoint_in, expected_operation_index);
+	else
+		return ret;
+}
 
-		// debug_print("usb_lowlevel_status_read: mismatched tags: %d (expected %d)", csw.operation_tag, expected_operation_index);
-		// return KBURN_ERROR_KIND_COMMON | KBurnUsbReadIndexMismatch;
+kburn_err_t usb_lowlevel_transfer(kburnUsbDeviceNode *node, enum InOut direction, void *buffer, int size)
+{
+	debug_print(GREY("usb_lowlevel_transfer(%s, %d bytes)"), direction == USB_READ ? "read" : "write", size);
+
+	if (direction == USB_WRITE)
+	{
+		print_buffer("PC→USB", buffer, size);
 	}
 
-	debug_print("mass storage status: %X (%s)", csw.is_success, csw.is_success ? "FAILED" : "success");
-	if (csw.is_success)
+	int actual_size;
+	IfUsbErrorLogReturn(
+		retry_libusb_bulk_transfer(
+			node->handle,
+			direction == USB_WRITE ? node->deviceInfo.endpoint_out : node->deviceInfo.endpoint_in,
+			buffer,
+			size,
+			&actual_size,
+			1000));
+
+	if (direction == USB_READ)
 	{
-		// 状态值为1说明有错误出现，应该使用GetSense获取错误原因。状态值大于等于2说明设备没有识别CWB命令是啥
-		if (csw.is_success == 1)
-			return KBURN_ERROR_KIND_COMMON | KBurnUsbErrorSense;
-		else
-			return KBURN_ERROR_KIND_COMMON | KBurnProtocolOpMismatch;
+		print_buffer("USB→PC", buffer, actual_size);
+	}
+
+	if (actual_size != size)
+	{
+		if (actual_size >= (int)sizeof(usbIspResponsePacket) && is_packet_type_csw(buffer))
+		{
+			return csw_status_parse(buffer, 0);
+		}
+
+		kburn_err_t r = make_error_code(KBURN_ERROR_KIND_COMMON, KBurnUsbSizeMismatch);
+		_set_error(node->parent, KBURN_ERROR_KIND_COMMON, KBurnUsbSizeMismatch, "actual read/write size(%d) is not equal to expected (%d)", actual_size, size);
+		return r;
 	}
 	return KBurnNoErr;
 }
@@ -191,13 +238,13 @@ kburn_err_t usb_lowlevel_error_read(libusb_device_handle *handle, uint8_t endpoi
 	rc = usb_lowlevel_command_send(handle, endpoint_out, request, LIBUSB_ENDPOINT_IN, REQUEST_SENSE_LENGTH, expected_tag);
 	if (rc < LIBUSB_SUCCESS)
 	{
-		return KBURN_ERROR_KIND_USB | rc;
+		return make_error_code(KBURN_ERROR_KIND_USB, rc);
 	}
 	rc = retry_libusb_bulk_transfer(handle, endpoint_in, (unsigned char *)&sense, REQUEST_SENSE_LENGTH, &size, 1000);
 	if (rc < LIBUSB_SUCCESS)
 	{
 		debug_print_libusb_error("libusb_bulk_transfer failed:", rc);
-		return KBURN_ERROR_KIND_USB | rc;
+		return make_error_code(KBURN_ERROR_KIND_USB, rc);
 	}
 	print_buffer("sense", sense, REQUEST_SENSE_LENGTH);
 

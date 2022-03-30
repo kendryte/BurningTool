@@ -1,9 +1,9 @@
 #include <stdint.h>
 #include <stddef.h>
+#include "basic/lock.h"
 #include "context.h"
 #include "types.h"
 #include "basic/disposable.h"
-#include "basic/lock.h"
 
 typedef struct port_link_element
 {

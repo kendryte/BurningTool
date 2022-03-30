@@ -1,4 +1,5 @@
 #include "components/device-link-list.h"
+#include "components/call-user-handler.h"
 #include "serial.h"
 
 kburn_err_t on_serial_device_attach(KBCTX scope, const char *path)
@@ -12,6 +13,9 @@ kburn_err_t on_serial_device_attach(KBCTX scope, const char *path)
 	IfErrorReturn(
 		create_empty_device_instance(scope, &node));
 	DeferDispose(scope->disposables, node, destroy_device);
+	debug_print("new device created: %p", (void *)node);
+
+	DeferUserCallback(scope->serial->handler_callback, node, true);
 
 	IfErrorReturn(
 		serial_port_init(node->serial, path));
@@ -21,10 +25,11 @@ kburn_err_t on_serial_device_attach(KBCTX scope, const char *path)
 	{
 		if (!scope->serial->verify_callback(node, scope->serial->verify_callback_ctx))
 		{
-			debug_print("verify return false");
-			return KBURN_ERROR_KIND_COMMON | KBurnUserCancel;
+			set_error(node, KBURN_ERROR_KIND_COMMON, KBurnUserCancel, "operation canceled by verify callback");
+			return make_error_code(KBURN_ERROR_KIND_COMMON, KBurnUserCancel);
 		}
 	}
+	debug_print("user verify pass");
 
 	if (!node->serial->isOpen)
 	{
@@ -45,8 +50,8 @@ kburn_err_t on_serial_device_attach(KBCTX scope, const char *path)
 	}
 
 	add_to_device_list(node);
+	node->disconnect_should_call = true;
 
-	scope->serial->handler_callback(node, scope->serial->handler_callback_ctx);
 	DeferAbort;
 	return KBurnNoErr;
 }

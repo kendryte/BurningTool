@@ -1,7 +1,7 @@
 #define _GNU_SOURCE
 #include <pthread.h>
-#include "thread.h"
 #include "global.h"
+#include "thread.h"
 
 typedef struct thread_passing_object
 {
@@ -75,7 +75,7 @@ kburn_err_t thread_create(const char *debug_title, thread_function start_routine
 	if (thread_ret != 0)
 	{
 		debug_print("[thread] failed create: %d", thread_ret);
-		return KBURN_ERROR_KIND_SYSCALL | thread_ret;
+		return make_error_code(KBURN_ERROR_KIND_SYSCALL, thread_ret);
 	}
 
 	dispose_list_add(scope->threads, toDisposable(destroy_thread, thread));

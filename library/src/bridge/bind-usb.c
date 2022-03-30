@@ -13,7 +13,10 @@ kburn_err_t usb_device_serial_bind(kburnDeviceNode *node)
 	{
 		kburn_err_t r = usb_device_serial_print(node, (uint8_t *)output, buff_len);
 		if (r != KBurnNoErr)
+		{
+			set_kb_error(node, r, "failed send serial print command");
 			return r;
+		}
 
 		do_sleep(500);
 

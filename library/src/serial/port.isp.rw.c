@@ -165,9 +165,10 @@ isp_response_t *serial_isp_command_send_low_retry(kburnSerialDeviceNode *node, i
 		if (node->isSwitchIsp || node->isUsbBound)
 		{
 			debug_print("this port is already binded");
-			static isp_response_t bounded = {
+			static isp_response_t bounded;
+			bounded = (isp_response_t){
 				.op = -1,
-				.status = KBURN_ERROR_KIND_COMMON | KBurnSerialAlreadyBound,
+				.status = make_error_code(KBURN_ERROR_KIND_COMMON, KBurnSerialAlreadyBound),
 			};
 			return &bounded;
 		}

@@ -64,5 +64,5 @@ typedef struct kburnSerialDeviceNode
 	PCONST struct binding_state *binding;
 	PCONST struct ser *m_dev_handle;
 
-	PCONST struct kb_mutex *mutex;
+	PCONST kb_mutex_t mutex;
 } kburnSerialDeviceNode;

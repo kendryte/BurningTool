@@ -22,7 +22,7 @@ uint32_t handle_page(const char *buff, const size_t buff_size)
 		return false;
 
 	uint32_t bind_id = strtoul(buff + strlen(SIGNATURE), NULL, 16);
-	debug_print("  -> bind_id = %u", bind_id);
+	debug_print("  -> bind_id = %u (%X)", bind_id, bind_id);
 
 	char vbuff[buff_size * 2];
 	create_pair_protocol(bind_id, vbuff, buff_size * 2);

@@ -37,7 +37,7 @@ disposable __toDisposable(dispose_function callback, void *userData, const char 
 	};
 }
 #else
-disposable toDisposable(dispose_function callback, void *userData)
+disposable _toDisposable(dispose_function callback, void *userData)
 {
 	return (disposable){.object = userData, .callback = callback, .list = NULL};
 }
@@ -77,9 +77,7 @@ disposable dispose_list_add(disposable_list_t *r, disposable e)
 	ele->callback = e.callback;
 	ele->object = e.object;
 	ele->next = NULL;
-#ifndef NDEBUG
 	ele->__debug = e._dbg;
-#endif
 	ele->parent = r;
 	e.list = r;
 

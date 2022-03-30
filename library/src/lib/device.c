@@ -14,7 +14,7 @@ DECALRE_DISPOSE(destroy_device, kburnDeviceNode)
 		return;
 	context->destroy_in_progress = true;
 
-	if (context->_scope->disconnect_callback)
+	if (context->disconnect_should_call && context->_scope->disconnect_callback)
 	{
 		debug_print("\tdisconnect_callback()");
 		context->_scope->disconnect_callback(context, context->_scope->disconnect_callback_ctx);

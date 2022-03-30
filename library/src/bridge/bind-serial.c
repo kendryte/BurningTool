@@ -45,7 +45,7 @@ static uint32_t handle_one_device(kburnSerialDeviceNode *dev)
 		return false;
 	}
 
-	debug_print("\t%ld is new", in_buffer_size);
+	debug_print("\t%ld in serial buffer", in_buffer_size);
 
 	for (size_t i = 0; i < tbuff_size; i++)
 	{

@@ -32,7 +32,7 @@ static int on_event_sync(struct libusb_context *UNUSED(ctx), struct libusb_devic
 			return 0;
 		}
 
-		kburn_err_t r = open_single_usb_port(scope, dev);
+		kburn_err_t r = open_single_usb_port(scope, dev, NULL);
 		if (r != KBurnNoErr)
 			debug_print("failed open single port: %ld", r);
 	}
@@ -147,7 +147,7 @@ kburn_err_t usb_monitor_prepare(KBCTX scope)
 		if (err != KBurnNoErr)
 			return err;
 
-		err = thread_create("monitor events handle", thread_event_process, scope, &scope->usb->event_thread);
+		err = thread_create("my usb handle", thread_event_process, scope, &scope->usb->event_thread);
 		if (err != KBurnNoErr)
 			return err;
 	}
@@ -202,5 +202,5 @@ kburn_err_t usb_monitor_resume(KBCTX scope)
 		debug_print_libusb_error("error creating a hotplug callback", ret);
 	}
 
-	return KBURN_ERROR_KIND_USB | ret;
+	return make_error_code(KBURN_ERROR_KIND_USB, ret);
 }

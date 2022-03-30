@@ -1,32 +1,71 @@
+#include <stdarg.h>
 #include "serial.h"
+#include <libusb.h>
 
 void _copy_last_serial_io_error(kburnDeviceNode *node, uint32_t err)
 {
 	clear_error(node);
-	node->error->code = err | KBURN_ERROR_KIND_SERIAL;
+	node->error->code = make_error_code(KBURN_ERROR_KIND_SERIAL, err);
 	node->error->errorMessage = strdup(sererr_last());
 	debug_print("copy_last_serial_io_error: %s", node->error->errorMessage);
 }
 
+void _copy_last_libusb_error(kburnDeviceNode *node, int err)
+{
+	clear_error(node);
+	node->error->code = make_error_code(KBURN_ERROR_KIND_USB, err);
+	const char *name = libusb_error_name(err);
+	const char *desc = libusb_strerror(err);
+	size_t size = snprintf(NULL, 0, "%s: %s", name, desc);
+	char *buff = malloc(size + 1);
+	snprintf(buff, size + 1, "%s: %s", name, desc);
+	node->error->errorMessage = buff;
+	// debug_print("copy_last_libusb_error: %d - %s", err, node->error->errorMessage);
+}
+
+#include <endian.h>
+typedef union error_convert
+{
+	struct
+	{
+#if BYTE_ORDER == LITTLE_ENDIAN
+		int32_t code;
+		uint32_t kind;
+#else
+		uint32_t kind;
+		int32_t code;
+#endif
+	} __attribute__((__packed__)) split;
+	kburn_err_t combine;
+} error_convert;
+
 kburnErrorDesc kburnSplitErrorCode(kburn_err_t code)
 {
-	kburnErrorDesc a = {
-		.kind = code & ~(uint64_t)UINT32_MAX,
-		.code = code & UINT32_MAX,
+	error_convert c = {.combine = code};
+
+	return (kburnErrorDesc){
+		.code = c.split.code,
+		.kind = ((uint64_t)c.split.kind) << 32,
 	};
-	return a;
 }
 kburn_err_t make_error_code(enum kburnErrorKind kind, int32_t code)
 {
-	return kind | code;
+	error_convert c = {.split = {.kind = kind >> 32, .code = code}};
+
+	return c.combine;
 }
 
-void _set_error(kburnDeviceNode *node, enum kburnErrorKind kind, int32_t code, const char *error)
+void _set_error(kburnDeviceNode *node, enum kburnErrorKind kind, int32_t code, const char *error, ...)
 {
 	int32_t e = make_error_code(kind, code);
 	clear_error(node);
 	node->error->code = e;
-	node->error->errorMessage = strdup(error);
+
+	va_list args;
+	va_start(args, error);
+	node->error->errorMessage = vsprintf_alloc(error, args);
+	va_end(args);
+
 	debug_print("set_error: %s", node->error->errorMessage);
 }
 

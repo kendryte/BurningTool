@@ -54,6 +54,7 @@
 		"iterator": "c",
 		"map": "c",
 		"set": "c",
-		"unordered_set": "c"
+		"unordered_set": "c",
+		"iomanip": "cpp"
 	}
 }

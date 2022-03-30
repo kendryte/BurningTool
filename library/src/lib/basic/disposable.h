@@ -30,7 +30,12 @@ disposable __toDisposable(dispose_function callback, void *userData, const char 
 				   __FILENAME__, __LINE__);                                                                 \
 })
 #else
-disposable toDisposable(dispose_function callback, void *userData);
+disposable _toDisposable(dispose_function callback, void *userData);
+#define toDisposable(callback, userData) __extension__({             \
+	if (0)                                                           \
+		callback((disposable_list_t *)NULL, userData);               \
+	_toDisposable((dispose_function)(callback), (void *)(userData)); \
+})
 #endif
 
 static inline disposable bindToList(disposable_list_t *list, disposable d)

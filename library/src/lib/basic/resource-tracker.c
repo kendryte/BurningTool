@@ -39,7 +39,6 @@ void resource_tracker_done(resource_tracker_t *tracker)
 			if (tracker->element[i].force)
 			{
 				debug_print_bundle(" * [force] $b", tracker->element[i].__debug);
-				tracker->element[i].callback(*(void **)tracker->element[i].resource);
 				do_cleanup(tracker->element[i]);
 			}
 		}
@@ -56,6 +55,7 @@ void *_track_resource(resource_tracker_t *tracker, void *resource, cleanup_funct
 	m_assert_ptr(resource, "can not track null ptr");
 	uint8_t i = tracker->size++;
 	m_assert(i < MAX_TRACE, "resource tracker can not hold too many element");
+	memset(tracker->element + i, 0, sizeof(resource_tracker_element));
 	tracker->element[i].callback = clean;
 	tracker->element[i].resource = resource;
 	tracker->element[i].force = always;
@@ -73,8 +73,7 @@ void *_track_dispose(resource_tracker_t *tracker, disposable d, const char *var,
 	m_assert_ptr(d.list, "can not track disposable without add it to list");
 	uint8_t i = tracker->size++;
 	m_assert(i < MAX_TRACE, "resource tracker can not hold too many element");
-	tracker->element[i].callback = NULL;
-	tracker->element[i].resource = NULL;
+	memset(tracker->element + i, 0, sizeof(resource_tracker_element));
 	tracker->element[i].dispose_object = d;
 	tracker->element[i].force = false;
 	tracker->element[i].__debug.file = file;

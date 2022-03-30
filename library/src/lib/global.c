@@ -30,3 +30,17 @@ char *sprintf_alloc(const char *fmt, ...)
 	va_end(args);
 	return ret;
 }
+
+char *vsprintf_alloc(const char *fmt, va_list args)
+{
+	va_list argsc;
+	va_copy(argsc, args);
+	size_t size = vsnprintf(NULL, 0, fmt, argsc);
+	char *ret = calloc(sizeof(char), size + 100);
+	if (ret == NULL)
+		return ret;
+
+	vsnprintf(ret, size + 100, fmt, args);
+
+	return ret;
+}

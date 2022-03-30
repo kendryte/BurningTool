@@ -3,8 +3,8 @@
 #include <stdint.h>
 #include <stdlib.h>
 #include <stdbool.h>
-#include "canaan-burn/canaan-burn.h"
 #include "basic/lock.h"
+#include "canaan-burn/canaan-burn.h"
 #include "basic/disposable.h"
 
 #define MAX_WAITTING_DEVICES 32

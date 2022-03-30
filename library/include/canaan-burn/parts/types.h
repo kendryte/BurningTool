@@ -14,6 +14,10 @@ typedef struct kburnDeviceError
 	PCONST char *errorMessage;
 } kburnDeviceError;
 
+#ifndef has_kb_mutex
+typedef struct kb_mutex *kb_mutex_t;
+#endif
+
 #include "types.serial.h"
 #include "types.usb.h"
 
@@ -27,6 +31,7 @@ typedef struct kburnDeviceNode
 	PCONST struct kburnContext *const _scope;
 
 	PCONST bool destroy_in_progress;
+	PCONST bool disconnect_should_call;
 	PCONST uint32_t bind_id;
 } kburnDeviceNode;
 

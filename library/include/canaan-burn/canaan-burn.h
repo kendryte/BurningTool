@@ -109,6 +109,8 @@ DEFINE_END
 #include "./parts/serial.config.h"
 #include "./parts/serial.isp.h"
 
+#include "./parts/usb.isp.h"
+
 #ifdef KBURN_ASSERT_SIZE
 #include "./parts/static-assert.h"
 #endif

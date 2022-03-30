@@ -1,3 +1,5 @@
+#include "basic/lock.h"
+#include "components/call-user-handler.h"
 #include "components/device-link-list.h"
 #include "usb.h"
 
@@ -18,7 +20,7 @@ static int get_endpoint(libusb_device *dev, uint8_t *out_endpoint_in, uint8_t *o
 	*out_endpoint_out = 0;
 
 	/* 获取配置描述符，里面包含端点信息 */
-	IfUsbErrorLogReturn(
+	CheckLibusbError(
 		libusb_get_config_descriptor(dev, 0, &conf_desc));
 
 	/* 默认使用第一个接口 usb_interface[0]*/
@@ -57,7 +59,7 @@ _quit:
 
 DECALRE_DISPOSE(destroy_usb_port, kburnUsbDeviceNode)
 {
-	debug_print("destroy_usb_port(USB[0x%p: %s])", (void *)context->device, _debug_path_string(context->deviceInfo.path));
+	debug_print("destroy_usb_port(USB[0x%p: %s])", (void *)context->device, usb_debug_path_string(context->deviceInfo.path));
 
 	lock(context->mutex);
 	if (context->isClaim)
@@ -80,7 +82,7 @@ DECALRE_DISPOSE(destroy_usb_port, kburnUsbDeviceNode)
 }
 DECALRE_DISPOSE_END()
 
-kburn_err_t open_single_usb_port(KBCTX scope, struct libusb_device *dev)
+kburn_err_t open_single_usb_port(KBCTX scope, struct libusb_device *dev, kburnDeviceNode **out_node)
 {
 	DeferEnabled;
 
@@ -94,11 +96,17 @@ kburn_err_t open_single_usb_port(KBCTX scope, struct libusb_device *dev)
 	DeferDispose(scope->disposables, node, destroy_device);
 	DeferDispose(node->disposable_list, node->usb, destroy_usb_port);
 
+	DeferUserCallback(scope->usb->handle_callback, node, true);
+
 	node->usb->mutex = CheckNull(lock_init());
 	node->usb->device = dev;
 
 	IfUsbErrorReturn(
 		usb_get_vid_pid_path(dev, &node->usb->deviceInfo.idVendor, &node->usb->deviceInfo.idProduct, node->usb->deviceInfo.path));
+
+	debug_print("  * vid: %d", node->usb->deviceInfo.idVendor);
+	debug_print("  * vid: %d", node->usb->deviceInfo.idProduct);
+	debug_print("  * path: %s", usb_debug_path_string(node->usb->deviceInfo.path));
 
 	IfUsbErrorLogReturn(
 		libusb_open(dev, &node->usb->handle));
@@ -115,15 +123,15 @@ kburn_err_t open_single_usb_port(KBCTX scope, struct libusb_device *dev)
 		r = libusb_detach_kernel_driver(node->usb->handle, 0);
 		if (r != LIBUSB_ERROR_NOT_FOUND && r != 0)
 		{
-			debug_print_libusb_error("libusb_detach_kernel_driver", r);
-			return KBURN_ERROR_KIND_USB | r;
+			set_node_error_with_log(r, "libusb_detach_kernel_driver() returns %d", r);
+			return make_error_code(KBURN_ERROR_KIND_USB, r);
 		}
 		debug_print("libusb kernel driver switch ok");
 	}
 	else if (r == LIBUSB_ERROR_NOT_SUPPORTED)
 	{
-		debug_print_libusb_error("open_single_usb_port: system not support detach kernel driver", r);
-		return KBURN_ERROR_KIND_USB | r;
+		set_node_error_with_log(r, "open_single_usb_port: system not support detach kernel driver");
+		return make_error_code(KBURN_ERROR_KIND_USB, r);
 	}
 
 	libusb_clear_halt(node->usb->handle, 0);
@@ -143,6 +151,13 @@ kburn_err_t open_single_usb_port(KBCTX scope, struct libusb_device *dev)
 		}
 		do_sleep(500);
 	}
+
+	if (r != 0)
+	{
+		set_node_error_with_log(r, "libusb_claim_interface: can not claim interface in 10s, other program is using this port.");
+		return make_error_code(KBURN_ERROR_KIND_USB, r);
+	}
+
 	node->usb->isClaim = true;
 	debug_print("libusb_claim_interface success");
 
@@ -164,6 +179,9 @@ kburn_err_t open_single_usb_port(KBCTX scope, struct libusb_device *dev)
 		usb_device_serial_bind(node));
 
 	node->usb->init = true;
+	node->disconnect_should_call = true;
+	if (out_node)
+		*out_node = node;
 
 	DeferAbort;
 	return KBurnNoErr;

@@ -112,7 +112,7 @@ kburn_err_t serial_monitor_resume(KBCTX scope)
 	if (scope->serial->monitor_instance == NULL)
 	{
 		debug_print("ser_dev_monitor_init fail");
-		return KBURN_ERROR_KIND_COMMON | KBurnSerialMonitorFailStart;
+		return make_error_code(KBURN_ERROR_KIND_COMMON, KBurnSerialMonitorFailStart);
 	}
 
 	return KBurnNoErr;

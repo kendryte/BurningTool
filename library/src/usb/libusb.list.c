@@ -1,4 +1,5 @@
 #include "usb.h"
+#include "components/call-user-handler.h"
 
 static inline bool match_device(int vid, int pid, const struct libusb_device_descriptor *desc)
 {
@@ -106,12 +107,12 @@ int get_all_unopend_usb_info(KBCTX scope, int vid, int pid, kburnUsbDeviceInfo *
 
 		if (usb_device_find(scope, desc.idVendor, desc.idProduct, path) != NULL)
 		{
-			debug_print("  * %s - already open", debug_path_string(path));
+			debug_print("  * %s - already open", usb_debug_path_string(path));
 			continue;
 		}
 		else
 		{
-			debug_print("  * %s", debug_path_string(path));
+			debug_print("  * %s", usb_debug_path_string(path));
 		}
 
 		ret[found] = info;
@@ -156,11 +157,11 @@ kburn_err_t init_list_all_usb_devices(KBCTX scope)
 		uint8_t path[MAX_PATH_LENGTH] = {0};
 		if (usb_get_device_path(dev, path) < LIBUSB_SUCCESS)
 		{
-			debug_print("[init/poll] \tget serial failed.");
+			debug_print("[init/poll] \tget path failed.");
 			continue;
 		}
 
-		debug_print("[init/poll] \tserial: %s", debug_path_string(path));
+		debug_print("[init/poll] \tpath: %s", usb_debug_path_string(path));
 
 		if (usb_device_find(scope, desc.idVendor, desc.idProduct, path) != NULL)
 		{
@@ -170,10 +171,9 @@ kburn_err_t init_list_all_usb_devices(KBCTX scope)
 		else
 		{
 			debug_print("[init/poll] \topen");
-			IfErrorReturn(
-				open_single_usb_port(scope, dev));
 
-			call_usb_handler(scope, dev, false);
+			IfErrorReturn(
+				open_single_usb_port(scope, dev, NULL));
 		}
 	}
 	libusb_free_device_list(list, true);

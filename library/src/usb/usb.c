@@ -1,6 +1,6 @@
 #include "usb.h"
 
-int usb_get_vid_pid_path(struct libusb_device *dev, uint16_t *out_vid, uint16_t *out_pid, uint8_t *out_path)
+int usb_get_vid_pid_path(struct libusb_device *dev, uint16_t *out_vid, uint16_t *out_pid, uint8_t out_path[MAX_PATH_LENGTH])
 {
 	struct libusb_device_descriptor desc;
 	int r = libusb_get_device_descriptor(dev, &desc);
@@ -16,10 +16,11 @@ int usb_get_vid_pid_path(struct libusb_device *dev, uint16_t *out_vid, uint16_t 
 	return usb_get_device_path(dev, out_path);
 }
 
-int usb_get_device_path(struct libusb_device *dev, uint8_t *path)
+int usb_get_device_path(struct libusb_device *dev, uint8_t path[MAX_PATH_LENGTH])
 {
 	int r;
 
+	memset(path, 0, MAX_PATH_LENGTH);
 	r = libusb_get_port_numbers(dev, path, MAX_PATH_LENGTH - 1);
 	if (r < LIBUSB_SUCCESS)
 	{
@@ -34,8 +35,13 @@ int usb_get_device_serial(libusb_device *dev, libusb_device_handle *handle, uint
 {
 	debug_print("usb_get_device_serial()");
 	struct libusb_device_descriptor desc;
-	CheckLibusbError(
-		libusb_get_device_descriptor(dev, &desc));
+
+	int err = libusb_get_device_descriptor(dev, &desc);
+	if (err < LIBUSB_SUCCESS)
+	{
+		debug_print_libusb_error("libusb_get_device_descriptor", err);
+		return err;
+	}
 
 	memset(output, 0, MAX_SERIAL_LENGTH);
 

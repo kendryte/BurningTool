@@ -209,7 +209,7 @@ static bool set_speed(kburnSerialDeviceNode *node, int fd, uint32_t br, struct t
 		/* Mac OS X (>= 10.4) */
 		if (ioctl(fd, IOSSIOSPEED, (speed_t *)&br, 1) < 0)
 		{
-			node->error->code = KBURN_ERROR_KIND_SYSCALL | errno;
+			node->error->code = make_error_code(KBURN_ERROR_KIND_SYSCALL, errno);
 			set_error(node, strerror(errno));
 			return false;
 		}

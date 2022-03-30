@@ -1,4 +1,5 @@
 #include "usb.h"
+#include "isp.low.h"
 
 kburn_err_t usb_device_hello(kburnDeviceNode *node)
 {
@@ -15,7 +16,8 @@ kburn_err_t usb_device_hello(kburnDeviceNode *node)
 	r = usb_lowlevel_command_send(node->usb->handle, node->usb->deviceInfo.endpoint_out, request, LIBUSB_ENDPOINT_OUT, 0, expected_tag);
 	if (r < LIBUSB_SUCCESS)
 	{
-		return KBURN_ERROR_KIND_USB | r;
+		copy_last_libusb_error(node, r);
+		return make_error_code(KBURN_ERROR_KIND_USB, r);
 	}
 	/* 数据阶段 */
 
@@ -30,6 +32,7 @@ kburn_err_t usb_device_hello(kburnDeviceNode *node)
 		{
 			usb_lowlevel_error_read(node->usb->handle, node->usb->deviceInfo.endpoint_in, node->usb->deviceInfo.endpoint_out);
 		}
+		copy_last_libusb_error(node, e);
 		return e;
 	}
 	return KBurnNoErr;

@@ -1,6 +1,7 @@
 #include "debug-print.h"
 #include <stdarg.h>
 #include <stdlib.h>
+#include <string.h>
 
 void m_assert_print_abort(const char *ncondition_str, const char *file, int line, const char *message, ...)
 {

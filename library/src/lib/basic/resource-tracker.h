@@ -5,11 +5,14 @@
 typedef void (*cleanup_function)(void *value);
 
 typedef struct debug_bundle resource_tracker_debug;
+typedef void (*handle_function)(void *dev, void *ctx);
 
 #define MAX_TRACE 20
 typedef struct resource_tracker_element
 {
 	cleanup_function callback;
+	handle_function user_callback;
+	void *user_callback_ctx;
 	void *resource;
 	disposable dispose_object;
 	bool force;
@@ -52,7 +55,13 @@ void *_track_dispose(resource_tracker_t *tracker, disposable d, const char *var,
 		cleaner(pointer);                                                                                                     \
 	_track_resource(&_resource_tracker, (void *)pointer, (cleanup_function)cleaner, false, #pointer, __FILENAME__, __LINE__); \
 })
+#define DeferCallAlways(cleaner, pointer) __extension__({                                                                    \
+	if (0)                                                                                                                   \
+		cleaner(pointer);                                                                                                    \
+	_track_resource(&_resource_tracker, (void *)pointer, (cleanup_function)cleaner, true, #pointer, __FILENAME__, __LINE__); \
+})
 #define DeferFree(pointer) DeferCall(free, pointer)
+#define DeferFreeAlways(pointer) DeferCallAlways(free, pointer)
 #define DeferDispose(list, obj, destruct) __extension__({                                                          \
 	disposable d = toDisposable(destruct, obj);                                                                    \
 	_track_dispose(&_resource_tracker, dispose_list_add(list, d), #destruct "(" #obj ")", __FILENAME__, __LINE__); \
