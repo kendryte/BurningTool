@@ -57,7 +57,12 @@ PUBLIC void kburnOnSerialConfirm(KBCTX scope, on_device_handle handler_callback,
 /**
  * 当端口断开时，调用此回调，用户可以进行一些清理，该回调执行完后，参数的设备结构会被释放
  **/
-PUBLIC void kburnOnSerialDisconnect(KBCTX scope, on_device_remove disconnect_callback, void *ctx);
+PUBLIC void kburnOnDeviceDisconnect(KBCTX scope, on_device_remove disconnect_callback, void *ctx);
+
+/**
+ * 新设备连接回调，当设备确认为k510后，用户程序在此处理
+ */
+PUBLIC void kburnOnUsbConfirm(KBCTX scope, on_device_handle handle_callback, void *ctx);
 
 /**
  * 开始监视串口+USB设备

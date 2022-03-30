@@ -63,12 +63,12 @@ static kburn_err_t usb_device_serial_put_str4(kburnDeviceNode *node, const uint8
 
 kburn_err_t usb_device_serial_print(kburnDeviceNode *node, const uint8_t *buff, size_t buff_size)
 {
-	for (size_t i = 0; i < buff_size; i += 5)
+	for (size_t i = 0; i < buff_size; i += 4)
 	{
 		kburn_err_t e;
-		if (i + 5 > buff_size)
+		if (i + 4 > buff_size)
 		{
-			uint8_t nbuff[5] = {0};
+			uint8_t nbuff[4] = {0};
 			memcpy(nbuff, buff + i, buff_size - i);
 			e = usb_device_serial_put_str4(node, nbuff);
 		}

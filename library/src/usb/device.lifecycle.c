@@ -1,3 +1,4 @@
+#include "components/device-link-list.h"
 #include "usb.h"
 
 /****************************************************
@@ -118,15 +119,6 @@ kburn_err_t open_single_usb_port(KBCTX scope, struct libusb_device *dev)
 			return KBURN_ERROR_KIND_USB | r;
 		}
 		debug_print("libusb kernel driver switch ok");
-
-		libusb_close(node->usb->handle);
-		node->usb->isOpen = false;
-		node->usb->handle = NULL;
-
-		IfUsbErrorLogReturn(
-			libusb_open(dev, &node->usb->handle));
-		node->usb->isOpen = true;
-		debug_print("usb port re-open success, handle=%p", (void *)node->usb->handle);
 	}
 	else if (r == LIBUSB_ERROR_NOT_SUPPORTED)
 	{
@@ -175,6 +167,12 @@ kburn_err_t open_single_usb_port(KBCTX scope, struct libusb_device *dev)
 
 	DeferAbort;
 	return KBurnNoErr;
+}
+
+void kburnOnUsbConfirm(KBCTX scope, on_device_handle handle_callback, void *ctx)
+{
+	scope->usb->handle_callback = handle_callback;
+	scope->usb->handle_callback_ctx = ctx;
 }
 
 kburnDeviceNode *usb_device_find(KBCTX scope, uint16_t vid, uint16_t pid, const uint8_t *path)

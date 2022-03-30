@@ -1,6 +1,7 @@
 #pragma once
 
 #include "./prefix.h"
+#include "./errors.h"
 
 DEFINE_START
 

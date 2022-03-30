@@ -170,7 +170,10 @@ kburn_err_t init_list_all_usb_devices(KBCTX scope)
 		else
 		{
 			debug_print("[init/poll] \topen");
-			open_single_usb_port(scope, dev);
+			IfErrorReturn(
+				open_single_usb_port(scope, dev));
+
+			call_usb_handler(scope, dev, false);
 		}
 	}
 	libusb_free_device_list(list, true);

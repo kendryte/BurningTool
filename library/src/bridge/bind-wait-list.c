@@ -36,8 +36,6 @@ void _recreate_waitting_list(KBCTX scope)
 	debug_print("\tportlist::recreate_waitting_list()");
 	port_link_element *curs = NULL;
 
-	lock(scope->waittingDevice->mutex);
-
 	memset(scope->waittingDevice->list, 0, sizeof(scope->waittingDevice->list));
 
 	size_t itr = 0;
@@ -46,7 +44,7 @@ void _recreate_waitting_list(KBCTX scope)
 		if (_should_insert_waitting_list(curs->node))
 		{
 			debug_print("\t\t%s", curs->node->serial->path);
-			scope->waittingDevice->list[itr] = curs->node->serial;
+			scope->waittingDevice->list[itr] = curs->node;
 
 			itr++;
 			if (itr >= MAX_WAITTING_DEVICES)
@@ -56,6 +54,4 @@ void _recreate_waitting_list(KBCTX scope)
 		}
 	}
 	debug_print("\t%lu items", itr);
-
-	unlock(scope->waittingDevice->mutex);
 }

@@ -15,8 +15,15 @@ kburn_err_t usb_device_serial_bind(kburnDeviceNode *node)
 		if (r != KBurnNoErr)
 			return r;
 
-		// TODO match
+		do_sleep(500);
+
+		if (node->serial->isUsbBound)
+		{
+			debug_print(" * bind success @ usb");
+			return KBurnNoErr;
+		}
 	}
 
+	debug_print(" * bind " YELLO("failed") " @ usb");
 	return KBurnNoErr;
 }

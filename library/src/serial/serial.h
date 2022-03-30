@@ -24,8 +24,6 @@ typedef struct serial_subsystem_context
 	void *verify_callback_ctx;
 	on_device_handle handler_callback;
 	void *handler_callback_ctx;
-	on_device_remove disconnect_callback;
-	void *disconnect_callback_ctx;
 } serial_subsystem_context;
 
 #define SERIAL_CHUNK_SIZE 1064

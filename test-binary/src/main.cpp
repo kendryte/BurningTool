@@ -40,6 +40,24 @@ void handle(kburnDeviceNode *dev, void *ctx)
 	}
 }
 
+void handle_usb(kburnDeviceNode *dev, void *ctx)
+{
+	cout << "GotDev: " << dev->serial->path << endl;
+	cout << "  * serial port: " << dev->serial->path << endl;
+	cout << "  * usb port: " << dev->usb->deviceInfo.path << endl;
+	cout << "  * error status: " << dev->error->code << ", " << test_null(dev->error->errorMessage) << endl;
+
+	if (!kburnSerialIspSetBaudrateHigh(dev->serial))
+	{
+		cout << "Error: can not set baudrate: " << test_null(dev->error->errorMessage) << endl;
+	}
+
+	if (!kburnSerialIspSwitchUsbMode(dev->serial, print_progress, NULL))
+	{
+		cout << "Error: can not go usb mode: " << test_null(dev->error->errorMessage) << endl;
+	}
+}
+
 void disconnect(const kburnDeviceNode *dev, void *ctx)
 {
 	cout << "Disconnect: " << dev->serial->path << endl;
@@ -62,9 +80,11 @@ int main(int argc, char **argv)
 		return 1;
 	}
 
-	kburnOnSerialDisconnect(context, disconnect, NULL);
+	kburnOnDeviceDisconnect(context, disconnect, NULL);
 	kburnOnSerialConnect(context, verify, NULL);
 	kburnOnSerialConfirm(context, handle, NULL);
+
+	kburnOnUsbConfirm(context, handle_usb, NULL);
 
 	kburnStartWaitingDevices(context);
 

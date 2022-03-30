@@ -1,12 +1,6 @@
 #include "serial.h"
 #include "driver.h"
 
-void kburnOnSerialDisconnect(KBCTX scope, on_device_remove callback, void *ctx)
-{
-	scope->serial->disconnect_callback = callback;
-	scope->serial->disconnect_callback_ctx = ctx;
-}
-
 static inline void free_handle(void *handle)
 {
 	if (handle)
@@ -22,12 +16,6 @@ DECALRE_DISPOSE(destroy_serial_port, kburnDeviceNode)
 	lock(serial->mutex);
 
 	debug_print("destroy_serial_port(%p[%s])", (void *)serial, serial->path);
-
-	if (context->_scope->serial->disconnect_callback)
-	{
-		debug_print("\tdisconnect_callback()");
-		context->_scope->serial->disconnect_callback(context, context->_scope->serial->disconnect_callback_ctx);
-	}
 
 	serial_isp_delete(serial);
 

@@ -1,4 +1,5 @@
 #include "bind-wait-list.h"
+#include "components/device-link-list.h"
 #include "global.h"
 #include "protocol.h"
 #include "serial.h"
@@ -19,7 +20,7 @@ static bool verify4chr(char c1, char c2, char c3, char c4, char sum)
 	return vsum == (int)sum;
 }
 
-static bool handle_one_device(kburnSerialDeviceNode *dev)
+static uint32_t handle_one_device(kburnSerialDeviceNode *dev)
 {
 #define MAX_INPUT 64
 
@@ -97,10 +98,10 @@ static bool handle_one_device(kburnSerialDeviceNode *dev)
 			return false;
 		}
 
-		bool hit = handle_page(dev, b->buffer + found_start, found_end - found_start);
+		uint32_t bind_id = handle_page(b->buffer + found_start, found_end - found_start);
 
-		if (hit)
-			return true;
+		if (bind_id > 0)
+			return bind_id;
 
 		if ((uint32_t)found_end + 1 > b->buff_i)
 		{
@@ -116,43 +117,51 @@ static bool handle_one_device(kburnSerialDeviceNode *dev)
 
 void pair_serial_ports_thread(KBCTX scope, const bool *const quit)
 {
-	bool need_recreate = false;
 	int delay = 100;
 	while (!*quit)
 	{
-		int current_size = 0;
+		int item_waitting_pair = 0;
 
 		lock(scope->waittingDevice->mutex);
 
-		for (kburnSerialDeviceNode **ptr = scope->waittingDevice->list; *ptr != NULL; ptr++)
+		for (kburnDeviceNode **ptr = scope->waittingDevice->list; *ptr != NULL; ptr++)
 		{
-			kburnSerialDeviceNode *dev = *ptr;
+			kburnDeviceNode *serial_node = *ptr;
+			kburnSerialDeviceNode *dev = serial_node->serial;
 			if (!dev->init) // TODO: need lock with deinit
 				continue;
 
 			if (dev->binding == NULL)
-			{
 				dev->binding = calloc(1, sizeof(binding_state));
-			}
 
-			if (handle_one_device(*ptr))
+			uint32_t found_bind = handle_one_device(dev);
+			if (found_bind > 0)
 			{
-				need_recreate = true;
+				dev->isUsbBound = true;
+				free(dev->binding);
+				dev->binding = NULL;
+
+				recreate_waitting_list(scope);
+
+				kburnDeviceNode *new_usb_node = get_device_by_bind_id(scope, found_bind);
+				if (new_usb_node == NULL)
+				{
+					debug_print(YELLO("bind target usb port gone, bind_id=%d, maybe disconnected?"), found_bind);
+					continue;
+				}
+				void copy_serial_device(kburnDeviceNode * _src, kburnDeviceNode * _dst);
+				copy_serial_device(serial_node, new_usb_node);
+
+				continue;
 			}
-			current_size++;
+			item_waitting_pair++;
 		}
 
 		unlock(scope->waittingDevice->mutex);
 
-		if (need_recreate)
-		{
-			recreate_waitting_list(scope);
-			continue;
-		}
-
-		if (current_size > 0)
+		if (item_waitting_pair > 0)
 			delay = 100;
-		else if (delay < 5000)
+		else if (delay < 1000)
 			delay += 10;
 
 		do_sleep(delay);

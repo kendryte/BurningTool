@@ -1,3 +1,4 @@
+#include "components/device-link-list.h"
 #include "serial.h"
 
 kburn_err_t on_serial_device_attach(KBCTX scope, const char *path)

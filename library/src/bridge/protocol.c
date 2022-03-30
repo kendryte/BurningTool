@@ -15,7 +15,7 @@ size_t create_pair_protocol(uint32_t bind_id, char *output, size_t size)
 	return snprintf(output, size, SIGNATURE "%.8x = %d}", bind_id, sum);
 }
 
-bool handle_page(kburnSerialDeviceNode *dev, const char *buff, const size_t buff_size)
+uint32_t handle_page(const char *buff, const size_t buff_size)
 {
 	debug_print("handle page: %.*s", (int)buff_size, buff);
 	if (!strncmp(buff, SIGNATURE, buff_size))
@@ -29,9 +29,8 @@ bool handle_page(kburnSerialDeviceNode *dev, const char *buff, const size_t buff
 	if (strncmp(buff, vbuff, buff_size) != 0)
 	{
 		debug_print("!! verify failed: %s", vbuff);
-		return false;
+		return 0;
 	}
 
-	dev->parent->bind_id = bind_id;
-	return true;
+	return bind_id;
 }

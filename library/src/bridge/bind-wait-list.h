@@ -11,7 +11,7 @@
 typedef struct waiting_list
 {
 	kb_mutex_t mutex;
-	kburnSerialDeviceNode *list[MAX_WAITTING_DEVICES + 1];
+	kburnDeviceNode *list[MAX_WAITTING_DEVICES + 1];
 } waiting_list_t;
 
 bool _should_insert_waitting_list(kburnDeviceNode *node);

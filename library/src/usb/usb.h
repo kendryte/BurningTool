@@ -16,6 +16,9 @@ typedef struct usb_subsystem_context
 	bool subsystem_inited;
 	bool detach_kernel_driver;
 
+	on_device_handle handle_callback;
+	void *handle_callback_ctx;
+
 	struct libusb_context *libusb;
 	bool monitor_prepared;
 	bool monitor_enabled;

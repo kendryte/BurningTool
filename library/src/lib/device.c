@@ -1,11 +1,25 @@
 #include "serial.h"
 #include "usb.h"
+#include "components/device-link-list.h"
+
+void kburnOnDeviceDisconnect(KBCTX scope, on_device_remove callback, void *ctx)
+{
+	scope->disconnect_callback = callback;
+	scope->disconnect_callback_ctx = ctx;
+}
 
 DECALRE_DISPOSE(destroy_device, kburnDeviceNode)
 {
 	if (context->destroy_in_progress)
 		return;
 	context->destroy_in_progress = true;
+
+	if (context->_scope->disconnect_callback)
+	{
+		debug_print("\tdisconnect_callback()");
+		context->_scope->disconnect_callback(context, context->_scope->disconnect_callback_ctx);
+	}
+
 	clear_error(context);
 	disposable_list_t *dlist = context->disposable_list;
 	dispose_all(dlist);

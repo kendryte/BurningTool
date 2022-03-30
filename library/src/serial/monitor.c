@@ -1,3 +1,4 @@
+#include "components/device-link-list.h"
 #include "serial.h"
 
 static void on_event(void *ctx, ser_dev_evt_t evt, const ser_dev_t *dev)

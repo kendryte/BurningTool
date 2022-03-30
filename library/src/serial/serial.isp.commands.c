@@ -1,3 +1,4 @@
+#include "components/device-link-list.h"
 #include "serial.h"
 
 slip_error_t _serial_isp_slip_send_request(kburnSerialDeviceNode *node, isp_request_t *command);

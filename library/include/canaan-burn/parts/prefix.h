@@ -1,5 +1,9 @@
 #pragma once
 
+#include <stdint.h>
+#include <stdbool.h>
+#include <stddef.h>
+
 #if BURN_LIB_COMPILING
 #define PUBLIC EXPORT
 #define PCONST
