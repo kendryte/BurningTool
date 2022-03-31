@@ -50,7 +50,7 @@ typedef struct isp_request_t
 	uint8_t _op_high;
 	uint16_t reserved;
 	uint32_t checksum;
-	kburn_address_t address;
+	kburn_mem_address_t address;
 	uint32_t data_len;
 	uint8_t data[];
 } isp_request_t;

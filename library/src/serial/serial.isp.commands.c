@@ -115,7 +115,7 @@ bool kburnSerialIspSetBaudrate(kburnSerialDeviceNode *node, uint32_t want_br)
 	return true;
 }
 
-bool kburnSerialIspBootMemory(kburnSerialDeviceNode *node, kburn_address_t address)
+bool kburnSerialIspBootMemory(kburnSerialDeviceNode *node, kburn_mem_address_t address)
 {
 	debug_print("kburnSerialIspBootMemory(node[%s], 0x%X)", node->path, address);
 	make_serial_isp_packet(packet, 0);
@@ -160,7 +160,7 @@ bool kburnSerialIspBootMemory(kburnSerialDeviceNode *node, kburn_address_t addre
 }
 
 __attribute__((access(read_only, 3, 4))) bool
-kburnSerialIspMemoryWrite(kburnSerialDeviceNode *node, const kburn_address_t address, const char *data, const size_t data_size, const on_write_progress cb, void *ctx)
+kburnSerialIspMemoryWrite(kburnSerialDeviceNode *node, const kburn_mem_address_t address, const char *data, const size_t data_size, const on_write_progress cb, void *ctx)
 {
 	make_serial_isp_packet(packet, BOARD_MEMORY_PAGE_SIZE);
 	packet->op = ISP_MEMORY_WRITE;

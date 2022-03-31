@@ -26,7 +26,7 @@ enum KBurnCommonError
 	KBurnUsbProtocolWrong,
 	KBurnProtocolOpMismatch,
 	KBurnSizeNotAlign,
-	KBurnAddressNotAlign,
+	KBurnAddressOverflow,
 	KBurnUserCancel,
 };
 

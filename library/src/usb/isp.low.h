@@ -31,7 +31,7 @@ _Static_assert(sizeof(usbIspCommandTaget) == 1, "enum must 8bit");
 
 struct usbIspCommandPacketBurnBody
 {
-	uint32_t address;
+	kburn_stor_address_t address;
 	uint16_t block_count;
 } __attribute__((__packed__));
 struct usbIspCommandPacketLedBody

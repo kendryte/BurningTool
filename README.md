@@ -12,6 +12,10 @@ TODO
 # 开发
 参考 [Contribution.md](./Contribution.md)
 
+# TODOs
+ [ ] 清理线程时 queue 有内存泄漏
+ [ ] 回调线程不统一
+
 # 开源代码协议
 ## MIT
 * [sanitizers-cmake](https://github.com/arsenm/sanitizers-cmake)

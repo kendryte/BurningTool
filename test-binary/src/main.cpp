@@ -83,7 +83,7 @@ void handle_usb(kburnDeviceNode *dev, void *ctx)
 	uint8_t test_block[512];
 	for (size_t i = 0; i < 512; i++)
 		test_block[i] = rand();
-	uint32_t testAddress = 50 * 512;
+	uint32_t testAddress = 50;
 
 	cout << "test read memory size:" << endl;
 	r = kburnUsbIspGetMemorySize(dev, KBURN_USB_ISP_EMMC, &size_info);
@@ -94,18 +94,18 @@ void handle_usb(kburnDeviceNode *dev, void *ctx)
 	else
 	{
 		cout << "  * block_size: " << size_info.block_size << endl;
-		cout << "  * device_size: " << size_info.device_size << endl;
-		cout << "  * max_block_addr: " << size_info.max_block_addr << endl;
+		cout << "  * device_size: " << size_info.storage_size << endl;
+		cout << "  * max_block_addr: " << size_info.last_block_address << endl;
 	}
 
 	cout << "test write emmc:" << endl;
-	r = kburnUsbIspWriteData(dev, KBURN_USB_ISP_EMMC, testAddress, test_block, 512, &size_info);
+	r = kburnUsbIspWriteChunk(dev, size_info, testAddress, test_block, 512);
 	perror(r);
 
 	cout << "test read emmc:" << endl;
 	uint8_t out_test[512];
 	memset(out_test, 0, 512);
-	r = kburnUsbIspReadData(dev, KBURN_USB_ISP_EMMC, testAddress, 512, out_test, &size_info);
+	r = kburnUsbIspReadChunk(dev, size_info, testAddress, 512, out_test);
 	perror(r);
 	if (memcmp(out_test, test_block, 0) == 0)
 		cout << "    - data same" << endl;

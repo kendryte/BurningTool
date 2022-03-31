@@ -36,8 +36,10 @@
 ### 终端进程启动失败: Starting directory (cwd) "/data/DevelopmentRoot/github.com/kendryte/BurningTool/build-vscode" does not exist。
 编译（build）前必须运行配置（configure）
 
-### 
+### ==125182==ASan runtime does not come first in initial library list; you should either link runtime to your application or manually preload it with LD_PRELOAD.
 
 `LD_PRELOAD=/usr/lib64/libasan.so.6 ./build-vscode/test-binary/test`
+或
+bash ./run.sh
 
 ### /usr/bin/ld: ../library/libcanaan_burn.so: undefined reference to `__asan_report_store4'

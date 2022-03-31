@@ -37,9 +37,12 @@ kburn_err_t kburnUsbIspLedControl(kburnDeviceNode *node, uint8_t pin, struct kbu
 
 typedef struct kburnDeviceMemorySizeInfo
 {
-	uint32_t block_size;	 /* 一个块的字节数,通常为512 */
-	uint64_t device_size;	 /* usb设备的总容量，单位：字节 */
-	uint32_t max_block_addr; /* 最大的块地址，从0开始数 */
+	kburnUsbIspCommandTaget device;
+	uint32_t block_size;					 /* 一个块的字节数（通常为512） */
+	uint64_t storage_size;					 /* 设备的总容量（字节） */
+	kburn_stor_address_t base_address;		 /* 设备起始地址，目前均为0 */
+	kburn_stor_block_t block_count;			 /* 设备的总容量（块） */
+	kburn_stor_address_t last_block_address; /* 最后一个块的地址 */
 } kburnDeviceMemorySizeInfo;
 /**
  * 获取块设备大小信息
@@ -51,33 +54,25 @@ kburn_err_t kburnUsbIspGetMemorySize(kburnDeviceNode *node, kburnUsbIspCommandTa
 /**
  * 从target的address地址读取length长度数据到buffer
  * @param target 读取目标设备
- * @param address 读取地址，将会转成块地址，也就是第几个block
- * @param length 数据长度，单位字节，函数处理时会转成块，所以传入字节需要是dev_info.block_size的整数倍
+ * @param address 读取地址，**以块数为单位，基地址=0**
+ * @param length 数据长度，单位字节，函数处理时会转成块，所以传入字节需要是dev_info.block_size的整数倍，一次最多10MB数据
  * @param buffer 输出缓冲区，长度必须至少为length
  * @param dev_info 设备块大小信息
  */
-kburn_err_t kburnUsbIspReadData(kburnDeviceNode *node, kburnUsbIspCommandTaget target, uint64_t address, uint32_t length, unsigned char *buffer, const kburnDeviceMemorySizeInfo *dev_info);
-
-/****************************************************************************
-Function: writeData
-Description: 从指定地址写入指定长度数据到缓冲区。
-param1 : usbdev_node* usbdev          usb节点句柄
-param2 : uint32_t length              数据长度(单位：字节，函数处理时会转成块)
-										  所以传入字节需要是512字节的整数倍。
-param3 : uint32_t address             写入地址(将会转成块地址，也就是第几个block)
-param4 : unsigned char *buffer        缓冲区
-param5 : order                        烧录、读取容量，存储器类型
-Return: 返回负数说明函数执行失败，返回0为成功
-******************************************************************************/
+kburn_err_t kburnUsbIspReadChunk(kburnDeviceNode *node, const kburnDeviceMemorySizeInfo dev_info, kburn_stor_block_t address, uint32_t length, void *buffer);
 
 /**
  * 将buffer写入target的address地址
  * @param target 写入目标设备
- * @param address 写入地址，将会转成块地址，也就是第几个block
+ * @param address 写入地址，**以块数为单位，基地址=0**
  * @param buffer 数据缓冲区
- * @param buffer_size 数据长度，单位字节，函数处理时会转成块，所以传入字节需要是dev_info.block_size的整数倍
+ * @param buffer_size 数据长度，单位字节，函数处理时会转成块，所以传入字节需要是dev_info.block_size的整数倍，一次最多10MB数据
  * @param dev_info 设备块大小信息
  */
-kburn_err_t kburnUsbIspWriteData(kburnDeviceNode *node, kburnUsbIspCommandTaget target, uint64_t address, unsigned char *buffer, uint32_t length, const kburnDeviceMemorySizeInfo *dev_info);
+kburn_err_t kburnUsbIspWriteChunk(kburnDeviceNode *node, const kburnDeviceMemorySizeInfo dev_info, kburn_stor_block_t address, void *buffer, uint32_t length);
+/** 写入数据，但不要求任何对齐，效率较低，注意地址单位是字节 */
+kburn_err_t kburnUsbIspReadUnaligned(kburnDeviceNode *node, const kburnDeviceMemorySizeInfo dev_info, kburn_stor_address_t address, uint32_t length, void *buffer);
+/** 读取数据，但不要求任何对齐，效率较低，注意地址单位是字节 */
+kburn_err_t kburnUsbIspWriteUnaligned(kburnDeviceNode *node, const kburnDeviceMemorySizeInfo dev_info, kburn_stor_address_t address, void *buffer, uint32_t length);
 
 DEFINE_END

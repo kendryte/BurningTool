@@ -6,7 +6,9 @@
 DEFINE_START
 
 #define KBURN_PROGRAM_BASE_ADDR 0x80080000
-typedef uint32_t kburn_address_t;
+typedef uint32_t kburn_mem_address_t;
+typedef uint32_t kburn_stor_address_t;
+typedef uint32_t kburn_stor_block_t;
 
 typedef struct kburnDeviceError
 {

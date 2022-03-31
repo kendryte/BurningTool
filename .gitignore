@@ -2,3 +2,4 @@ build-*
 vcpkg_installed
 c_cpp_properties.json
 .vscode/compile_command.json
+sysimage*
