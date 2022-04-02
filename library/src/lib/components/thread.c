@@ -1,12 +1,11 @@
 #include "thread.h"
-#include "context.h"
-#include <pthread.h>
-#include "global.h"
-#include "debug/print.h"
 #include "basic/errors.h"
+#include "context.h"
+#include "debug/print.h"
+#include "global.h"
+#include <pthread.h>
 
-typedef struct thread_passing_object
-{
+typedef struct thread_passing_object {
 	KBCTX scope;
 	bool running;
 	bool quit;
@@ -16,13 +15,9 @@ typedef struct thread_passing_object
 	const char *debug_title;
 } thread_passing_object;
 
-void thread_tell_quit(thread_passing_object *thread)
-{
-	thread->quit = true;
-}
+void thread_tell_quit(thread_passing_object *thread) { thread->quit = true; }
 
-DECALRE_DISPOSE(destroy_thread, thread_passing_object)
-{
+DECALRE_DISPOSE(destroy_thread, thread_passing_object) {
 	debug_print(KBURN_LOG_DEBUG, COLOR_FMT("[thread]") " wait quit: %s", COLOR_ARG(YELLOW, context->debug_title));
 	thread_tell_quit(context);
 	pthread_join(context->thread, NULL);
@@ -31,8 +26,7 @@ DECALRE_DISPOSE(destroy_thread, thread_passing_object)
 }
 DECALRE_DISPOSE_END()
 
-static void *start_routine_wrapper(void *_ctx)
-{
+static void *start_routine_wrapper(void *_ctx) {
 	thread_passing_object *context = _ctx;
 	context->running = true;
 
@@ -55,14 +49,10 @@ static void *start_routine_wrapper(void *_ctx)
 	return NULL;
 }
 
-static DECALRE_DISPOSE(set_null, thread_passing_object *)
-{
-	*context = NULL;
-}
+static DECALRE_DISPOSE(set_null, thread_passing_object *) { *context = NULL; }
 DECALRE_DISPOSE_END()
 
-kburn_err_t thread_create(const char *debug_title, thread_function start_routine, void *context, KBCTX scope, thread_passing_object **out_thread)
-{
+kburn_err_t thread_create(const char *debug_title, thread_function start_routine, void *context, KBCTX scope, thread_passing_object **out_thread) {
 	thread_passing_object *thread = MyAlloc(thread_passing_object);
 	*out_thread = thread;
 
@@ -76,8 +66,7 @@ kburn_err_t thread_create(const char *debug_title, thread_function start_routine
 	thread->user_data = context;
 
 	int thread_ret = pthread_create(&thread->thread, NULL, start_routine_wrapper, thread);
-	if (thread_ret != 0)
-	{
+	if (thread_ret != 0) {
 		debug_print(KBURN_LOG_ERROR, "[thread] failed create: %d", thread_ret);
 		return make_error_code(KBURN_ERROR_KIND_SYSCALL, thread_ret);
 	}

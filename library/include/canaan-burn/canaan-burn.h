@@ -1,11 +1,11 @@
 #pragma once
 
 #include <stdbool.h>
-#include <stdint.h>
 #include <stddef.h>
+#include <stdint.h>
 
-#include "./parts/prefix.h"
 #include "./parts/errors.h"
+#include "./parts/prefix.h"
 #include "./parts/types.h"
 
 #if BURN_LIB_COMPILING
@@ -13,7 +13,6 @@
 #else
 #include "./parts/context.h"
 #endif
-
 
 DEFINE_START
 

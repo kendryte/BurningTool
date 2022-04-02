@@ -1,9 +1,9 @@
 #pragma once
 
-#include <stdbool.h>
 #include "basic/disposable.h"
 #include "context.h"
 #include "errors.h"
+#include <stdbool.h>
 
 typedef void (*thread_function)(void *context, KBCTX scope, const bool *const quit);
 typedef struct thread_passing_object *kbthread;

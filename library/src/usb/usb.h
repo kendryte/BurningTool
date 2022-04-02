@@ -1,15 +1,13 @@
 #pragma once
 
-#include <stdlib.h>
-#include "global.h"
-#include "components/thread.h"
-#include "usb.types.h"
 #include "components/queued-thread.h"
+#include "components/thread.h"
+#include "global.h"
+#include "usb.types.h"
+#include <stdlib.h>
 
-typedef struct usb_subsystem_context
-{
-	struct
-	{
+typedef struct usb_subsystem_context {
+	struct {
 		int vid;
 		int pid;
 	} filter;
@@ -52,29 +50,30 @@ DECALRE_DISPOSE_HEADER(destroy_usb_port, kburnUsbDeviceNode);
 kburn_err_t open_single_usb_port(KBCTX scope, struct libusb_device *dev, kburnDeviceNode **out_node);
 kburnDeviceNode *usb_device_find(KBCTX scope, uint16_t vid, uint16_t pid, const uint8_t *serial);
 
-#define debug_print_libusb_result(msg, err, ...) \
-	debug_print(err < 0 ? KBURN_LOG_ERROR : KBURN_LOG_DEBUG, msg ": %s[%d] %s", __VA_ARGS__ __VA_OPT__(, ) libusb_error_name(err), (int)err, libusb_strerror(err));
+#define debug_print_libusb_result(msg, err, ...)                                                                                                     \
+	debug_print(err < 0 ? KBURN_LOG_ERROR : KBURN_LOG_DEBUG, msg ": %s[%d] %s", __VA_ARGS__ __VA_OPT__(, ) libusb_error_name(err), (int)err,         \
+				libusb_strerror(err));
 
-#define debug_print_libusb_error(msg, err, ...) __extension__({        \
-	if (err < 0)                                                       \
-	{                                                                  \
-		debug_print_libusb_result(msg, err __VA_OPT__(, ) __VA_ARGS__) \
-	}                                                                  \
-})
+#define debug_print_libusb_error(msg, err, ...)                                                                                                      \
+	__extension__({                                                                                                                                  \
+		if (err < 0) {                                                                                                                               \
+			debug_print_libusb_result(msg, err __VA_OPT__(, ) __VA_ARGS__)                                                                           \
+		}                                                                                                                                            \
+	})
 
-#define CheckLibusbError(action) __extension__({           \
-	int _err = action;                                     \
-	if (_err < LIBUSB_SUCCESS)                             \
-	{                                                      \
-		debug_print_libusb_error(#action "-failed", _err); \
-		return _err;                                       \
-	}                                                      \
-	_err;                                                  \
-})
+#define CheckLibusbError(action)                                                                                                                     \
+	__extension__({                                                                                                                                  \
+		int _err = action;                                                                                                                           \
+		if (_err < LIBUSB_SUCCESS) {                                                                                                                 \
+			debug_print_libusb_error(#action "-failed", _err);                                                                                       \
+			return _err;                                                                                                                             \
+		}                                                                                                                                            \
+		_err;                                                                                                                                        \
+	})
 
 #define check_libusb(err) (err >= LIBUSB_SUCCESS)
-#define set_node_error_with_log(err, msg, ...)                      \
-	debug_print_libusb_result(msg, err __VA_OPT__(, ) __VA_ARGS__); \
+#define set_node_error_with_log(err, msg, ...)                                                                                                       \
+	debug_print_libusb_result(msg, err __VA_OPT__(, ) __VA_ARGS__);                                                                                  \
 	copy_last_libusb_error(node, err);
 #define IfUsbErrorLogReturn(action) IfErrorReturn(check_libusb, action, set_node_error_with_log)
 #define set_node_error(err, msg) copy_last_libusb_error(node, err);

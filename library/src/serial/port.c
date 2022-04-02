@@ -1,14 +1,12 @@
-#include "serial.h"
 #include "driver.h"
+#include "serial.h"
 
-static inline void free_handle(void *handle)
-{
+static inline void free_handle(void *handle) {
 	if (handle)
 		free(handle);
 }
 
-DECALRE_DISPOSE(destroy_serial_port, kburnDeviceNode)
-{
+DECALRE_DISPOSE(destroy_serial_port, kburnDeviceNode) {
 	kburnSerialDeviceNode *serial = context->serial;
 	debug_trace_function("%p[%s]", (void *)serial, OPTSTR(serial->path, "*invalid*"));
 
@@ -19,8 +17,7 @@ DECALRE_DISPOSE(destroy_serial_port, kburnDeviceNode)
 
 	serial_isp_delete(serial);
 
-	if (serial->binding)
-	{
+	if (serial->binding) {
 		free(serial->binding);
 		serial->binding = NULL;
 	}
@@ -42,8 +39,7 @@ DECALRE_DISPOSE(destroy_serial_port, kburnDeviceNode)
 }
 DECALRE_DISPOSE_END()
 
-kburn_err_t serial_port_init(kburnSerialDeviceNode *serial, const char *path)
-{
+kburn_err_t serial_port_init(kburnSerialDeviceNode *serial, const char *path) {
 	debug_trace_function("0x%p, %s", (void *)serial, path);
 
 	m_assert(!serial->init, "serial port must not already inited");

@@ -9,22 +9,16 @@ ser_opts_t opts = {
 	.timeouts = {.rd = 800, .wr = 200},
 };
 
-ser_opts_t get_current_serial_options(const char *path)
-{
+ser_opts_t get_current_serial_options(const char *path) {
 	ser_opts_t _opts = SER_OPTS_INIT;
 	memcpy(&_opts, &opts, sizeof(ser_opts_t));
 	_opts.port = path;
 	return _opts;
 }
 
-void kburnSetSerialBaudrate(uint32_t baudrate)
-{
-	opts.baudrate = baudrate;
-}
-void kburnSetSerialByteSize(enum KBurnSerialConfigByteSize byteSize)
-{
-	switch (byteSize)
-	{
+void kburnSetSerialBaudrate(uint32_t baudrate) { opts.baudrate = baudrate; }
+void kburnSetSerialByteSize(enum KBurnSerialConfigByteSize byteSize) {
+	switch (byteSize) {
 	case KBurnSerialConfigByteSize_8:
 		opts.bytesz = SER_BYTESZ_8;
 		break;
@@ -41,10 +35,8 @@ void kburnSetSerialByteSize(enum KBurnSerialConfigByteSize byteSize)
 		m_abort("byteSize is invalid");
 	}
 }
-void kburnSetSerialParity(enum KBurnSerialConfigParity parity)
-{
-	switch (parity)
-	{
+void kburnSetSerialParity(enum KBurnSerialConfigParity parity) {
+	switch (parity) {
 	case KBurnSerialConfigParityNone:
 		opts.parity = SER_PAR_NONE;
 		break;
@@ -65,10 +57,8 @@ void kburnSetSerialParity(enum KBurnSerialConfigParity parity)
 		m_abort("parity is invalid");
 	}
 }
-void kburnSetSerialStopBits(enum KBurnSerialConfigStopBits stopBits)
-{
-	switch (stopBits)
-	{
+void kburnSetSerialStopBits(enum KBurnSerialConfigStopBits stopBits) {
+	switch (stopBits) {
 	case KBurnSerialConfigStopBitsOne:
 		opts.stopbits = SER_STOPB_ONE;
 		break;
@@ -82,11 +72,5 @@ void kburnSetSerialStopBits(enum KBurnSerialConfigStopBits stopBits)
 		m_abort("stopBits is invalid");
 	}
 }
-void kburnSetSerialReadTimeout(int32_t readTimeout)
-{
-	opts.timeouts.rd = readTimeout;
-}
-void kburnSetSerialWriteTimeout(int32_t writeTimeout)
-{
-	opts.timeouts.wr = writeTimeout;
-}
+void kburnSetSerialReadTimeout(int32_t readTimeout) { opts.timeouts.rd = readTimeout; }
+void kburnSetSerialWriteTimeout(int32_t writeTimeout) { opts.timeouts.wr = writeTimeout; }

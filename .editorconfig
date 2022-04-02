@@ -8,3 +8,10 @@ indent_style = tab
 insert_final_newline = true
 tab_width = 4
 trim_trailing_whitespace = true
+
+[*.ts]
+indent_style = space
+
+[*.ui]
+indent_style = space
+indent_size = 2

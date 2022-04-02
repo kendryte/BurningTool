@@ -29,11 +29,9 @@ void _deinit_lock(pthread_mutex_t **mutex);
 #define raw_lock(mutex) (mutex)
 #endif
 
-static inline void __unlock_ptr(kb_mutex_t *pmutex)
-{
-	unlock(*pmutex);
-}
-#define autolock(mutex) __extension__({                                      \
-	kb_mutex_t __attribute__((cleanup(__unlock_ptr))) __lock_holder = mutex; \
-	lock(__lock_holder);                                                     \
-})
+static inline void __unlock_ptr(kb_mutex_t *pmutex) { unlock(*pmutex); }
+#define autolock(mutex)                                                                                                                              \
+	__extension__({                                                                                                                                  \
+		kb_mutex_t __attribute__((cleanup(__unlock_ptr))) __lock_holder = mutex;                                                                     \
+		lock(__lock_holder);                                                                                                                         \
+	})

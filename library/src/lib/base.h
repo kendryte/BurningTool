@@ -1,8 +1,8 @@
 #pragma once
 
-#include <stdint.h>
 #include <stdbool.h>
 #include <stddef.h>
+#include <stdint.h>
 
 #ifdef UNUSED
 #elif defined(__GNUC__)
@@ -29,15 +29,15 @@
 #define GET_COUNT(_1, _2, _3, _4, _5, _6, COUNT, ...) COUNT
 #define VA_SIZE(...) GET_COUNT(__VA_ARGS__ __VA_OPT__(, ) 6, 5, 4, 3, 2, 1, 0)
 
-#define __VaridicMacro_Select(NAME, ...) \
-	SELECT(NAME, VA_SIZE(__VA_ARGS__))   \
+#define __VaridicMacro_Select(NAME, ...)                                                                                                             \
+	SELECT(NAME, VA_SIZE(__VA_ARGS__))                                                                                                               \
 	(__VA_ARGS__)
 
 #define __VaridicMacro_First(a, ...) a
-#define __VaridicMacro_Shift(a, ...) \
-	__VA_OPT__(, )                   \
+#define __VaridicMacro_Shift(a, ...)                                                                                                                 \
+	__VA_OPT__(, )                                                                                                                                   \
 	__VA_ARGS__
 #define __VaridicMacro_Opt(default, ...) __VaridicMacro_First(__VA_ARGS__ __VA_OPT__(, ) default)
 
-#include "basic/macros.error.h"
 #include "basic/macros.alloc.h"
+#include "basic/macros.error.h"

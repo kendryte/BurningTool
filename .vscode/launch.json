@@ -1,5 +1,5 @@
 {
-	// 使用 IntelliSense 了解相关属性。 
+	// 使用 IntelliSense 了解相关属性。
 	// 悬停以查看现有属性的描述。
 	// 欲了解更多信息，请访问: https://go.microsoft.com/fwlink/?linkid=830387
 	"version": "0.2.0",
@@ -54,7 +54,7 @@
 					"ignoreFailures": true
 				}
 			],
-			"visualizerFile": "/root/.vscode-server-insiders/data/User/workspaceStorage/ce15d615a573ca90ab41c11fe8bfd156/tonka3000.qtvsctools/qt.natvis.xml"
+			"visualizerFile": "/root/.vscode-server-insiders/data/User/workspaceStorage/0a10780273df37d22318baa12ed06247/tonka3000.qtvsctools/qt.natvis.xml"
 		}
 	]
 }

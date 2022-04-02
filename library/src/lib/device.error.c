@@ -1,19 +1,17 @@
-#include <stdarg.h>
-#include <libusb.h>
+#include "basic/errors.h"
 #include "basic/string.h"
 #include "serial.h"
-#include "basic/errors.h"
+#include <libusb.h>
+#include <stdarg.h>
 
-void _copy_last_serial_io_error(kburnDeviceNode *node, uint32_t err)
-{
+void _copy_last_serial_io_error(kburnDeviceNode *node, uint32_t err) {
 	clear_error(node);
 	node->error->code = make_error_code(KBURN_ERROR_KIND_SERIAL, err);
 	node->error->errorMessage = strdup(sererr_last());
 	debug_print(KBURN_LOG_ERROR, "copy_last_serial_io_error: %s", node->error->errorMessage);
 }
 
-void _copy_last_libusb_error(kburnDeviceNode *node, int err)
-{
+void _copy_last_libusb_error(kburnDeviceNode *node, int err) {
 	clear_error(node);
 	node->error->code = make_error_code(KBURN_ERROR_KIND_USB, err);
 	const char *name = libusb_error_name(err);
@@ -25,8 +23,7 @@ void _copy_last_libusb_error(kburnDeviceNode *node, int err)
 	debug_print(KBURN_LOG_INFO, "copy_last_libusb_error: %d - %s", err, node->error->errorMessage);
 }
 
-void _set_error(kburnDeviceNode *node, enum kburnErrorKind kind, int32_t code, const char *error, ...)
-{
+void _set_error(kburnDeviceNode *node, enum kburnErrorKind kind, int32_t code, const char *error, ...) {
 	int32_t e = make_error_code(kind, code);
 	clear_error(node);
 	node->error->code = e;
@@ -39,21 +36,17 @@ void _set_error(kburnDeviceNode *node, enum kburnErrorKind kind, int32_t code, c
 	debug_print(KBURN_LOG_ERROR, "set_error: %s", node->error->errorMessage);
 }
 
-void _clear_error(kburnDeviceNode *node)
-{
+void _clear_error(kburnDeviceNode *node) {
 	node->error->code = 0;
-	if (node->error->errorMessage != NULL)
-	{
+	if (node->error->errorMessage != NULL) {
 		debug_print(KBURN_LOG_INFO, "clear_error: free last");
 		free(node->error->errorMessage);
 		node->error->errorMessage = NULL;
 	}
 }
 
-void slip_error(kburnSerialDeviceNode *node, slip_error_t err)
-{
-	switch (err)
-	{
+void slip_error(kburnSerialDeviceNode *node, slip_error_t err) {
+	switch (err) {
 	case SLIP_ERROR_BUFFER_OVERFLOW:
 		set_error(node, KBURN_ERROR_KIND_SLIP, err, "SLIP_ERROR_BUFFER_OVERFLOW");
 		break;
@@ -68,10 +61,8 @@ void slip_error(kburnSerialDeviceNode *node, slip_error_t err)
 	}
 }
 
-void _serial_isp_command_error(kburnDeviceNode *node, kburnIspErrorCode err)
-{
-	switch (err)
-	{
+void _serial_isp_command_error(kburnDeviceNode *node, kburnIspErrorCode err) {
+	switch (err) {
 	case ISP_RET_DEFAULT:
 		set_error(node, KBURN_ERROR_KIND_ISP, err, "ISP_RET_DEFAULT");
 		return;

@@ -1,14 +1,13 @@
 #pragma once
 
-#include <stdint.h>
 #include "./prefix.h"
+#include <stdint.h>
 
 DEFINE_START
 
 typedef int64_t kburn_err_t;
 
-enum KBurnCommonError
-{
+enum KBurnCommonError {
 	KBurnNoErr = 0,
 	KBurnWiredError,
 	KBurnNoMemory,
@@ -32,8 +31,7 @@ enum KBurnCommonError
 };
 
 #pragma GCC diagnostic ignored "-Wpedantic"
-enum kburnErrorKind
-{
+enum kburnErrorKind {
 	KBURN_ERROR_KIND_COMMON = 0ULL,
 	KBURN_ERROR_KIND_SERIAL = 1ULL << 32,
 	KBURN_ERROR_KIND_SLIP = 1ULL << 33,
@@ -45,8 +43,7 @@ enum kburnErrorKind
 };
 #pragma GCC diagnostic pop
 
-typedef struct kburnErrorDesc
-{
+typedef struct kburnErrorDesc {
 	enum kburnErrorKind kind;
 	int32_t code;
 } __attribute__((__packed__)) kburnErrorDesc;

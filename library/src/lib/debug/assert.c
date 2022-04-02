@@ -1,12 +1,11 @@
 #include "assert.h"
-#include "debug/print.h"
 #include "debug/color.h"
+#include "debug/print.h"
 #include <stdarg.h>
-#include <stdlib.h>
 #include <stdio.h>
+#include <stdlib.h>
 
-void m_assert_print_abort(const char *ncondition_str, const char *file, int line, const char *message, ...)
-{
+void m_assert_print_abort(const char *ncondition_str, const char *file, int line, const char *message, ...) {
 	static char buffer[1024];
 
 	_debug_format_prefix(buffer, 1024, file, line);

@@ -3,17 +3,16 @@
 #include <stdint.h>
 #include <stdio.h>
 
-#include "global.h"
 #include "components/thread.h"
+#include "global.h"
 
-#include <sercomm/sercomm.h>
-#include "slip.h"
 #include "isp.h"
+#include "slip.h"
+#include <sercomm/sercomm.h>
 
 ser_opts_t get_current_serial_options(const char *path);
 
-typedef struct serial_subsystem_context
-{
+typedef struct serial_subsystem_context {
 	bool subsystem_inited;
 	kbthread init_list_thread;
 
@@ -30,8 +29,7 @@ typedef struct serial_subsystem_context
 #define BOARD_MEMORY_PAGE_SIZE 1024
 #define MAX_COMMAND_SIZE 1024
 
-typedef struct isp_state
-{
+typedef struct isp_state {
 	slip_descriptor_s descriptor;
 	slip_handler_s slip;
 
@@ -44,8 +42,7 @@ typedef struct isp_state
 	bool has_response;
 } isp_state;
 
-typedef struct isp_request_t
-{
+typedef struct isp_request_t {
 	kburnIspOperation op;
 	uint8_t _op_high;
 	uint16_t reserved;
@@ -55,8 +52,7 @@ typedef struct isp_request_t
 	uint8_t data[];
 } isp_request_t;
 
-typedef struct isp_response_t
-{
+typedef struct isp_response_t {
 
 	kburnIspOperation op;
 	kburnIspErrorCode status;
@@ -88,12 +84,12 @@ isp_request_t *new_serial_isp_packet(uint32_t data_length);
 bool serial_isp_verify_checksum(isp_request_t *packet);
 void serial_isp_calculate_checksum(isp_request_t *packet);
 size_t serial_isp_packet_size(const isp_request_t *packet);
-#define make_serial_isp_packet(pointer_name, data_length)                          \
-	size_t __isp_packet_memory_size = offsetof(isp_request_t, data) + data_length; \
-	uint8_t __isp_packet_memory[__isp_packet_memory_size];                         \
-	memset(__isp_packet_memory, 0, __isp_packet_memory_size);                      \
-	isp_request_t *pointer_name = (void *)__isp_packet_memory;                     \
-	pointer_name->data_len = data_length;                                          \
+#define make_serial_isp_packet(pointer_name, data_length)                                                                                            \
+	size_t __isp_packet_memory_size = offsetof(isp_request_t, data) + data_length;                                                                   \
+	uint8_t __isp_packet_memory[__isp_packet_memory_size];                                                                                           \
+	memset(__isp_packet_memory, 0, __isp_packet_memory_size);                                                                                        \
+	isp_request_t *pointer_name = (void *)__isp_packet_memory;                                                                                       \
+	pointer_name->data_len = data_length;                                                                                                            \
 	debug_print(KBURN_LOG_TRACE, "[alloc] %ld bytes, data len=%d", __isp_packet_memory_size, pointer_name->data_len)
 
 void slip_error(kburnSerialDeviceNode *node, slip_error_t err);

@@ -25,8 +25,8 @@ THE SOFTWARE.
 #ifndef SLIP_H
 #define SLIP_H
 
-#include <stdint.h>
 #include <stdbool.h>
+#include <stdint.h>
 
 #define SLIP_SPECIAL_BYTE_END 0xC0
 #define SLIP_SPECIAL_BYTE_ESC 0xDB
@@ -34,22 +34,11 @@ THE SOFTWARE.
 #define SLIP_ESCAPED_BYTE_END 0xDC
 #define SLIP_ESCAPED_BYTE_ESC 0xDD
 
-typedef enum slip_state
-{
-	SLIP_STATE_NORMAL = 0x00,
-	SLIP_STATE_ESCAPED
-} slip_state_t;
+typedef enum slip_state { SLIP_STATE_NORMAL = 0x00, SLIP_STATE_ESCAPED } slip_state_t;
 
-typedef enum slip_error
-{
-	SLIP_NO_ERROR = 0x00,
-	SLIP_ERROR_BUFFER_OVERFLOW,
-	SLIP_ERROR_UNKNOWN_ESCAPED_BYTE,
-	SLIP_ERROR_CRC_MISMATCH
-} slip_error_t;
+typedef enum slip_error { SLIP_NO_ERROR = 0x00, SLIP_ERROR_BUFFER_OVERFLOW, SLIP_ERROR_UNKNOWN_ESCAPED_BYTE, SLIP_ERROR_CRC_MISMATCH } slip_error_t;
 
-typedef struct slip_descriptor
-{
+typedef struct slip_descriptor {
 	uint8_t *buf;
 	uint32_t buf_size;
 	uint16_t crc_seed;
@@ -60,8 +49,7 @@ typedef struct slip_descriptor
 	uint8_t (*write_byte)(void *context, uint8_t byte, bool last_char);
 } slip_descriptor_s;
 
-typedef struct slip_handler
-{
+typedef struct slip_handler {
 	slip_state_t state;
 	uint32_t size;
 	uint16_t crc;

@@ -2,18 +2,16 @@
 #include <libudev.h>
 #include <stdlib.h>
 
-#define get_number_prop(store, PROP, base)            \
-	pstr = udev_device_get_property_value(dev, PROP); \
+#define get_number_prop(store, PROP, base)                                                                                                           \
+	pstr = udev_device_get_property_value(dev, PROP);                                                                                                \
 	store = pstr ? strtol(pstr, (char **)NULL, base) : 0
 
-void driver_get_devinfo_free(kburnSerialDeviceInfo deviceInfo)
-{
+void driver_get_devinfo_free(kburnSerialDeviceInfo deviceInfo) {
 	if (deviceInfo.usbDriver)
 		free(deviceInfo.usbDriver);
 }
 
-kburnSerialDeviceInfo driver_get_devinfo(const char *path)
-{
+kburnSerialDeviceInfo driver_get_devinfo(const char *path) {
 	debug_trace_function("%s", path);
 
 	struct udev_device *dev = NULL;
@@ -32,8 +30,7 @@ kburnSerialDeviceInfo driver_get_devinfo(const char *path)
 
 	/* create libudev enumerate */
 	query = udev_enumerate_new(u);
-	if (query == NULL)
-	{
+	if (query == NULL) {
 		goto exit;
 	}
 
@@ -41,8 +38,7 @@ kburnSerialDeviceInfo driver_get_devinfo(const char *path)
 	udev_enumerate_scan_devices(query);
 	list = udev_enumerate_get_list_entry(query);
 
-	udev_list_entry_foreach(itr, list)
-	{
+	udev_list_entry_foreach(itr, list) {
 		dev = udev_device_new_from_syspath(u, udev_list_entry_get_name(itr));
 
 		if (dev == NULL)
@@ -50,19 +46,16 @@ kburnSerialDeviceInfo driver_get_devinfo(const char *path)
 
 		const char *node = udev_device_get_devnode(dev);
 
-		if (strcmp(node, path) == 0)
-		{
+		if (strcmp(node, path) == 0) {
 			debug_print(KBURN_LOG_ERROR, "driver_get_devinfo: found device");
 
 			pstr = udev_device_get_property_value(dev, "SUBSYSTEM");
-			if (pstr && (strcmp(pstr, "tty") == 0))
-			{
+			if (pstr && (strcmp(pstr, "tty") == 0)) {
 				ret.isTTY = true;
 			}
 
 			pstr = udev_device_get_property_value(dev, "ID_BUS");
-			if (pstr && (strcmp(pstr, "usb") == 0))
-			{
+			if (pstr && (strcmp(pstr, "usb") == 0)) {
 				ret.isUSB = true;
 				get_number_prop(ret.usbIdVendor, "ID_VENDOR_ID", 16);
 				get_number_prop(ret.usbIdProduct, "ID_MODEL_ID", 16);

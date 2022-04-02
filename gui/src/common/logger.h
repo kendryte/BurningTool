@@ -1,12 +1,11 @@
 #pragma once
 
+#include <canaan-burn/canaan-burn.h>
 #include <QObject>
 #include <QString>
 #include <QTextStream>
-#include <canaan-burn/canaan-burn.h>
 
-class LogReceiver : public QObject
-{
+class LogReceiver : public QObject {
 	Q_OBJECT
 
 	QTextStream console;
@@ -14,11 +13,11 @@ class LogReceiver : public QObject
 	struct debug_callback savedCallback;
 	kburnDebugColors savedColors;
 
-public:
+  public:
 	LogReceiver();
 	~LogReceiver();
 	void receive(kburnLogType level, const char *cstr);
 
-signals:
+  signals:
 	void onReceiveLine(QString line);
 };

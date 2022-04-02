@@ -4,8 +4,7 @@
 
 #define MAX_SERIAL_LENGTH 256
 #define MAX_PATH_LENGTH 8 // 当前usb最大7级，多一个0用于字符串比较
-typedef struct kburnUsbDeviceInfo
-{
+typedef struct kburnUsbDeviceInfo {
 	PCONST uint16_t idVendor;
 	PCONST uint16_t idProduct;
 	// PCONST uint16_t idRevision;
@@ -22,8 +21,7 @@ typedef struct kburnUsbDeviceInfo
 
 } kburnUsbDeviceInfo;
 
-typedef struct kburnUsbDeviceNode
-{
+typedef struct kburnUsbDeviceNode {
 	PCONST struct kburnDeviceNode *parent;
 
 	PCONST bool init;

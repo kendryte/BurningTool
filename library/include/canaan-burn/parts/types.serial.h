@@ -2,16 +2,9 @@
 
 #include "./prefix.h"
 
-enum KBurnSerialConfigByteSize
-{
-	KBurnSerialConfigByteSize_8,
-	KBurnSerialConfigByteSize_7,
-	KBurnSerialConfigByteSize_6,
-	KBurnSerialConfigByteSize_5
-};
+enum KBurnSerialConfigByteSize { KBurnSerialConfigByteSize_8, KBurnSerialConfigByteSize_7, KBurnSerialConfigByteSize_6, KBurnSerialConfigByteSize_5 };
 
-enum KBurnSerialConfigParity
-{
+enum KBurnSerialConfigParity {
 	KBurnSerialConfigParityNone,
 	KBurnSerialConfigParityOdd,
 	KBurnSerialConfigParityEven,
@@ -19,15 +12,9 @@ enum KBurnSerialConfigParity
 	KBurnSerialConfigParitySpace
 };
 
-enum KBurnSerialConfigStopBits
-{
-	KBurnSerialConfigStopBitsOne,
-	KBurnSerialConfigStopBitsOneHalf,
-	KBurnSerialConfigStopBitsTwo
-};
+enum KBurnSerialConfigStopBits { KBurnSerialConfigStopBitsOne, KBurnSerialConfigStopBitsOneHalf, KBurnSerialConfigStopBitsTwo };
 
-typedef struct kburnSerialDeviceInfo
-{
+typedef struct kburnSerialDeviceInfo {
 	PCONST bool isUSB;
 	PCONST bool isTTY;
 
@@ -43,8 +30,7 @@ typedef struct kburnSerialDeviceInfo
 
 } kburnSerialDeviceInfo;
 
-typedef struct kburnSerialDeviceNode
-{
+typedef struct kburnSerialDeviceNode {
 	PCONST struct kburnDeviceNode *parent;
 
 	PCONST bool init;

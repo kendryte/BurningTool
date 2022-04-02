@@ -1,15 +1,14 @@
 #pragma once
 
-#include <stdint.h>
-#include <stdlib.h>
-#include <stdbool.h>
+#include "basic/disposable.h"
 #include "basic/lock.h"
 #include "canaan-burn/canaan-burn.h"
-#include "basic/disposable.h"
+#include <stdbool.h>
+#include <stdint.h>
+#include <stdlib.h>
 
 #define MAX_WAITTING_DEVICES 32
-typedef struct waiting_list
-{
+typedef struct waiting_list {
 	kb_mutex_t mutex;
 	kburnDeviceNode *list[MAX_WAITTING_DEVICES + 1];
 } waiting_list_t;

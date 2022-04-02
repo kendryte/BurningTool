@@ -5,13 +5,11 @@
 
 DEFINE_START
 
-struct kburnDebugColor
-{
+struct kburnDebugColor {
 	const char *prefix;
 	const char *postfix;
 };
-typedef struct kburnDebugColors
-{
+typedef struct kburnDebugColors {
 	struct kburnDebugColor red;
 	struct kburnDebugColor green;
 	struct kburnDebugColor yellow;
@@ -20,8 +18,7 @@ typedef struct kburnDebugColors
 PUBLIC void kburnSetLogBufferEnabled(bool enable);
 PUBLIC kburnDebugColors kburnSetColors(kburnDebugColors color_list);
 
-struct debug_callback
-{
+struct debug_callback {
 	on_debug_log callback;
 	void *call_context;
 };

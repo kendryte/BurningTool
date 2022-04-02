@@ -1,8 +1,7 @@
-#include "serial.h"
 #include "protocol.h"
+#include "serial.h"
 
-kburn_err_t serial_subsystem_init(KBCTX scope)
-{
+kburn_err_t serial_subsystem_init(KBCTX scope) {
 	debug_trace_function();
 	if (scope->serial->subsystem_inited)
 		return KBurnNoErr;
@@ -14,8 +13,7 @@ kburn_err_t serial_subsystem_init(KBCTX scope)
 	scope->serial->subsystem_inited = true;
 	return KBurnNoErr;
 }
-void serial_subsystem_deinit(KBCTX scope)
-{
+void serial_subsystem_deinit(KBCTX scope) {
 	debug_trace_function();
 	if (!scope->serial->subsystem_inited)
 		return;

@@ -1,21 +1,18 @@
+#include "components/device-link-list.h"
 #include "serial.h"
 #include "usb.h"
-#include "components/device-link-list.h"
 
-void kburnOnDeviceDisconnect(KBCTX scope, on_device_remove callback, void *ctx)
-{
+void kburnOnDeviceDisconnect(KBCTX scope, on_device_remove callback, void *ctx) {
 	scope->disconnect_callback = callback;
 	scope->disconnect_callback_ctx = ctx;
 }
 
-DECALRE_DISPOSE(destroy_device, kburnDeviceNode)
-{
+DECALRE_DISPOSE(destroy_device, kburnDeviceNode) {
 	if (context->destroy_in_progress)
 		return;
 	context->destroy_in_progress = true;
 
-	if (context->disconnect_should_call && context->_scope->disconnect_callback)
-	{
+	if (context->disconnect_should_call && context->_scope->disconnect_callback) {
 		debug_print(KBURN_LOG_DEBUG, "\tdisconnect_callback()");
 		context->_scope->disconnect_callback(context, context->_scope->disconnect_callback_ctx);
 	}
@@ -27,16 +24,13 @@ DECALRE_DISPOSE(destroy_device, kburnDeviceNode)
 }
 DECALRE_DISPOSE_END()
 
-void device_instance_collect(KBCTX scope, kburnDeviceNode *instance)
-{
-	if (!instance->serial->init && !instance->usb->init && !instance->destroy_in_progress)
-	{
+void device_instance_collect(KBCTX scope, kburnDeviceNode *instance) {
+	if (!instance->serial->init && !instance->usb->init && !instance->destroy_in_progress) {
 		destroy_device(scope->disposables, instance);
 	}
 }
 
-kburn_err_t create_empty_device_instance(KBCTX scope, kburnDeviceNode **output)
-{
+kburn_err_t create_empty_device_instance(KBCTX scope, kburnDeviceNode **output) {
 	DeferEnabled;
 
 	disposable_list_t *disposable_list = DeferFree(CheckNull(disposable_list_init("device instance")));
@@ -77,8 +71,7 @@ kburn_err_t create_empty_device_instance(KBCTX scope, kburnDeviceNode **output)
 	return KBurnNoErr;
 }
 
-kburnDeviceNode *kburnOpenSerial(KBCTX scope, const char *path)
-{
+kburnDeviceNode *kburnOpenSerial(KBCTX scope, const char *path) {
 	debug_print(KBURN_LOG_DEBUG, "kburnOpenSerial(%s)", path);
 	on_serial_device_attach(scope, path);
 

@@ -1,8 +1,8 @@
 #pragma once
 
-#include <stdint.h>
 #include <stdbool.h>
 #include <stddef.h>
+#include <stdint.h>
 
 #if BURN_LIB_COMPILING
 #define PUBLIC EXPORT
@@ -23,9 +23,7 @@
 #endif
 
 #ifdef __cplusplus
-#define DEFINE_START \
-	extern "C"       \
-	{
+#define DEFINE_START extern "C" {
 #define DEFINE_END }
 #else
 #define DEFINE_START

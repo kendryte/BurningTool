@@ -1,13 +1,11 @@
 #include "basic/errors.h"
-#include <time.h>
-#include <string.h>
-#include "usb.h"
 #include "isp.low.h"
+#include "usb.h"
+#include <string.h>
+#include <time.h>
 
-static inline usbIspCommandTaget convertTarget(kburnUsbIspCommandTaget i)
-{
-	switch (i)
-	{
+static inline usbIspCommandTaget convertTarget(kburnUsbIspCommandTaget i) {
+	switch (i) {
 	case KBURN_USB_ISP_EMMC:
 		return USB_ISP_COMMAND_TARGET_EMMC;
 	case KBURN_USB_ISP_SDCARD:
@@ -20,8 +18,7 @@ static inline usbIspCommandTaget convertTarget(kburnUsbIspCommandTaget i)
 	m_abort("invalid usb isp command target: %d", i);
 }
 
-kburn_err_t kburnUsbIspLedControl(kburnDeviceNode *node, uint8_t pin, struct kburnColor color)
-{
+kburn_err_t kburnUsbIspLedControl(kburnDeviceNode *node, uint8_t pin, struct kburnColor color) {
 	debug_trace_function();
 	usbIspCommandPacket request = {
 		.command = USB_ISP_COMMAND_WRITE_DEVICE,
@@ -33,14 +30,12 @@ kburn_err_t kburnUsbIspLedControl(kburnDeviceNode *node, uint8_t pin, struct kbu
 	};
 	uint32_t expected_tag = rand();
 
-	IfErrorReturn(
-		usb_lowlevel_command_send(node->usb->handle, node->usb->deviceInfo.endpoint_out, request, LIBUSB_ENDPOINT_OUT, 0, expected_tag));
+	IfErrorReturn(usb_lowlevel_command_send(node->usb->handle, node->usb->deviceInfo.endpoint_out, request, LIBUSB_ENDPOINT_OUT, 0, expected_tag));
 
 	return usb_lowlevel_status_read(node->usb->handle, node->usb->deviceInfo.endpoint_in, expected_tag);
 }
 
-kburn_err_t kburnUsbIspGetMemorySize(kburnDeviceNode *node, kburnUsbIspCommandTaget target, kburnDeviceMemorySizeInfo *out_dev_info)
-{
+kburn_err_t kburnUsbIspGetMemorySize(kburnDeviceNode *node, kburnUsbIspCommandTaget target, kburnDeviceMemorySizeInfo *out_dev_info) {
 	debug_trace_function();
 #define READ_CAPACITY_LENGTH 0x08
 
@@ -50,16 +45,14 @@ kburn_err_t kburnUsbIspGetMemorySize(kburnDeviceNode *node, kburnUsbIspCommandTa
 	};
 	uint32_t expected_tag = rand();
 
-	IfErrorReturn(
-		usb_lowlevel_command_send(node->usb->handle, node->usb->deviceInfo.endpoint_out, request, LIBUSB_ENDPOINT_IN, READ_CAPACITY_LENGTH, expected_tag));
+	IfErrorReturn(usb_lowlevel_command_send(node->usb->handle, node->usb->deviceInfo.endpoint_out, request, LIBUSB_ENDPOINT_IN, READ_CAPACITY_LENGTH,
+											expected_tag));
 
 	uint8_t buffer[READ_CAPACITY_LENGTH];
 
-	IfErrorReturn(
-		usb_lowlevel_transfer(node->usb, USB_READ, buffer, READ_CAPACITY_LENGTH));
+	IfErrorReturn(usb_lowlevel_transfer(node->usb, USB_READ, buffer, READ_CAPACITY_LENGTH));
 
-	IfErrorReturn(
-		usb_lowlevel_status_read(node->usb->handle, node->usb->deviceInfo.endpoint_in, expected_tag));
+	IfErrorReturn(usb_lowlevel_status_read(node->usb->handle, node->usb->deviceInfo.endpoint_in, expected_tag));
 
 	kburn_stor_address_t last_block_address = uchar2uint(&buffer[0]);
 	uint32_t block_size = uchar2uint(&buffer[4]);
@@ -76,17 +69,14 @@ kburn_err_t kburnUsbIspGetMemorySize(kburnDeviceNode *node, kburnUsbIspCommandTa
 	return KBurnNoErr;
 }
 
-static kburn_err_t check_input(kburnDeviceNode *node, kburn_stor_block_t nblock, int32_t length, const kburnDeviceMemorySizeInfo dev_info)
-{
-	if (length % dev_info.block_size != 0)
-	{
+static kburn_err_t check_input(kburnDeviceNode *node, kburn_stor_block_t nblock, int32_t length, const kburnDeviceMemorySizeInfo dev_info) {
+	if (length % dev_info.block_size != 0) {
 		kburn_err_t r = make_error_code(KBURN_ERROR_KIND_COMMON, KBurnSizeNotAlign);
 		set_kb_error(node, r, "buffer length (%d) is not align to block (size=%d)", length, dev_info.block_size);
 		return r;
 	}
 	kburn_stor_address_t over_last_block = nblock + length / dev_info.block_size;
-	if (over_last_block - 1 > dev_info.block_count)
-	{
+	if (over_last_block - 1 > dev_info.block_count) {
 		kburn_err_t r = make_error_code(KBURN_ERROR_KIND_COMMON, KBurnAddressOverflow);
 		set_kb_error(node, r, "ending block (%d) is larger than the device (%d)", over_last_block - 1, dev_info.block_count);
 		return r;
@@ -95,8 +85,8 @@ static kburn_err_t check_input(kburnDeviceNode *node, kburn_stor_block_t nblock,
 	return KBurnNoErr;
 }
 
-static kburn_err_t read_normalized(kburnDeviceNode *node, kburnUsbIspCommandTaget device, kburn_stor_address_t start_addr, uint32_t block_count, void *buffer, uint32_t length)
-{
+static kburn_err_t read_normalized(kburnDeviceNode *node, kburnUsbIspCommandTaget device, kburn_stor_address_t start_addr, uint32_t block_count,
+								   void *buffer, uint32_t length) {
 	usbIspCommandPacket request = {
 		.command = USB_ISP_COMMAND_READ_BURN,
 		.target = convertTarget(device),
@@ -108,17 +98,15 @@ static kburn_err_t read_normalized(kburnDeviceNode *node, kburnUsbIspCommandTage
 	IfErrorReturn(
 		usb_lowlevel_command_send(node->usb->handle, node->usb->deviceInfo.endpoint_out, request, LIBUSB_ENDPOINT_IN, length, expected_tag));
 
-	IfErrorReturn(
-		usb_lowlevel_transfer(node->usb, USB_READ, buffer, length));
+	IfErrorReturn(usb_lowlevel_transfer(node->usb, USB_READ, buffer, length));
 
-	IfErrorReturn(
-		usb_lowlevel_status_read(node->usb->handle, node->usb->deviceInfo.endpoint_in, expected_tag));
+	IfErrorReturn(usb_lowlevel_status_read(node->usb->handle, node->usb->deviceInfo.endpoint_in, expected_tag));
 
 	return KBurnNoErr;
 }
 
-static kburn_err_t write_normalized(kburnDeviceNode *node, kburnUsbIspCommandTaget device, kburn_stor_address_t start_addr, uint32_t block_count, void *buffer, uint32_t length)
-{
+static kburn_err_t write_normalized(kburnDeviceNode *node, kburnUsbIspCommandTaget device, kburn_stor_address_t start_addr, uint32_t block_count,
+									void *buffer, uint32_t length) {
 	usbIspCommandPacket request = {
 		.command = USB_ISP_COMMAND_WRITE_BURN,
 		.target = convertTarget(device),
@@ -130,20 +118,17 @@ static kburn_err_t write_normalized(kburnDeviceNode *node, kburnUsbIspCommandTag
 	IfErrorReturn(
 		usb_lowlevel_command_send(node->usb->handle, node->usb->deviceInfo.endpoint_out, request, LIBUSB_ENDPOINT_OUT, length, expected_tag));
 
-	IfErrorReturn(
-		usb_lowlevel_transfer(node->usb, USB_WRITE, buffer, length));
+	IfErrorReturn(usb_lowlevel_transfer(node->usb, USB_WRITE, buffer, length));
 
-	IfErrorReturn(
-		usb_lowlevel_status_read(node->usb->handle, node->usb->deviceInfo.endpoint_in, expected_tag));
+	IfErrorReturn(usb_lowlevel_status_read(node->usb->handle, node->usb->deviceInfo.endpoint_in, expected_tag));
 
 	return KBurnNoErr;
 }
 
-kburn_err_t kburnUsbIspWriteChunk(kburnDeviceNode *node, const kburnDeviceMemorySizeInfo dev_info, kburn_stor_block_t start_block, void *buffer, uint32_t length)
-{
+kburn_err_t kburnUsbIspWriteChunk(kburnDeviceNode *node, const kburnDeviceMemorySizeInfo dev_info, kburn_stor_block_t start_block, void *buffer,
+								  uint32_t length) {
 	debug_trace_function();
-	IfErrorReturn(
-		check_input(node, start_block, length, dev_info));
+	IfErrorReturn(check_input(node, start_block, length, dev_info));
 
 	uint32_t block_count = length / dev_info.block_size;
 	uint32_t start_addr = (start_block * dev_info.block_size) + dev_info.base_address;
@@ -151,11 +136,10 @@ kburn_err_t kburnUsbIspWriteChunk(kburnDeviceNode *node, const kburnDeviceMemory
 	return write_normalized(node, dev_info.device, start_addr, block_count, buffer, length);
 }
 
-kburn_err_t kburnUsbIspReadChunk(kburnDeviceNode *node, const kburnDeviceMemorySizeInfo dev_info, kburn_stor_block_t start_block, uint32_t length, void *buffer)
-{
+kburn_err_t kburnUsbIspReadChunk(kburnDeviceNode *node, const kburnDeviceMemorySizeInfo dev_info, kburn_stor_block_t start_block, uint32_t length,
+								 void *buffer) {
 	debug_trace_function();
-	IfErrorReturn(
-		check_input(node, start_block, length, dev_info));
+	IfErrorReturn(check_input(node, start_block, length, dev_info));
 
 	uint32_t block_count = length / dev_info.block_size;
 	uint32_t start_addr = (start_block * dev_info.block_size) + dev_info.base_address;

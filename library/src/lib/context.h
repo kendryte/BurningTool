@@ -1,13 +1,12 @@
 #pragma once
 
-#include <stdbool.h>
 #include "types.h"
+#include <stdbool.h>
 
 /**
  * 库上下文，通过kburnCreate创建，所有函数都需要传此参数。主要用于跟踪内存资源
  */
-typedef struct kburnContext
-{
+typedef struct kburnContext {
 	on_device_remove disconnect_callback;
 	void *disconnect_callback_ctx;
 

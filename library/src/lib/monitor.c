@@ -1,10 +1,8 @@
 #include "serial.h"
 #include "usb.h"
 
-static DECALRE_DISPOSE(_dispose, kburnContext)
-{
-	if (context->monitor_inited)
-	{
+static DECALRE_DISPOSE(_dispose, kburnContext) {
+	if (context->monitor_inited) {
 		usb_monitor_pause(context);
 		serial_monitor_pause(context);
 
@@ -17,8 +15,7 @@ static DECALRE_DISPOSE(_dispose, kburnContext)
 }
 DECALRE_DISPOSE_END()
 
-kburn_err_t kburnStartWaitingDevices(KBCTX scope)
-{
+kburn_err_t kburnStartWaitingDevices(KBCTX scope) {
 	debug_trace_function("already_init=%d", scope->monitor_inited);
 	if (scope->monitor_inited)
 		return KBurnNoErr;
@@ -27,14 +24,12 @@ kburn_err_t kburnStartWaitingDevices(KBCTX scope)
 
 	kburn_err_t r;
 
-	if (!scope->usb->subsystem_inited)
-	{
+	if (!scope->usb->subsystem_inited) {
 		usb_subsystem_init(scope);
 		DeferCall(usb_subsystem_deinit, scope);
 	}
 
-	if (!scope->serial->subsystem_inited)
-	{
+	if (!scope->serial->subsystem_inited) {
 		serial_subsystem_init(scope);
 		DeferCall(serial_subsystem_deinit, scope);
 	}
@@ -56,15 +51,13 @@ kburn_err_t kburnStartWaitingDevices(KBCTX scope)
 	return kburnWaitDeviceResume(scope);
 }
 
-void kburnWaitDevicePause(KBCTX scope)
-{
+void kburnWaitDevicePause(KBCTX scope) {
 	debug_trace_function();
 
 	usb_monitor_pause(scope);
 	serial_monitor_pause(scope);
 }
-kburn_err_t kburnWaitDeviceResume(KBCTX scope)
-{
+kburn_err_t kburnWaitDeviceResume(KBCTX scope) {
 	debug_trace_function();
 
 	kburn_err_t r = serial_monitor_resume(scope);

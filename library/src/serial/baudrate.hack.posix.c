@@ -1,10 +1,10 @@
 #include <errno.h>
 #include <fcntl.h>
+#include <serial.h>
 #include <string.h>
+#include <sys/ioctl.h>
 #include <termios.h>
 #include <unistd.h>
-#include <serial.h>
-#include <sys/ioctl.h>
 
 #ifdef __linux__
 #include <linux/serial.h>
@@ -19,22 +19,18 @@
 #endif
 
 // https://github.com/ingeniamc/sercomm/blob/master/include/sercomm/posix/types.h
-struct ser
-{
+struct ser {
 	struct termios tios_old;
 	int fd;
-	struct
-	{
+	struct {
 		int rd;
 		int wr;
 	} timeouts;
 };
 
 // https://github.com/ingeniamc/sercomm/blob/master/sercomm/posix/comms.c#L123
-static speed_t convert_speed(uint32_t br)
-{
-	switch (br)
-	{
+static speed_t convert_speed(uint32_t br) {
+	switch (br) {
 #ifdef B0
 	case 0:
 		return B0;
@@ -188,27 +184,21 @@ static speed_t convert_speed(uint32_t br)
 	}
 }
 
-static bool set_speed(kburnSerialDeviceNode *node, int fd, uint32_t br, struct termios *tios)
-{
+static bool set_speed(kburnSerialDeviceNode *node, int fd, uint32_t br, struct termios *tios) {
 	speed_t speed = convert_speed(br);
 
-	if (speed <= __MAX_BAUD)
-	{
+	if (speed <= __MAX_BAUD) {
 		cfsetispeed(tios, speed);
 		cfsetospeed(tios, speed);
 
-		if (tcsetattr(fd, TCSANOW, tios) != 0)
-		{
+		if (tcsetattr(fd, TCSANOW, tios) != 0) {
 			set_syserr(node);
 			return false;
 		}
-	}
-	else
-	{
+	} else {
 #if defined(__MACH__) && defined(__APPLE__)
 		/* Mac OS X (>= 10.4) */
-		if (ioctl(fd, IOSSIOSPEED, (speed_t *)&br, 1) < 0)
-		{
+		if (ioctl(fd, IOSSIOSPEED, (speed_t *)&br, 1) < 0) {
 			node->error->code = make_error_code(KBURN_ERROR_KIND_SYSCALL, errno);
 			set_error(node, strerror(errno));
 			return false;
@@ -217,8 +207,7 @@ static bool set_speed(kburnSerialDeviceNode *node, int fd, uint32_t br, struct t
 		/* Linux */
 		struct serial_struct lser;
 
-		if (ioctl(fd, TIOCGSERIAL, &lser) < 0)
-		{
+		if (ioctl(fd, TIOCGSERIAL, &lser) < 0) {
 			set_syserr(node);
 			return false;
 		}
@@ -228,8 +217,7 @@ static bool set_speed(kburnSerialDeviceNode *node, int fd, uint32_t br, struct t
 		lser.flags &= ~ASYNC_SPD_MASK;
 		lser.flags |= ASYNC_SPD_CUST;
 
-		if (ioctl(fd, TIOCSSERIAL, &lser) < 0)
-		{
+		if (ioctl(fd, TIOCSSERIAL, &lser) < 0) {
 			set_syserr(node);
 			return false;
 		}
@@ -242,21 +230,18 @@ static bool set_speed(kburnSerialDeviceNode *node, int fd, uint32_t br, struct t
 	return true;
 }
 
-bool hackdev_serial_low_switch_baudrate(kburnSerialDeviceNode *node, uint32_t speed)
-{
+bool hackdev_serial_low_switch_baudrate(kburnSerialDeviceNode *node, uint32_t speed) {
 	debug_trace_function("node[%s], %d", node->path, speed);
 	autolock(node->mutex);
 	struct ser *ser = node->m_dev_handle;
 	struct termios new_termios;
-	if (tcgetattr(ser->fd, &new_termios) < 0)
-	{
+	if (tcgetattr(ser->fd, &new_termios) < 0) {
 		set_error(node, KBURN_ERROR_KIND_COMMON, KBurnSerialDriverAttrReadErr, "failed read driver attr");
 		unlock(node->mutex);
 		return false;
 	}
 
-	if (!set_speed(node, ser->fd, speed, &new_termios))
-	{
+	if (!set_speed(node, ser->fd, speed, &new_termios)) {
 		unlock(node->mutex);
 		return false;
 	}

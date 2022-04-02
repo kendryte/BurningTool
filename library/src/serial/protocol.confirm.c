@@ -1,9 +1,7 @@
 #include "serial.h"
 
-bool confirm_port_is_ready(kburnSerialDeviceNode *node)
-{
-	if (!kburnSerialIspGreeting(node))
-	{
+bool confirm_port_is_ready(kburnSerialDeviceNode *node) {
+	if (!kburnSerialIspGreeting(node)) {
 		return false;
 	}
 

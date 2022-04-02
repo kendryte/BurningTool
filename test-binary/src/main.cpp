@@ -1,72 +1,59 @@
-#include <canaan-burn/canaan-burn.h>
-#include <stddef.h>
-#include <iostream>
-#include <cassert>
-#include <vector>
-#include <iomanip>
-#include <string>
-#include <cstring>
-#include <iostream>
 #include "main.h"
+#include <canaan-burn/canaan-burn.h>
+#include <cassert>
+#include <cstring>
+#include <iomanip>
+#include <iostream>
+#include <stddef.h>
+#include <string>
+#include <vector>
 
 using namespace std;
 
-const char *test_null(const char *str)
-{
-	return str ? str : "NULL";
-}
+const char *test_null(const char *str) { return str ? str : "NULL"; }
 
-bool verify(void *ctx, const kburnDeviceNode *dev)
-{
+bool verify(void *ctx, const kburnDeviceNode *dev) {
 	cout << "ask connect: " << dev->serial->path << ", isUSB=" << dev->serial->deviceInfo.isUSB << endl;
 	return true;
 }
 
-void print_progress(void *ctx, const struct kburnDeviceNode *dev, size_t current, size_t length)
-{
+void print_progress(void *ctx, const struct kburnDeviceNode *dev, size_t current, size_t length) {
 	cout << "loading: " << current << '/' << length << "\t " << (int)(current * 100 / length) << "%" << endl;
 }
 
-static void perror(kburn_err_t e)
-{
+static void perror(kburn_err_t e) {
 	auto errs = kburnSplitErrorCode(e);
 	cout << "    - kind: " << (errs.kind >> 32) << endl;
 	cout << "    - code: " << errs.code << endl;
 }
 
-void handle(void *ctx, kburnDeviceNode *dev)
-{
+void handle(void *ctx, kburnDeviceNode *dev) {
 	cout << "Got Serial Device: " << dev->serial->path << endl;
 	cout << "  * isOpen: " << dev->serial->isOpen << endl;
 	cout << "  * isConfirm: " << dev->serial->isConfirm << endl;
 	cout << "  * error status: " << dev->error->code << ", " << test_null(dev->error->errorMessage) << endl;
 
-	if (dev->error->code != KBurnNoErr)
-	{
+	if (dev->error->code != KBurnNoErr) {
 		perror(dev->error->code);
 		return;
 	}
 
-	if (!kburnSerialIspSetBaudrateHigh(dev->serial))
-	{
+	if (!kburnSerialIspSetBaudrateHigh(dev->serial)) {
 		cout << "Error: can not set baudrate: " << test_null(dev->error->errorMessage) << endl;
 	}
 
-	if (!kburnSerialIspSwitchUsbMode(dev->serial, print_progress, NULL))
-	{
+	if (!kburnSerialIspSwitchUsbMode(dev->serial, print_progress, NULL)) {
 		cout << "Error: can not go usb mode: " << test_null(dev->error->errorMessage) << endl;
 	}
 }
 
-void handle_usb(void *ctx, kburnDeviceNode *dev)
-{
+void handle_usb(void *ctx, kburnDeviceNode *dev) {
 	kburn_err_t r;
 
 	cout << "Got Usb Device: " << endl;
 	cout << "  * serial port: " << (dev->serial->isUsbBound ? dev->serial->path : "not bind") << endl;
 	cout << "  * usb port: ";
-	for (auto i = 0; i < MAX_PATH_LENGTH; i++)
-	{
+	for (auto i = 0; i < MAX_PATH_LENGTH; i++) {
 		cout << (uint8_t)dev->usb->deviceInfo.path[i] << " " << flush;
 	}
 	cout << endl;
@@ -87,12 +74,9 @@ void handle_usb(void *ctx, kburnDeviceNode *dev)
 
 	cout << "test read memory size:" << endl;
 	r = kburnUsbIspGetMemorySize(dev, KBURN_USB_ISP_EMMC, &size_info);
-	if (r != KBurnNoErr)
-	{
+	if (r != KBurnNoErr) {
 		cout << "  * error status: " << dev->error->code << ", " << test_null(dev->error->errorMessage) << endl;
-	}
-	else
-	{
+	} else {
 		cout << "  * block_size: " << size_info.block_size << endl;
 		cout << "  * device_size: " << size_info.storage_size << endl;
 		cout << "  * max_block_addr: " << size_info.last_block_address << endl;
@@ -113,24 +97,21 @@ void handle_usb(void *ctx, kburnDeviceNode *dev)
 		cout << "    - data wrong" << endl;
 }
 
-void disconnect(void *ctx, const kburnDeviceNode *dev)
-{
+void disconnect(void *ctx, const kburnDeviceNode *dev) {
 	cout << "Disconnect: " << dev->serial->path << endl;
 	cout << "  * isOpen: " << dev->serial->isOpen << endl;
 	cout << "  * isConfirm: " << dev->serial->isConfirm << endl;
 	cout << "  * error status: " << dev->error->code << ", " << test_null(dev->error->errorMessage) << endl;
 }
 
-int main(int argc, char **argv)
-{
+int main(int argc, char **argv) {
 	assert(KBURN_ERROR_KIND_SERIAL > UINT32_MAX);
 	cout << '\x1B' << 'c';
 	flush(cout);
 
 	KBCTX context = NULL;
 	kburn_err_t err = kburnCreate(&context);
-	if (err != KBurnNoErr)
-	{
+	if (err != KBurnNoErr) {
 		cerr << "Failed Start: " << err << endl;
 		return 1;
 	}

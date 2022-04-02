@@ -1,7 +1,7 @@
 #pragma once
 
-#include "./prefix.h"
 #include "./errors.h"
+#include "./prefix.h"
 
 DEFINE_START
 
@@ -10,8 +10,7 @@ typedef uint32_t kburn_mem_address_t;
 typedef uint32_t kburn_stor_address_t;
 typedef uint32_t kburn_stor_block_t;
 
-typedef struct kburnDeviceError
-{
+typedef struct kburnDeviceError {
 	PCONST kburn_err_t code; // (kburnErrorKind << 32) + (slip error code / serial port error code)
 	PCONST char *errorMessage;
 } kburnDeviceError;
@@ -23,8 +22,7 @@ typedef struct kb_mutex *kb_mutex_t;
 #include "types.serial.h"
 #include "types.usb.h"
 
-typedef struct kburnDeviceNode
-{
+typedef struct kburnDeviceNode {
 	PCONST kburnDeviceError *const error;
 	PCONST void *chipInfo;
 	PCONST struct disposable_list *disposable_list;
@@ -37,8 +35,7 @@ typedef struct kburnDeviceNode
 	PCONST uint32_t bind_id;
 } kburnDeviceNode;
 
-typedef enum kburnLogType
-{
+typedef enum kburnLogType {
 	KBURN_LOG_BUFFER,
 	KBURN_LOG_TRACE,
 	KBURN_LOG_DEBUG,

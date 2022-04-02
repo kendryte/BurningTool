@@ -1,9 +1,8 @@
-#include "slip.h"
-#include "serial.h"
 #include "basic/errors.h"
+#include "serial.h"
+#include "slip.h"
 
-void recv_message(void *_ctx, uint8_t *UNUSED(data), uint32_t size)
-{
+void recv_message(void *_ctx, uint8_t *UNUSED(data), uint32_t size) {
 	kburnSerialDeviceNode *node = _ctx;
 	node->isp->has_response = true;
 	node->isp->main_buffer_length = size;
@@ -11,15 +10,13 @@ void recv_message(void *_ctx, uint8_t *UNUSED(data), uint32_t size)
 	return;
 }
 
-uint8_t write_byte(void *_ctx, uint8_t byte, bool end)
-{
+uint8_t write_byte(void *_ctx, uint8_t byte, bool end) {
 	kburnSerialDeviceNode *node = _ctx;
 
 	node->isp->send_buffer[node->isp->send_buffer_length] = byte;
 	node->isp->send_buffer_length++;
 
-	if (end || node->isp->send_buffer_length >= SERIAL_CHUNK_SIZE)
-	{
+	if (end || node->isp->send_buffer_length >= SERIAL_CHUNK_SIZE) {
 		size_t sent = 0;
 		ser_write(node->m_dev_handle, node->isp->send_buffer, node->isp->send_buffer_length, &sent);
 
@@ -33,8 +30,7 @@ uint8_t write_byte(void *_ctx, uint8_t byte, bool end)
 	return 1;
 }
 
-void serial_isp_open(kburnSerialDeviceNode *node)
-{
+void serial_isp_open(kburnSerialDeviceNode *node) {
 	debug_trace_function("node[%s]", node->path);
 	isp_state *isp = malloc(sizeof(isp_state));
 
@@ -54,18 +50,15 @@ void serial_isp_open(kburnSerialDeviceNode *node)
 	node->isp = isp;
 }
 
-void serial_isp_delete(kburnSerialDeviceNode *node)
-{
+void serial_isp_delete(kburnSerialDeviceNode *node) {
 	debug_trace_function();
-	if (node->isp)
-	{
+	if (node->isp) {
 		free(node->isp);
 		node->isp = NULL;
 	}
 }
 
-slip_error_t _serial_isp_slip_send_request(kburnSerialDeviceNode *node, isp_request_t *command)
-{
+slip_error_t _serial_isp_slip_send_request(kburnSerialDeviceNode *node, isp_request_t *command) {
 	serial_low_drain_input(node);
 	serial_isp_calculate_checksum(command);
 
@@ -77,8 +70,7 @@ slip_error_t _serial_isp_slip_send_request(kburnSerialDeviceNode *node, isp_requ
 	return ret;
 }
 
-static isp_response_t *serial_isp_command_send_low(kburnSerialDeviceNode *node, isp_request_t *command)
-{
+static isp_response_t *serial_isp_command_send_low(kburnSerialDeviceNode *node, isp_request_t *command) {
 	isp_response_t *ret = NULL;
 
 	m_assert(!node->serial_isp_busy, "serial isp is running.");
@@ -86,8 +78,7 @@ static isp_response_t *serial_isp_command_send_low(kburnSerialDeviceNode *node, 
 	node->isp->has_response = false;
 	node->isp->main_buffer_length = 0;
 
-	if (_serial_isp_slip_send_request(node, command) != SLIP_NO_ERROR)
-	{
+	if (_serial_isp_slip_send_request(node, command) != SLIP_NO_ERROR) {
 		goto exit;
 	}
 
@@ -98,26 +89,22 @@ static isp_response_t *serial_isp_command_send_low(kburnSerialDeviceNode *node, 
 #endif
 
 	uint8_t byte = '\0';
-	while (!node->isp->has_response)
-	{
+	while (!node->isp->has_response) {
 		size_t recv;
 		int32_t err = ser_read_wait(node->m_dev_handle);
-		if (err != 0)
-		{
+		if (err != 0) {
 			copy_last_serial_io_error(node, err);
 			goto exit;
 		}
 
 		err = ser_read(node->m_dev_handle, &byte, 1, &recv);
-		if (err != 0)
-		{
+		if (err != 0) {
 			copy_last_serial_io_error(node, err);
 			goto exit;
 		}
 
 #ifndef NDEBUG
-		if (debug_buffer_length < SERIAL_CHUNK_SIZE)
-		{
+		if (debug_buffer_length < SERIAL_CHUNK_SIZE) {
 			debug_buffer[debug_buffer_length] = byte;
 			debug_buffer_length++;
 		}
@@ -125,8 +112,7 @@ static isp_response_t *serial_isp_command_send_low(kburnSerialDeviceNode *node, 
 
 		m_assert(recv == 1, "serial port invalid return state");
 		slip_error_t err2 = slip_read_byte(&node->isp->slip, byte);
-		if (err2 != SLIP_NO_ERROR)
-		{
+		if (err2 != SLIP_NO_ERROR) {
 			slip_error(node, err2);
 			goto exit;
 		}
@@ -136,14 +122,12 @@ static isp_response_t *serial_isp_command_send_low(kburnSerialDeviceNode *node, 
 	print_buffer(KBURN_LOG_TRACE, "[response]", node->isp->main_buffer, node->isp->main_buffer_length);
 
 	isp_response_t *response = (void *)node->isp->main_buffer;
-	if (response->op != command->op)
-	{
+	if (response->op != command->op) {
 		set_error(node, KBURN_ERROR_KIND_COMMON, KBurnProtocolOpMismatch, "response invalid: operation not equals");
 		goto exit;
 	}
 
-	if (response->status != ISP_RET_OK)
-	{
+	if (response->status != ISP_RET_OK) {
 		serial_isp_command_error(node, response->status);
 		goto exit;
 	}
@@ -156,15 +140,12 @@ exit:
 	return ret;
 }
 
-isp_response_t *serial_isp_command_send_low_retry(kburnSerialDeviceNode *node, isp_request_t *command, int tries)
-{
+isp_response_t *serial_isp_command_send_low_retry(kburnSerialDeviceNode *node, isp_request_t *command, int tries) {
 	isp_response_t *r;
 
 	autolock(node->mutex);
-	for (int curr = 1; curr < tries; curr++)
-	{
-		if (node->isSwitchIsp || node->isUsbBound)
-		{
+	for (int curr = 1; curr < tries; curr++) {
+		if (node->isSwitchIsp || node->isUsbBound) {
 			debug_print(KBURN_LOG_ERROR, "this port is already binded");
 			static isp_response_t bounded;
 			bounded = (isp_response_t){

@@ -1,16 +1,15 @@
-#include <pthread.h>
 #include "global.h"
-#include "usb.h"
-#include "serial.h"
-#include "components/device-link-list.h"
 #include "bind-wait-list.h"
 #include "components/call-user-handler.h"
+#include "components/device-link-list.h"
+#include "serial.h"
+#include "usb.h"
+#include <pthread.h>
 
 disposable_list_t *lib_global_scope = NULL;
 uint32_t dbg_index = 0;
 
-kburn_err_t kburnCreate(KBCTX *ppCtx)
-{
+kburn_err_t kburnCreate(KBCTX *ppCtx) {
 	debug_trace_function();
 
 	DeferEnabled;
@@ -45,15 +44,16 @@ kburn_err_t kburnCreate(KBCTX *ppCtx)
 	struct port_link_list *odlist = port_link_list_init();
 	dispose_list_add(dis, toDisposable(port_link_list_deinit, odlist));
 
-	memcpy(*ppCtx, &(kburnContext){
-					   .serial = serial,
-					   .usb = usb,
-					   .openDeviceList = odlist,
-					   .waittingDevice = wlist,
-					   .disposables = dis,
-					   .threads = threads,
-					   .monitor_inited = false,
-				   },
+	memcpy(*ppCtx,
+		   &(kburnContext){
+			   .serial = serial,
+			   .usb = usb,
+			   .openDeviceList = odlist,
+			   .waittingDevice = wlist,
+			   .disposables = dis,
+			   .threads = threads,
+			   .monitor_inited = false,
+		   },
 		   sizeof(kburnContext));
 
 	if (!lib_global_scope)
@@ -62,15 +62,13 @@ kburn_err_t kburnCreate(KBCTX *ppCtx)
 	dispose_list_add(lib_global_scope, toDisposable(dispose_all_and_deinit, dis));
 	dispose_list_add(lib_global_scope, toDisposable(dispose_all_and_deinit, threads));
 
-	IfErrorReturn(
-		global_init_user_handle_thread(*ppCtx));
+	IfErrorReturn(global_init_user_handle_thread(*ppCtx));
 
 	DeferAbort;
 	return KBurnNoErr;
 }
 
-void kburnGlobalDestroy()
-{
+void kburnGlobalDestroy() {
 	debug_trace_function();
 	if (lib_global_scope == NULL)
 		return;
@@ -78,8 +76,7 @@ void kburnGlobalDestroy()
 	disposable_list_deinit(lib_global_scope);
 }
 
-void kburnDestroy(KBCTX scope)
-{
+void kburnDestroy(KBCTX scope) {
 	debug_trace_function("(%p)", (void *)scope);
 	if (lib_global_scope == NULL)
 		return;

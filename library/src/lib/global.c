@@ -1,10 +1,9 @@
 #include "global.h"
+#include <stdarg.h>
 #include <stdlib.h>
 #include <string.h>
-#include <stdarg.h>
 
-char *sprintf_alloc(const char *fmt, ...)
-{
+char *sprintf_alloc(const char *fmt, ...) {
 	va_list args;
 	va_start(args, fmt);
 
@@ -18,8 +17,7 @@ char *sprintf_alloc(const char *fmt, ...)
 	return ret;
 }
 
-char *vsprintf_alloc(const char *fmt, va_list args)
-{
+char *vsprintf_alloc(const char *fmt, va_list args) {
 	va_list argsc;
 	va_copy(argsc, args);
 	size_t size = m_vsnprintf(NULL, 0, fmt, argsc);

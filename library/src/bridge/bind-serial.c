@@ -5,24 +5,20 @@
 #include "protocol.h"
 #include "serial.h"
 
-static void push_buffer(char *tgt, size_t *tgt_i, const char *src, const size_t src_size)
-{
+static void push_buffer(char *tgt, size_t *tgt_i, const char *src, const size_t src_size) {
 	memcpy(tgt + *tgt_i, src, src_size);
 	*tgt_i += src_size;
 }
-static void cut_buffer_start(char *buf, size_t *tgt_i, const size_t pos)
-{
+static void cut_buffer_start(char *buf, size_t *tgt_i, const size_t pos) {
 	memmove(buf, buf + pos, *tgt_i - pos);
 	*tgt_i -= pos;
 }
-static bool verify4chr(char c1, char c2, char c3, char c4, char sum)
-{
+static bool verify4chr(char c1, char c2, char c3, char c4, char sum) {
 	int vsum = c1 + c2 + c3 + c4;
 	return vsum == (int)sum;
 }
 
-static uint32_t handle_one_device(kburnSerialDeviceNode *dev)
-{
+static uint32_t handle_one_device(kburnSerialDeviceNode *dev) {
 #define MAX_INPUT 64
 
 	size_t in_buffer_size = 0;
@@ -40,60 +36,48 @@ static uint32_t handle_one_device(kburnSerialDeviceNode *dev)
 	memcpy(tbuff, b->packet, tbuff_start);
 
 	int err = ser_read(dev->m_dev_handle, tbuff + tbuff_start, in_buffer_size, NULL);
-	if (err != 0)
-	{
+	if (err != 0) {
 		copy_last_serial_io_error(dev->parent, err);
 		return false;
 	}
 
 	debug_print(KBURN_LOG_DEBUG, "\t%zu in serial buffer", in_buffer_size);
 
-	for (size_t i = 0; i < tbuff_size; i++)
-	{
+	for (size_t i = 0; i < tbuff_size; i++) {
 		if (tbuff[i] != '\xff')
 			continue;
 
-		if (i + 6 > tbuff_size)
-		{
+		if (i + 6 > tbuff_size) {
 			push_buffer(b->packet, &b->packet_last, tbuff + i, tbuff_size - i);
 			break;
 		}
 
-		if (verify4chr(b->buffer[i + 1], b->buffer[i + 2], b->buffer[i + 3], b->buffer[i + 4], b->buffer[i + 5]))
-		{
+		if (verify4chr(b->buffer[i + 1], b->buffer[i + 2], b->buffer[i + 3], b->buffer[i + 4], b->buffer[i + 5])) {
 			push_buffer(b->buffer, &b->buff_i, tbuff + i + 1, 4);
 			i += 5;
 		}
 	}
 
-	while (true)
-	{
+	while (true) {
 		int found_start = -1, found_end = -1;
 		size_t work_size = (b->buff_i / 6) * 6;
-		for (size_t i = 0; i < work_size; i++)
-		{
+		for (size_t i = 0; i < work_size; i++) {
 			char ch = b->buffer[i];
-			if (ch == '{')
-			{
+			if (ch == '{') {
 				found_start = i;
-			}
-			else if (found_start >= 0 && ch == '}')
-			{
+			} else if (found_start >= 0 && ch == '}') {
 				found_end = i;
 				break;
 			}
 		}
 
-		if (found_start < 0)
-		{
+		if (found_start < 0) {
 			b->buff_i = 0;
 			return false;
 		}
 
-		if (found_end < 0)
-		{
-			if (found_start > 0)
-			{
+		if (found_end < 0) {
+			if (found_start > 0) {
 				cut_buffer_start(b->buffer, &b->buff_i, found_start);
 			}
 			return false;
@@ -104,29 +88,23 @@ static uint32_t handle_one_device(kburnSerialDeviceNode *dev)
 		if (bind_id > 0)
 			return bind_id;
 
-		if ((uint32_t)found_end + 1 > b->buff_i)
-		{
+		if ((uint32_t)found_end + 1 > b->buff_i) {
 			b->buff_i = 0;
-		}
-		else
-		{
+		} else {
 			cut_buffer_start(b->buffer, &b->buff_i, found_end + 1);
 		}
 	}
 	return false;
 }
 
-void pair_serial_ports_thread(void *UNUSED(ctx), KBCTX scope, const bool *const quit)
-{
+void pair_serial_ports_thread(void *UNUSED(ctx), KBCTX scope, const bool *const quit) {
 	int delay = 100;
-	while (!*quit)
-	{
+	while (!*quit) {
 		int item_waitting_pair = 0;
 
 		lock(scope->waittingDevice->mutex);
 
-		for (kburnDeviceNode **ptr = scope->waittingDevice->list; *ptr != NULL; ptr++)
-		{
+		for (kburnDeviceNode **ptr = scope->waittingDevice->list; *ptr != NULL; ptr++) {
 			kburnDeviceNode *serial_node = *ptr;
 			kburnSerialDeviceNode *dev = serial_node->serial;
 			if (!dev->init) // TODO: need lock with deinit
@@ -136,8 +114,7 @@ void pair_serial_ports_thread(void *UNUSED(ctx), KBCTX scope, const bool *const 
 				dev->binding = calloc(1, sizeof(binding_state));
 
 			uint32_t found_bind = handle_one_device(dev);
-			if (found_bind > 0)
-			{
+			if (found_bind > 0) {
 				dev->isUsbBound = true;
 				free(dev->binding);
 				dev->binding = NULL;
@@ -145,8 +122,7 @@ void pair_serial_ports_thread(void *UNUSED(ctx), KBCTX scope, const bool *const 
 				recreate_waitting_list(scope);
 
 				kburnDeviceNode *new_usb_node = get_device_by_bind_id(scope, found_bind);
-				if (new_usb_node == NULL)
-				{
+				if (new_usb_node == NULL) {
 					debug_print(KBURN_LOG_ERROR, COLOR_FMT("bind target usb port gone, bind_id=%d, maybe disconnected?"), COLOR_ARG(RED, found_bind));
 					continue;
 				}

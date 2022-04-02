@@ -11,8 +11,7 @@ param1 : dev         枚举出来并符合vid pid的usb设备
 param2 : current     当前设备节点
 Return: 返回负数说明获取端点失败，返回0为成功
 *******************************************************/
-static int get_endpoint(libusb_device *dev, uint8_t *out_endpoint_in, uint8_t *out_endpoint_out)
-{
+static int get_endpoint(libusb_device *dev, uint8_t *out_endpoint_in, uint8_t *out_endpoint_out) {
 	debug_trace_function("%p", (void *)dev);
 	int k, j;
 	struct libusb_config_descriptor *conf_desc;
@@ -21,29 +20,22 @@ static int get_endpoint(libusb_device *dev, uint8_t *out_endpoint_in, uint8_t *o
 	*out_endpoint_out = 0;
 
 	/* 获取配置描述符，里面包含端点信息 */
-	CheckLibusbError(
-		libusb_get_config_descriptor(dev, 0, &conf_desc));
+	CheckLibusbError(libusb_get_config_descriptor(dev, 0, &conf_desc));
 
 	/* 默认使用第一个接口 usb_interface[0]*/
-	for (j = 0; j < conf_desc->usb_interface[0].num_altsetting; j++)
-	{
-		for (k = 0; k < conf_desc->usb_interface[0].altsetting[j].bNumEndpoints; k++)
-		{
+	for (j = 0; j < conf_desc->usb_interface[0].num_altsetting; j++) {
+		for (k = 0; k < conf_desc->usb_interface[0].altsetting[j].bNumEndpoints; k++) {
 			endpoint = &conf_desc->usb_interface[0].altsetting[j].endpoint[k];
 			debug_print(KBURN_LOG_TRACE, "\tendpoint[%d].address: %02X", k, endpoint->bEndpointAddress);
 
 			/* 使用批量传输的端点 */
-			if (endpoint->bmAttributes & LIBUSB_TRANSFER_TYPE_MASK & LIBUSB_TRANSFER_TYPE_BULK)
-			{
-				if (endpoint->bEndpointAddress & LIBUSB_ENDPOINT_IN)
-				{
+			if (endpoint->bmAttributes & LIBUSB_TRANSFER_TYPE_MASK & LIBUSB_TRANSFER_TYPE_BULK) {
+				if (endpoint->bEndpointAddress & LIBUSB_ENDPOINT_IN) {
 					*out_endpoint_in = endpoint->bEndpointAddress;
 					debug_print(KBURN_LOG_INFO, " * endpoint_in = 0x%02X", *out_endpoint_in);
 					if (*out_endpoint_out)
 						goto _quit;
-				}
-				else
-				{
+				} else {
 					*out_endpoint_out = endpoint->bEndpointAddress;
 					debug_print(KBURN_LOG_INFO, " * endpoint_out = 0x%02X", *out_endpoint_out);
 					if (*out_endpoint_in)
@@ -58,19 +50,16 @@ _quit:
 	return LIBUSB_SUCCESS;
 }
 
-DECALRE_DISPOSE(destroy_usb_port, kburnUsbDeviceNode)
-{
+DECALRE_DISPOSE(destroy_usb_port, kburnUsbDeviceNode) {
 	debug_trace_function("USB[0x%p: %s]", (void *)context->device, usb_debug_path_string(context->deviceInfo.path));
 
 	lock(context->mutex);
-	if (context->isClaim)
-	{
+	if (context->isClaim) {
 		context->isClaim = false;
 		libusb_release_interface(context->handle, 0);
 	}
 
-	if (context->isOpen)
-	{
+	if (context->isOpen) {
 		context->isOpen = false;
 		libusb_close(context->handle);
 		context->handle = NULL;
@@ -83,8 +72,7 @@ DECALRE_DISPOSE(destroy_usb_port, kburnUsbDeviceNode)
 }
 DECALRE_DISPOSE_END()
 
-kburn_err_t open_single_usb_port(KBCTX scope, struct libusb_device *dev, kburnDeviceNode **out_node)
-{
+kburn_err_t open_single_usb_port(KBCTX scope, struct libusb_device *dev, kburnDeviceNode **out_node) {
 	DeferEnabled;
 
 	debug_print(KBURN_LOG_TRACE, COLOR_FMT("open_single_usb_port") "(%p)", COLOR_ARG(GREEN), (void *)dev);
@@ -92,8 +80,7 @@ kburn_err_t open_single_usb_port(KBCTX scope, struct libusb_device *dev, kburnDe
 
 	int r;
 	kburnDeviceNode *node;
-	IfErrorReturn(
-		create_empty_device_instance(scope, &node));
+	IfErrorReturn(create_empty_device_instance(scope, &node));
 	DeferDispose(scope->disposables, node, destroy_device);
 	DeferDispose(node->disposable_list, node->usb, destroy_usb_port);
 
@@ -102,59 +89,47 @@ kburn_err_t open_single_usb_port(KBCTX scope, struct libusb_device *dev, kburnDe
 	node->usb->mutex = CheckNull(lock_init());
 	node->usb->device = dev;
 
-	IfUsbErrorReturn(
-		usb_get_vid_pid_path(dev, &node->usb->deviceInfo.idVendor, &node->usb->deviceInfo.idProduct, node->usb->deviceInfo.path));
+	IfUsbErrorReturn(usb_get_vid_pid_path(dev, &node->usb->deviceInfo.idVendor, &node->usb->deviceInfo.idProduct, node->usb->deviceInfo.path));
 
 	debug_print(KBURN_LOG_INFO, "  * vid: %d", node->usb->deviceInfo.idVendor);
 	debug_print(KBURN_LOG_INFO, "  * vid: %d", node->usb->deviceInfo.idProduct);
 	debug_print(KBURN_LOG_INFO, "  * path: %s", usb_debug_path_string(node->usb->deviceInfo.path));
 
-	IfUsbErrorLogReturn(
-		libusb_open(dev, &node->usb->handle));
+	IfUsbErrorLogReturn(libusb_open(dev, &node->usb->handle));
 	node->usb->isOpen = true;
 	debug_print(KBURN_LOG_INFO, "usb port open success, handle=%p", (void *)node->usb->handle);
 
 	r = libusb_kernel_driver_active(node->usb->handle, 0);
-	if (r == 0)
-	{
+	if (r == 0) {
 		debug_print(KBURN_LOG_DEBUG, "libusb kernel driver is already set to this device");
-	}
-	else if (r == 1)
-	{
+	} else if (r == 1) {
 		r = libusb_detach_kernel_driver(node->usb->handle, 0);
-		if (r != LIBUSB_ERROR_NOT_FOUND && r != 0)
-		{
+		if (r != LIBUSB_ERROR_NOT_FOUND && r != 0) {
 			set_node_error_with_log(r, "libusb_detach_kernel_driver() returns %d", r);
 			return make_error_code(KBURN_ERROR_KIND_USB, r);
 		}
 		debug_print(KBURN_LOG_DEBUG, "libusb kernel driver switch ok");
-	}
-	else if (r == LIBUSB_ERROR_NOT_SUPPORTED)
-	{
+	} else if (r == LIBUSB_ERROR_NOT_SUPPORTED) {
 		set_node_error_with_log(r, "open_single_usb_port: system not support detach kernel driver");
 		return make_error_code(KBURN_ERROR_KIND_USB, r);
 	}
 
 	libusb_clear_halt(node->usb->handle, 0);
 	int lastr = -1;
-	for (int i = 0; i < 20; i++)
-	{
+	for (int i = 0; i < 20; i++) {
 		r = libusb_claim_interface(node->usb->handle, 0);
-		if (r == 0)
-		{
+		if (r == 0) {
 			debug_print(KBURN_LOG_INFO, "claim interface success, tried %d times", i + 1);
 			break;
 		}
-		if (lastr != r)
-		{
+		if (lastr != r) {
 			lastr = r;
 			debug_print_libusb_error("libusb_claim_interface", r);
 		}
 		do_sleep(500);
 	}
 
-	if (r != 0)
-	{
+	if (r != 0) {
 		set_node_error_with_log(r, "libusb_claim_interface: can not claim interface in 10s, other program is using this port.");
 		return make_error_code(KBURN_ERROR_KIND_USB, r);
 	}
@@ -164,11 +139,9 @@ kburn_err_t open_single_usb_port(KBCTX scope, struct libusb_device *dev, kburnDe
 
 	usb_get_device_serial(dev, node->usb->handle, node->usb->deviceInfo.strSerial);
 
-	IfUsbErrorReturn(
-		get_endpoint(dev, &node->usb->deviceInfo.endpoint_in, &node->usb->deviceInfo.endpoint_out));
+	IfUsbErrorReturn(get_endpoint(dev, &node->usb->deviceInfo.endpoint_in, &node->usb->deviceInfo.endpoint_out));
 
-	IfErrorReturn(
-		usb_device_hello(node));
+	IfErrorReturn(usb_device_hello(node));
 	debug_print(KBURN_LOG_DEBUG, "hello success.");
 
 	add_to_device_list(node);
@@ -176,8 +149,7 @@ kburn_err_t open_single_usb_port(KBCTX scope, struct libusb_device *dev, kburnDe
 	alloc_new_bind_id(node);
 	debug_print(KBURN_LOG_INFO, "	bind id = %d", node->bind_id);
 
-	IfErrorReturn(
-		usb_device_serial_bind(node));
+	IfErrorReturn(usb_device_serial_bind(node));
 
 	node->usb->init = true;
 	node->disconnect_should_call = true;
@@ -188,13 +160,11 @@ kburn_err_t open_single_usb_port(KBCTX scope, struct libusb_device *dev, kburnDe
 	return KBurnNoErr;
 }
 
-void kburnOnUsbConfirm(KBCTX scope, on_device_handle handle_callback, void *ctx)
-{
+void kburnOnUsbConfirm(KBCTX scope, on_device_handle handle_callback, void *ctx) {
 	scope->usb->handle_callback = handle_callback;
 	scope->usb->handle_callback_ctx = ctx;
 }
 
-kburnDeviceNode *usb_device_find(KBCTX scope, uint16_t vid, uint16_t pid, const uint8_t *path)
-{
+kburnDeviceNode *usb_device_find(KBCTX scope, uint16_t vid, uint16_t pid, const uint8_t *path) {
 	return get_device_by_usb_port_path(scope, vid, pid, path);
 }

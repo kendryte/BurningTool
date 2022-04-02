@@ -2,8 +2,7 @@
 
 #include <stdint.h>
 
-enum kburnIspOperation
-{
+enum kburnIspOperation {
 	ISP_ECHO = 0xC1,
 	ISP_NOP = 0xC2,
 	ISP_MEMORY_WRITE = 0xC3,
