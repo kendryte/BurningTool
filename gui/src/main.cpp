@@ -23,6 +23,9 @@ int main(int argc, char *argv[])
 		}
 	}
 
+	MainWindow w;
+	w.show();
+
 	KBCTX kb_context;
 	kburn_err_t err = kburnCreate(&kb_context);
 	if (err != KBurnNoErr)
@@ -32,11 +35,21 @@ int main(int argc, char *argv[])
 		return 1;
 	}
 
-	MainWindow w;
-	w.show();
+	kburnSetColors((kburnDebugColors){
+		.red = {.prefix = "<span style=\"color: red\">", .postfix = "</span>"},
+		.green = {.prefix = "<span style=\"color: lime\">", .postfix = "</span>"},
+		.yellow = {.prefix = "<span style=\"color: yellow\">", .postfix = "</span>"},
+		.grey = {.prefix = "<span style=\"opacity: 0.5\">", .postfix = "</span>"},
+	});
+	kburnSetLogCallback(receiver);
+
 	int r = a.exec();
 
 	kburnGlobalDestroy();
 
 	return r;
+}
+
+SIGNAL log_receiver()
+{
 }
