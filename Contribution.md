@@ -4,6 +4,13 @@
 * 使用vcpkg处理依赖、cmake编译
 * 调试模式链接了libasan，用于查找内存问题，发布模式没有
 
+# 依赖
+* UBuntu: 
+	* libusb: libudev-dev
+	* qt6: libdouble-conversion-dev
+* RHEL:
+	* libusb: systemd-devel
+	* qt6: qt6-qtbase-devel qt6-qttools-devel
 # 构建
 1. clone本项目（注意：有子模块）    
 	```bash

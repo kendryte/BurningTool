@@ -41,7 +41,7 @@ void *_track_dispose(resource_tracker_t *tracker, disposable d, const char *var,
 	.hasAlways = false,                               \
 	.size = false,                                    \
 	.__debug = {                                      \
-		.file = __FILENAME__,                         \
+		.file = __FILE__,                         \
 		.func = __func__,                             \
 		.line = __LINE__,                             \
 		.title = "ResourceTracker",                   \
@@ -53,18 +53,18 @@ void *_track_dispose(resource_tracker_t *tracker, disposable d, const char *var,
 #define DeferCall(cleaner, pointer) __extension__({                                                                           \
 	if (0)                                                                                                                    \
 		cleaner(pointer);                                                                                                     \
-	_track_resource(&_resource_tracker, (void *)pointer, (cleanup_function)cleaner, false, #pointer, __FILENAME__, __LINE__); \
+	_track_resource(&_resource_tracker, (void *)pointer, (cleanup_function)cleaner, false, #pointer, __FILE__, __LINE__); \
 })
 #define DeferCallAlways(cleaner, pointer) __extension__({                                                                    \
 	if (0)                                                                                                                   \
 		cleaner(pointer);                                                                                                    \
-	_track_resource(&_resource_tracker, (void *)pointer, (cleanup_function)cleaner, true, #pointer, __FILENAME__, __LINE__); \
+	_track_resource(&_resource_tracker, (void *)pointer, (cleanup_function)cleaner, true, #pointer, __FILE__, __LINE__); \
 })
 #define DeferFree(pointer) DeferCall(free, pointer)
 #define DeferFreeAlways(pointer) DeferCallAlways(free, pointer)
 #define DeferDispose(list, obj, destruct) __extension__({                                                          \
 	disposable d = toDisposable(destruct, obj);                                                                    \
-	_track_dispose(&_resource_tracker, dispose_list_add(list, d), #destruct "(" #obj ")", __FILENAME__, __LINE__); \
+	_track_dispose(&_resource_tracker, dispose_list_add(list, d), #destruct "(" #obj ")", __FILE__, __LINE__); \
 })
 
 #define DeferAbort keep_resource(&_resource_tracker)

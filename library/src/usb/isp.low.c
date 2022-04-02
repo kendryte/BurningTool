@@ -94,21 +94,21 @@ Return: 返回负数说明函数执行失败，返回0为成功
 kburn_err_t usb_lowlevel_command_send(libusb_device_handle *handle, uint8_t endpoint_out,
 									  const usbIspCommandPacket cdb, uint8_t direction, int data_length, uint32_t operation_index)
 {
-	debug_print("usb_lowlevel_command_send(%d)", operation_index);
+	debug_trace_function("%d", operation_index);
 
 	m_assert_ptr(handle, "handle pointer is null!");
 	m_assert0(endpoint_out & LIBUSB_ENDPOINT_IN, "cannot send command on IN endpoint"); /* 校验端点的传输方向 */
 
 	usbIspRequestPacket cbw = create_request(operation_index, data_length, direction, cdb);
 
-	print_buffer("cbw", (void *)&cbw, sizeof(usbIspRequestPacket));
+	print_buffer(KBURN_LOG_TRACE, "cbw", (void *)&cbw, sizeof(usbIspRequestPacket));
 
 	int written_size = 0;
 	int r = retry_libusb_bulk_transfer(handle, endpoint_out, &cbw, sizeof(usbIspRequestPacket), &written_size, 1000);
 	if (r < LIBUSB_SUCCESS)
 		return make_error_code(KBURN_ERROR_KIND_USB, r);
 
-	debug_print("      %d bytes sent", written_size);
+	debug_print(KBURN_LOG_DEBUG, "      %d bytes sent", written_size);
 
 	return KBurnNoErr;
 }
@@ -122,7 +122,7 @@ static kburn_err_t csw_status_parse(const void *buff, uint32_t expected_operatio
 {
 	if (!is_packet_type_csw(buff))
 	{
-		debug_print("mismatched signature: %.4s (expected USBS)", (char *)buff);
+		debug_print(KBURN_LOG_ERROR, "mismatched signature: %.4s (expected USBS)", (char *)buff);
 		return make_error_code(KBURN_ERROR_KIND_COMMON, KBurnUsbReadIndexMismatch);
 	}
 
@@ -130,25 +130,29 @@ static kburn_err_t csw_status_parse(const void *buff, uint32_t expected_operatio
 
 	if (expected_operation_index && csw->operation_tag != expected_operation_index)
 	{
-		debug_print("mismatched tags: %d (expected %d)", csw->operation_tag, expected_operation_index);
+		debug_print(KBURN_LOG_ERROR, "mismatched tags: %d (expected %d)", csw->operation_tag, expected_operation_index);
 		return make_error_code(KBURN_ERROR_KIND_COMMON, KBurnUsbReadIndexMismatch);
 	}
 
-	debug_print("mass storage status: %X (%s)", csw->is_success, csw->is_success ? "FAILED" : "success");
 	if (csw->is_success)
 	{
+		debug_print(KBURN_LOG_TRACE, "mass storage status: %d", csw->is_success);
 		// 状态值为1说明有错误出现，应该使用GetSense获取错误原因。状态值大于等于2说明设备没有识别CWB命令是啥
 		if (csw->is_success == 1)
 			return make_error_code(KBURN_ERROR_KIND_COMMON, KBurnUsbErrorSense);
 		else
 			return make_error_code(KBURN_ERROR_KIND_COMMON, KBurnProtocolOpMismatch);
 	}
+	else
+	{
+		debug_print(KBURN_LOG_ERROR, "mass storage status: %d", csw->is_success);
+	}
 	return KBurnNoErr;
 }
 
 kburn_err_t usb_lowlevel_status_read(libusb_device_handle *handle, uint8_t endpoint_in, uint32_t expected_operation_index)
 {
-	debug_print("usb_lowlevel_status_read(%d)", expected_operation_index);
+	debug_trace_function("%d", expected_operation_index);
 
 	usbIspResponsePacket csw;
 	memset(&csw, 0, sizeof(usbIspResponsePacket));
@@ -158,11 +162,11 @@ kburn_err_t usb_lowlevel_status_read(libusb_device_handle *handle, uint8_t endpo
 	if (r < LIBUSB_SUCCESS)
 		return make_error_code(KBURN_ERROR_KIND_USB, r);
 
-	print_buffer("csw", (void *)&csw, sizeof(usbIspResponsePacket));
+	print_buffer(KBURN_LOG_TRACE, "csw", (void *)&csw, sizeof(usbIspResponsePacket));
 
 	if (readed_size != sizeof(usbIspResponsePacket))
 	{
-		debug_print("usb_lowlevel_status_read: received %d bytes (expected %ld)", readed_size, sizeof(usbIspResponsePacket));
+		debug_print(KBURN_LOG_ERROR, "usb_lowlevel_status_read: received %d bytes (expected %ld)", readed_size, sizeof(usbIspResponsePacket));
 	}
 
 	kburn_err_t ret = csw_status_parse(&csw, expected_operation_index);
@@ -174,11 +178,11 @@ kburn_err_t usb_lowlevel_status_read(libusb_device_handle *handle, uint8_t endpo
 
 kburn_err_t usb_lowlevel_transfer(kburnUsbDeviceNode *node, enum InOut direction, void *buffer, int size)
 {
-	debug_print(GREY("usb_lowlevel_transfer(%s, %d bytes)"), direction == USB_READ ? "read" : "write", size);
+	debug_trace_function("%s, %d bytes", direction == USB_READ ? "read" : "write", size);
 
 	if (direction == USB_WRITE)
 	{
-		print_buffer("PC→USB", buffer, size);
+		print_buffer(KBURN_LOG_TRACE, "PC→USB", buffer, size);
 	}
 
 	int actual_size;
@@ -193,7 +197,7 @@ kburn_err_t usb_lowlevel_transfer(kburnUsbDeviceNode *node, enum InOut direction
 
 	if (direction == USB_READ)
 	{
-		print_buffer("USB→PC", buffer, actual_size);
+		print_buffer(KBURN_LOG_TRACE, "USB→PC", buffer, actual_size);
 	}
 
 	if (actual_size != size)
@@ -220,6 +224,8 @@ param3 : uint8_t endpoint_out                  端点I/O
 *************************************************************/
 kburn_err_t usb_lowlevel_error_read(libusb_device_handle *handle, uint8_t endpoint_in, uint8_t endpoint_out)
 {
+	debug_trace_function();
+
 	usbIspCommandPacket request = {
 		.command = USB_ISP_COMMAND_SENSE,
 		.sense.size = REQUEST_SENSE_LENGTH,
@@ -233,7 +239,6 @@ kburn_err_t usb_lowlevel_error_read(libusb_device_handle *handle, uint8_t endpoi
 	int rc;
 
 	// Request Sense
-	debug_print("usb_lowlevel_error_read:");
 
 	rc = usb_lowlevel_command_send(handle, endpoint_out, request, LIBUSB_ENDPOINT_IN, REQUEST_SENSE_LENGTH, expected_tag);
 	if (rc < LIBUSB_SUCCESS)
@@ -246,11 +251,11 @@ kburn_err_t usb_lowlevel_error_read(libusb_device_handle *handle, uint8_t endpoi
 		debug_print_libusb_error("libusb_bulk_transfer failed:", rc);
 		return make_error_code(KBURN_ERROR_KIND_USB, rc);
 	}
-	print_buffer("sense", sense, REQUEST_SENSE_LENGTH);
+	print_buffer(KBURN_LOG_TRACE, "sense", sense, REQUEST_SENSE_LENGTH);
 
 	if ((sense[0] != 0x70) && (sense[0] != 0x71))
 	{
-		debug_print("ERROR Sense: No data");
+		debug_print(KBURN_LOG_ERROR, "ERROR Sense: No data");
 	}
 	else
 	{

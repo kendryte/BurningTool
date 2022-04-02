@@ -10,12 +10,12 @@ static inline void free_handle(void *handle)
 DECALRE_DISPOSE(destroy_serial_port, kburnDeviceNode)
 {
 	kburnSerialDeviceNode *serial = context->serial;
+	debug_trace_function("%p[%s]", (void *)serial, OPTSTR(serial->path, "*invalid*"));
+
 	if (!serial->init)
 		return;
 
 	lock(serial->mutex);
-
-	debug_print("destroy_serial_port(%p[%s])", (void *)serial, serial->path);
 
 	serial_isp_delete(serial);
 
@@ -44,9 +44,10 @@ DECALRE_DISPOSE_END()
 
 kburn_err_t serial_port_init(kburnSerialDeviceNode *serial, const char *path)
 {
+	debug_trace_function("0x%p, %s", (void *)serial, path);
+
 	m_assert(!serial->init, "serial port must not already inited");
 
-	debug_print("serial_port_init(0x%p, %s)", (void *)serial, path);
 	serial->path = CheckNull(strdup(path));
 	serial->deviceInfo = driver_get_devinfo(path);
 	serial->mutex = CheckNull(lock_init());

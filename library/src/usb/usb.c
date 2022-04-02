@@ -33,7 +33,7 @@ int usb_get_device_path(struct libusb_device *dev, uint8_t path[MAX_PATH_LENGTH]
 
 int usb_get_device_serial(libusb_device *dev, libusb_device_handle *handle, uint8_t *output)
 {
-	debug_print("usb_get_device_serial()");
+	debug_trace_function();
 	struct libusb_device_descriptor desc;
 
 	int err = libusb_get_device_descriptor(dev, &desc);
@@ -47,7 +47,7 @@ int usb_get_device_serial(libusb_device *dev, libusb_device_handle *handle, uint
 
 	if (desc.iSerialNumber == 0)
 	{
-		debug_print("  - device do not have serial.");
+		debug_print(KBURN_LOG_WARN, "  - device do not have serial.");
 		return LIBUSB_SUCCESS;
 	}
 
@@ -63,11 +63,17 @@ int usb_get_device_serial(libusb_device *dev, libusb_device_handle *handle, uint
 	}
 
 	if (r >= LIBUSB_SUCCESS)
-		debug_print("serial: %s", output);
+	{
+		debug_print(KBURN_LOG_DEBUG, "serial: %s", output);
+	}
 	else if (r == LIBUSB_ERROR_BUSY)
-		debug_print("abort try to get serial number");
+	{
+		debug_print(KBURN_LOG_WARN, "abort try to get serial number");
+	}
 	else
+	{
 		debug_print_libusb_error("  - libusb_get_string_descriptor_ascii()", r);
+	}
 
 	return r;
 }

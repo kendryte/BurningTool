@@ -22,7 +22,7 @@ uint8_t write_byte(void *_ctx, uint8_t byte, bool end)
 		size_t sent = 0;
 		ser_write(node->m_dev_handle, node->isp->send_buffer, node->isp->send_buffer_length, &sent);
 
-		print_buffer("PC→MCU", node->isp->send_buffer, node->isp->send_buffer_length);
+		print_buffer(KBURN_LOG_TRACE, "PC→MCU", node->isp->send_buffer, node->isp->send_buffer_length);
 
 		node->isp->send_buffer_length = 0;
 	}
@@ -34,7 +34,7 @@ uint8_t write_byte(void *_ctx, uint8_t byte, bool end)
 
 void serial_isp_open(kburnSerialDeviceNode *node)
 {
-	debug_print("serial_isp_open(node[%s])", node->path);
+	debug_trace_function("node[%s]", node->path);
 	isp_state *isp = malloc(sizeof(isp_state));
 
 	isp->descriptor.buf = isp->main_buffer;
@@ -55,7 +55,7 @@ void serial_isp_open(kburnSerialDeviceNode *node)
 
 void serial_isp_delete(kburnSerialDeviceNode *node)
 {
-	debug_print("\tserial_isp_delete()");
+	debug_trace_function();
 	if (node->isp)
 	{
 		free(node->isp);
@@ -131,8 +131,8 @@ static isp_response_t *serial_isp_command_send_low(kburnSerialDeviceNode *node, 
 		}
 	}
 
-	print_buffer("MCU→PC", debug_buffer, debug_buffer_length);
-	print_buffer("[response]", node->isp->main_buffer, node->isp->main_buffer_length);
+	print_buffer(KBURN_LOG_TRACE, "MCU→PC", debug_buffer, debug_buffer_length);
+	print_buffer(KBURN_LOG_TRACE, "[response]", node->isp->main_buffer, node->isp->main_buffer_length);
 
 	isp_response_t *response = (void *)node->isp->main_buffer;
 	if (response->op != command->op)
@@ -164,7 +164,7 @@ isp_response_t *serial_isp_command_send_low_retry(kburnSerialDeviceNode *node, i
 	{
 		if (node->isSwitchIsp || node->isUsbBound)
 		{
-			debug_print("this port is already binded");
+			debug_print(KBURN_LOG_ERROR, "this port is already binded");
 			static isp_response_t bounded;
 			bounded = (isp_response_t){
 				.op = -1,
@@ -177,7 +177,7 @@ isp_response_t *serial_isp_command_send_low_retry(kburnSerialDeviceNode *node, i
 		if (r)
 			return r;
 
-		debug_print("failed retry: %d/%d", curr + 1, tries);
+		debug_print(KBURN_LOG_ERROR, "failed retry: %d/%d", curr + 1, tries);
 		bool isWiredState = error_compare(node, KBURN_ERROR_KIND_COMMON, KBurnProtocolOpMismatch);
 		clear_error(node);
 		serial_low_output_nulls(node, isWiredState && (curr % 2 == 1));

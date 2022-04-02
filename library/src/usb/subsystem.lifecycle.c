@@ -15,10 +15,10 @@ static void thread_libusb_handle_events(KBCTX scope, const bool *const quit)
 
 void usb_subsystem_deinit(KBCTX scope)
 {
-	debug_print("usb_subsystem_deinit()");
+	debug_trace_function();
 	if (!scope->usb->subsystem_inited)
 	{
-		debug_print("  - already deinited");
+		debug_print(KBURN_LOG_DEBUG, "  - already deinited");
 		return;
 	}
 
@@ -37,18 +37,18 @@ kburn_err_t usb_subsystem_init(KBCTX scope)
 {
 	DeferEnabled;
 
-	debug_print("usb_subsystem_init()");
+	debug_trace_function();
 	if (scope->usb->subsystem_inited)
 	{
-		debug_print("  - already inited");
+		debug_print(KBURN_LOG_DEBUG, "  - already inited");
 		return KBurnNoErr;
 	}
 
 	scope->usb->detach_kernel_driver = libusb_has_capability(LIBUSB_CAP_SUPPORTS_DETACH_KERNEL_DRIVER);
-	debug_print("libusb can detach kernel driver: %d", scope->usb->detach_kernel_driver);
+	debug_print(KBURN_LOG_INFO, "libusb can detach kernel driver: %d", scope->usb->detach_kernel_driver);
 
 	const struct libusb_version *version = libusb_get_version();
-	debug_print("\tlibusb v%d.%d.%d.%d\n\n", version->major, version->minor, version->micro, version->nano);
+	debug_print(KBURN_LOG_INFO, "\tlibusb v%d.%d.%d.%d\n\n", version->major, version->minor, version->micro, version->nano);
 
 	int r = libusb_init(&scope->usb->libusb);
 	if (r < 0)
@@ -62,7 +62,7 @@ kburn_err_t usb_subsystem_init(KBCTX scope)
 	if (err != KBurnNoErr)
 		return err;
 
-	debug_print("libusb init complete");
+	debug_print(KBURN_LOG_DEBUG, "libusb init complete");
 
 	scope->usb->subsystem_inited = true;
 	DeferAbort;

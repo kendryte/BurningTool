@@ -6,14 +6,14 @@ kburn_err_t on_serial_device_attach(KBCTX scope, const char *path)
 {
 	DeferEnabled;
 
-	debug_print(GREEN("on_serial_device_attach") "(%s)", path);
+	debug_print(KBURN_LOG_TRACE, COLOR_FMT("on_serial_device_attach") "(%s)", COLOR_ARG(GREEN), path);
 
 	kburnDeviceNode *node = NULL;
 
 	IfErrorReturn(
 		create_empty_device_instance(scope, &node));
 	DeferDispose(scope->disposables, node, destroy_device);
-	debug_print("new device created: %p", (void *)node);
+	debug_print(KBURN_LOG_INFO, "new device created: %p", (void *)node);
 
 	DeferUserCallback(scope->serial->handler_callback, node, true);
 
@@ -29,13 +29,13 @@ kburn_err_t on_serial_device_attach(KBCTX scope, const char *path)
 			return make_error_code(KBURN_ERROR_KIND_COMMON, KBurnUserCancel);
 		}
 	}
-	debug_print("user verify pass");
+	debug_print(KBURN_LOG_INFO, "user verify pass");
 
 	if (!node->serial->isOpen)
 	{
 		if (!serial_low_open(node->serial))
 		{
-			debug_print("open failed");
+			debug_print(KBURN_LOG_ERROR, "open failed");
 			return node->error->code;
 		}
 	}
@@ -44,7 +44,7 @@ kburn_err_t on_serial_device_attach(KBCTX scope, const char *path)
 	{
 		if (!confirm_port_is_ready(node->serial))
 		{
-			debug_print("confirm failed");
+			debug_print(KBURN_LOG_ERROR, "confirm failed");
 			return node->error->code;
 		}
 	}

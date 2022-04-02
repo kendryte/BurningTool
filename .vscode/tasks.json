@@ -8,13 +8,11 @@
 			"type": "shell",
 			"command": "cmake",
 			"args": [
-				"-G",
-				"Unix Makefiles",
-				"-Wdev",
 				"-S",
 				"${workspaceFolder}",
 				"-B",
-				"${workspaceFolder}/build-vscode"
+				"${workspaceFolder}/build-vscode-${env:HOSTNAME}${env:COMPUTERNAME}",
+				"--debug-trycompile"
 			],
 			"group": "build",
 			"presentation": {
@@ -33,10 +31,9 @@
 			"command": "cmake",
 			"args": [
 				"--build",
-				"."
+				"${workspaceFolder}/build-vscode-${env:HOSTNAME}${env:COMPUTERNAME}"
 			],
 			"options": {
-				"cwd": "${workspaceFolder}/build-vscode"
 			},
 			"group": {
 				"kind": "build",
@@ -51,6 +48,6 @@
 				"clear": true
 			},
 			"problemMatcher": "$gcc"
-		}
+		},
 	]
 }

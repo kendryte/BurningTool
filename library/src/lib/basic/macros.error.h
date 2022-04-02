@@ -1,10 +1,10 @@
 #pragma once
 
-#define default_log(err, msg) debug_print(msg " - %d", (int)err)
+#define default_log(err, msg) debug_print(KBURN_LOG_ERROR, msg " - %d", (int)err)
 
 #define _IfErrorReturn3(checker, action, before_return) __extension__({ \
 	kburn_err_t _err = (kburn_err_t)action;                             \
-	while (!checker(_err))                                              \
+	if (!checker(_err))                                                 \
 	{                                                                   \
 		before_return(_err, #action);                                   \
 		return _err;                                                    \

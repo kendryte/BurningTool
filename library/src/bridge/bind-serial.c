@@ -1,5 +1,6 @@
 #include "bind-wait-list.h"
 #include "components/device-link-list.h"
+#include "debug/print.h"
 #include "global.h"
 #include "protocol.h"
 #include "serial.h"
@@ -45,7 +46,7 @@ static uint32_t handle_one_device(kburnSerialDeviceNode *dev)
 		return false;
 	}
 
-	debug_print("\t%ld in serial buffer", in_buffer_size);
+	debug_print(KBURN_LOG_DEBUG, "\t%zu in serial buffer", in_buffer_size);
 
 	for (size_t i = 0; i < tbuff_size; i++)
 	{
@@ -146,7 +147,7 @@ void pair_serial_ports_thread(KBCTX scope, const bool *const quit)
 				kburnDeviceNode *new_usb_node = get_device_by_bind_id(scope, found_bind);
 				if (new_usb_node == NULL)
 				{
-					debug_print(YELLO("bind target usb port gone, bind_id=%d, maybe disconnected?"), found_bind);
+					debug_print(KBURN_LOG_ERROR, COLOR_FMT("bind target usb port gone, bind_id=%d, maybe disconnected?"), COLOR_ARG(RED, found_bind));
 					continue;
 				}
 				void copy_serial_device(kburnDeviceNode * _src, kburnDeviceNode * _dst);

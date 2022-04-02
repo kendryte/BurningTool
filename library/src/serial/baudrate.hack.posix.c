@@ -244,7 +244,7 @@ static bool set_speed(kburnSerialDeviceNode *node, int fd, uint32_t br, struct t
 
 bool hackdev_serial_low_switch_baudrate(kburnSerialDeviceNode *node, uint32_t speed)
 {
-	debug_print("hackdev_serial_low_switch_baudrate(node[%s], %d)", node->path, speed);
+	debug_trace_function("node[%s], %d", node->path, speed);
 	autolock(node->mutex);
 	struct ser *ser = node->m_dev_handle;
 	struct termios new_termios;

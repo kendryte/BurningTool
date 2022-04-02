@@ -1,13 +1,14 @@
 #include <stdarg.h>
-#include "serial.h"
 #include <libusb.h>
+#include "basic/string.h"
+#include "serial.h"
 
 void _copy_last_serial_io_error(kburnDeviceNode *node, uint32_t err)
 {
 	clear_error(node);
 	node->error->code = make_error_code(KBURN_ERROR_KIND_SERIAL, err);
 	node->error->errorMessage = strdup(sererr_last());
-	debug_print("copy_last_serial_io_error: %s", node->error->errorMessage);
+	debug_print(KBURN_LOG_ERROR, "copy_last_serial_io_error: %s", node->error->errorMessage);
 }
 
 void _copy_last_libusb_error(kburnDeviceNode *node, int err)
@@ -16,14 +17,14 @@ void _copy_last_libusb_error(kburnDeviceNode *node, int err)
 	node->error->code = make_error_code(KBURN_ERROR_KIND_USB, err);
 	const char *name = libusb_error_name(err);
 	const char *desc = libusb_strerror(err);
-	size_t size = snprintf(NULL, 0, "%s: %s", name, desc);
+	size_t size = m_snprintf(NULL, 0, "%s: %s", name, desc);
 	char *buff = malloc(size + 1);
-	snprintf(buff, size + 1, "%s: %s", name, desc);
+	m_snprintf(buff, size + 1, "%s: %s", name, desc);
 	node->error->errorMessage = buff;
-	// debug_print("copy_last_libusb_error: %d - %s", err, node->error->errorMessage);
+	debug_print(KBURN_LOG_INFO, "copy_last_libusb_error: %d - %s", err, node->error->errorMessage);
 }
 
-#include <endian.h>
+#include <sys/types.h>
 typedef union error_convert
 {
 	struct
@@ -66,7 +67,7 @@ void _set_error(kburnDeviceNode *node, enum kburnErrorKind kind, int32_t code, c
 	node->error->errorMessage = vsprintf_alloc(error, args);
 	va_end(args);
 
-	debug_print("set_error: %s", node->error->errorMessage);
+	debug_print(KBURN_LOG_ERROR, "set_error: %s", node->error->errorMessage);
 }
 
 void _clear_error(kburnDeviceNode *node)
@@ -74,7 +75,7 @@ void _clear_error(kburnDeviceNode *node)
 	node->error->code = 0;
 	if (node->error->errorMessage != NULL)
 	{
-		debug_print("clear_error: free last");
+		debug_print(KBURN_LOG_INFO, "clear_error: free last");
 		free(node->error->errorMessage);
 		node->error->errorMessage = NULL;
 	}

@@ -37,9 +37,20 @@ typedef struct kburnDeviceNode
 	PCONST uint32_t bind_id;
 } kburnDeviceNode;
 
+typedef enum kburnLogType
+{
+	KBURN_LOG_BUFFER,
+	KBURN_LOG_TRACE,
+	KBURN_LOG_DEBUG,
+	KBURN_LOG_INFO,
+	KBURN_LOG_WARN,
+	KBURN_LOG_ERROR,
+} kburnLogType;
+
 typedef bool (*on_device_connect)(const kburnDeviceNode *dev, void *ctx);
 typedef void (*on_device_remove)(const kburnDeviceNode *dev, void *ctx);
 typedef void (*on_device_handle)(kburnDeviceNode *dev, void *ctx);
 typedef void (*on_write_progress)(const kburnDeviceNode *dev, size_t current, size_t length, void *ctx);
+typedef void (*on_debug_log)(kburnLogType type, const char *message);
 
 DEFINE_END

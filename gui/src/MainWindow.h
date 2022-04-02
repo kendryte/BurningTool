@@ -14,6 +14,15 @@ public:
 	MainWindow(QWidget *parent = nullptr);
 	~MainWindow();
 
+private slots:
+	void on_btnSelectImage_clicked();
+
+	void on_inputSysImage_returnPressed();
+
+	void on_btnOpenWebsite_triggered();
+
+	void on_actionw_triggered();
+
 private:
 	Ui::MainWindow *ui;
 };

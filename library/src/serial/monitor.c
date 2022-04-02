@@ -7,11 +7,11 @@ static void on_event(void *ctx, ser_dev_evt_t evt, const ser_dev_t *dev)
 	switch (evt)
 	{
 	case SER_DEV_EVT_ADDED:
-		debug_print("[monitor] connect: %s", dev->path);
+		debug_print(KBURN_LOG_INFO, "[monitor] connect: %s", dev->path);
 		on_serial_device_attach(scope, dev->path);
 		break;
 	case SER_DEV_EVT_REMOVED:
-		debug_print("[monitor] remove : %s", dev->path);
+		debug_print(KBURN_LOG_INFO, "[monitor] remove : %s", dev->path);
 		kburnDeviceNode *device = get_device_by_serial_port_path(scope, dev->path);
 		if (device)
 			destroy_serial_port(device->disposable_list, device);
@@ -33,13 +33,13 @@ void kburnOnSerialConfirm(KBCTX scope, on_device_handle handler_callback, void *
 
 static void first_init_list(KBCTX scope, const bool *const quit)
 {
-	debug_print("[init] init_list()");
+	debug_print(KBURN_LOG_INFO, "[init] init_list()");
 	ser_dev_list_t *lst;
 
 	lst = ser_dev_list_get();
 	if (!lst)
 	{
-		debug_print("serial port list get failed: %s", sererr_last());
+		debug_print(KBURN_LOG_ERROR, "serial port list get failed: %s", sererr_last());
 		return;
 	}
 
@@ -54,7 +54,7 @@ static void first_init_list(KBCTX scope, const bool *const quit)
 		{
 			continue;
 		}
-		debug_print("[init]   * %s", item->dev.path);
+		debug_print(KBURN_LOG_INFO, "[init]   * %s", item->dev.path);
 		on_serial_device_attach(scope, item->dev.path);
 	}
 
@@ -63,7 +63,7 @@ static void first_init_list(KBCTX scope, const bool *const quit)
 
 void serial_monitor_destroy(KBCTX scope)
 {
-	debug_print("serial_monitor_destroy()");
+	debug_trace_function();
 	if (!scope->serial->monitor_prepared)
 		return;
 	if (scope->serial->monitor_instance)
@@ -77,14 +77,14 @@ void serial_monitor_destroy(KBCTX scope)
 
 kburn_err_t serial_monitor_prepare(KBCTX scope)
 {
-	debug_print("serial_monitor_prepare()");
+	debug_trace_function();
 	if (scope->serial->monitor_prepared)
 		return KBurnNoErr;
 	scope->serial->monitor_prepared = true;
 
 	if (scope->serial->monitor_instance)
 	{
-		debug_print("\talready inited.");
+		debug_print(KBURN_LOG_DEBUG, "\talready inited.");
 		return KBurnNoErr;
 	}
 
@@ -95,7 +95,7 @@ kburn_err_t serial_monitor_prepare(KBCTX scope)
 
 void serial_monitor_pause(KBCTX scope)
 {
-	debug_print("serial_monitor_pause() [instance=%p]", (void *)scope->serial->monitor_instance);
+	debug_trace_function("[instance=%p]", (void *)scope->serial->monitor_instance);
 	if (scope->serial->monitor_instance)
 	{
 		ser_dev_monitor_stop(scope->serial->monitor_instance);
@@ -105,13 +105,13 @@ void serial_monitor_pause(KBCTX scope)
 
 kburn_err_t serial_monitor_resume(KBCTX scope)
 {
-	debug_print("serial_monitor_resume() [instance=%p]", (void *)scope->serial->monitor_instance);
+	debug_trace_function("[instance=%p]", (void *)scope->serial->monitor_instance);
 	if (scope->serial->monitor_instance == NULL)
 		scope->serial->monitor_instance = ser_dev_monitor_init(on_event, scope);
 
 	if (scope->serial->monitor_instance == NULL)
 	{
-		debug_print("ser_dev_monitor_init fail");
+		debug_print(KBURN_LOG_ERROR, "ser_dev_monitor_init fail");
 		return make_error_code(KBURN_ERROR_KIND_COMMON, KBurnSerialMonitorFailStart);
 	}
 

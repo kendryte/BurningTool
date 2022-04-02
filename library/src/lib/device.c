@@ -16,7 +16,7 @@ DECALRE_DISPOSE(destroy_device, kburnDeviceNode)
 
 	if (context->disconnect_should_call && context->_scope->disconnect_callback)
 	{
-		debug_print("\tdisconnect_callback()");
+		debug_print(KBURN_LOG_DEBUG, "\tdisconnect_callback()");
 		context->_scope->disconnect_callback(context, context->_scope->disconnect_callback_ctx);
 	}
 
@@ -79,7 +79,7 @@ kburn_err_t create_empty_device_instance(KBCTX scope, kburnDeviceNode **output)
 
 kburnDeviceNode *kburnOpenSerial(KBCTX scope, const char *path)
 {
-	debug_print("kburnOpenSerial(%s)", path);
+	debug_print(KBURN_LOG_DEBUG, "kburnOpenSerial(%s)", path);
 	on_serial_device_attach(scope, path);
 
 	return get_device_by_serial_port_path(scope, path);

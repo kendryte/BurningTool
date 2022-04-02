@@ -36,7 +36,7 @@ void recreate_waitting_list(KBCTX scope)
 void add_to_device_list(kburnDeviceNode *target)
 {
 	KBCTX scope = target->_scope;
-	debug_print("add_to_device_list(0x%p) [size=%d]", (void *)target, scope->openDeviceList->size);
+	debug_trace_function("0x%p, [size=%d]", (void *)target, scope->openDeviceList->size);
 	port_link_element *ele = malloc(sizeof(port_link_element));
 	ele->node = target;
 	ele->prev = NULL;
@@ -69,7 +69,7 @@ void add_to_device_list(kburnDeviceNode *target)
 
 static void do_delete(KBCTX scope, port_link_element *target)
 {
-	debug_print("\tportlist::do_delete(0x%p) [size=%d]", (void *)target, scope->openDeviceList->size);
+	debug_trace_function("\t0x%p [size=%d]", (void *)target, scope->openDeviceList->size);
 
 	if (target->prev)
 		target->prev->next = target->next;
@@ -97,7 +97,7 @@ static void do_delete(KBCTX scope, port_link_element *target)
 DECALRE_DISPOSE(delete_from_device_list, kburnDeviceNode)
 {
 	KBCTX scope = context->_scope;
-	debug_print("delete_from_device_list(0x%p) [size=%d]", (void *)context, scope->openDeviceList->size);
+	debug_trace_function("0x%p [size=%d]", (void *)context, scope->openDeviceList->size);
 	autolock(scope->openDeviceList->exclusion);
 	for (port_link_element *curs = scope->openDeviceList->head; curs != NULL; curs = curs->next)
 	{
@@ -107,7 +107,7 @@ DECALRE_DISPOSE(delete_from_device_list, kburnDeviceNode)
 			return;
 		}
 	}
-	debug_print("  - not found");
+	debug_print(KBURN_LOG_WARN, "  - not found");
 	return;
 }
 DECALRE_DISPOSE_END()

@@ -3,7 +3,7 @@
 
 kburn_err_t serial_subsystem_init(KBCTX scope)
 {
-	debug_print("serial_subsystem_init()");
+	debug_trace_function();
 	if (scope->serial->subsystem_inited)
 		return KBurnNoErr;
 
@@ -16,7 +16,7 @@ kburn_err_t serial_subsystem_init(KBCTX scope)
 }
 void serial_subsystem_deinit(KBCTX scope)
 {
-	debug_print("serial_subsystem_deinit()");
+	debug_trace_function();
 	if (!scope->serial->subsystem_inited)
 		return;
 	scope->serial->subsystem_inited = false;

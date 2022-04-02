@@ -1,7 +1,7 @@
-#define _GNU_SOURCE
 #include <pthread.h>
 #include "global.h"
 #include "thread.h"
+#include "debug/print.h"
 
 typedef struct thread_passing_object
 {
@@ -20,10 +20,10 @@ static void thread_tell_quit(thread_passing_object *thread)
 
 DECALRE_DISPOSE(destroy_thread, thread_passing_object)
 {
-	debug_print(YELLO("[thread]") " wait quit: %s", context->debug_title);
+	debug_print(KBURN_LOG_DEBUG, COLOR_FMT("[thread]") " wait quit: %s", COLOR_ARG(YELLOW, context->debug_title));
 	thread_tell_quit(context);
 	pthread_join(context->thread, NULL);
-	debug_print(GREEN("[thread]") " %s quit success", context->debug_title);
+	debug_print(KBURN_LOG_INFO, COLOR_FMT("[thread]") " %s quit success", COLOR_ARG(GREEN, context->debug_title));
 	free(context);
 }
 DECALRE_DISPOSE_END()
@@ -33,7 +33,7 @@ static void *start_routine_wrapper(void *_ctx)
 	thread_passing_object *context = _ctx;
 	context->running = true;
 
-	debug_print("[thread] \"%s\" start", context->debug_title);
+	debug_print(KBURN_LOG_INFO, "[thread] \"%s\" start", context->debug_title);
 	do_sleep(1000);
 
 #ifdef APPLE
@@ -44,7 +44,7 @@ static void *start_routine_wrapper(void *_ctx)
 
 	context->quit = false;
 	context->main(context->scope, &context->quit);
-	debug_print("[thread] \"%s\" finished", context->debug_title);
+	debug_print(KBURN_LOG_INFO, "[thread] \"%s\" finished", context->debug_title);
 
 	context->running = false;
 
@@ -74,7 +74,7 @@ kburn_err_t thread_create(const char *debug_title, thread_function start_routine
 	int thread_ret = pthread_create(&thread->thread, NULL, start_routine_wrapper, thread);
 	if (thread_ret != 0)
 	{
-		debug_print("[thread] failed create: %d", thread_ret);
+		debug_print(KBURN_LOG_ERROR, "[thread] failed create: %d", thread_ret);
 		return make_error_code(KBURN_ERROR_KIND_SYSCALL, thread_ret);
 	}
 

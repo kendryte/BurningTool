@@ -21,7 +21,7 @@ void free_got_usb_device(libusb_device *dev)
 
 libusb_device *get_usb_device(struct libusb_context *libusb, uint16_t vid, uint16_t pid, const uint8_t *in_path)
 {
-	debug_print("get_usb_device(%d, %d, %.8s)", vid, pid, in_path);
+	debug_trace_function("%d, %d, %.8s", vid, pid, in_path);
 	libusb_device *ret = NULL;
 	libusb_device **list;
 	ssize_t cnt = libusb_get_device_list(libusb, &list);
@@ -54,7 +54,7 @@ libusb_device *get_usb_device(struct libusb_context *libusb, uint16_t vid, uint1
 		}
 	}
 	libusb_free_device_list(list, true);
-	debug_print("	get_usb_device() found %p", (void *)ret);
+	debug_print(KBURN_LOG_DEBUG, "	get_usb_device() found %p", (void *)ret);
 	return ret;
 }
 
@@ -69,7 +69,7 @@ void free_all_unopend_usb_info(kburnUsbDeviceInfo **list)
 int get_all_unopend_usb_info(KBCTX scope, int vid, int pid, kburnUsbDeviceInfo **ret)
 {
 	struct libusb_context *libusb = scope->usb->libusb;
-	debug_print("get_all_unopend_usb_info: vid=%d, pid=%d", vid, pid);
+	debug_trace_function("vid=%d, pid=%d", vid, pid);
 	libusb_device **list;
 	ssize_t cnt = libusb_get_device_list(libusb, &list);
 	if (cnt < 0)
@@ -107,12 +107,12 @@ int get_all_unopend_usb_info(KBCTX scope, int vid, int pid, kburnUsbDeviceInfo *
 
 		if (usb_device_find(scope, desc.idVendor, desc.idProduct, path) != NULL)
 		{
-			debug_print("  * %s - already open", usb_debug_path_string(path));
+			debug_print(KBURN_LOG_DEBUG, "  * %s - already open", usb_debug_path_string(path));
 			continue;
 		}
 		else
 		{
-			debug_print("  * %s", usb_debug_path_string(path));
+			debug_print(KBURN_LOG_DEBUG, "  * %s", usb_debug_path_string(path));
 		}
 
 		ret[found] = info;
@@ -124,14 +124,14 @@ int get_all_unopend_usb_info(KBCTX scope, int vid, int pid, kburnUsbDeviceInfo *
 	if (info)
 		free(info);
 
-	debug_print("get_all_unopend_usb_info: found %d devices.", found);
+	debug_print(KBURN_LOG_DEBUG, "get_all_unopend_usb_info: found %d devices.", found);
 
 	return found;
 }
 
 kburn_err_t init_list_all_usb_devices(KBCTX scope)
 {
-	debug_print("[init/poll] init_list_all_usb_devices [%.4x:%.4x]", scope->usb->filter.vid, scope->usb->filter.pid);
+	debug_trace_function("%.4x:%.4x", scope->usb->filter.vid, scope->usb->filter.pid);
 	struct libusb_device_descriptor desc;
 
 	libusb_device **list;
@@ -146,31 +146,31 @@ kburn_err_t init_list_all_usb_devices(KBCTX scope)
 			debug_print_libusb_error("[init/poll] libusb_get_device_descriptor()", r);
 			continue;
 		}
-		debug_print("[init/poll] found device: [%.4x:%.4x]", desc.idVendor, desc.idProduct);
+		debug_print(KBURN_LOG_DEBUG, "[init/poll] found device: [%.4x:%.4x]", desc.idVendor, desc.idProduct);
 
 		if (!match_device(scope->usb->filter.vid, scope->usb->filter.pid, &desc))
 		{
-			debug_print("[init/poll] \tnot wanted device.");
+			debug_print(KBURN_LOG_DEBUG, "[init/poll] \tnot wanted device.");
 			continue;
 		}
 
 		uint8_t path[MAX_PATH_LENGTH] = {0};
 		if (usb_get_device_path(dev, path) < LIBUSB_SUCCESS)
 		{
-			debug_print("[init/poll] \tget path failed.");
+			debug_print(KBURN_LOG_ERROR, "[init/poll] \tget path failed.");
 			continue;
 		}
 
-		debug_print("[init/poll] \tpath: %s", usb_debug_path_string(path));
+		debug_print(KBURN_LOG_DEBUG, "[init/poll] \tpath: %s", usb_debug_path_string(path));
 
 		if (usb_device_find(scope, desc.idVendor, desc.idProduct, path) != NULL)
 		{
-			debug_print("[init/poll] \tdevice already opened, ignore.");
+			debug_print(KBURN_LOG_DEBUG, "[init/poll] \tdevice already opened, ignore.");
 			continue;
 		}
 		else
 		{
-			debug_print("[init/poll] \topen");
+			debug_print(KBURN_LOG_DEBUG, "[init/poll] \topen");
 
 			IfErrorReturn(
 				open_single_usb_port(scope, dev, NULL));

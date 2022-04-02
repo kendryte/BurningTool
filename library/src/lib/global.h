@@ -15,9 +15,13 @@
 char *sprintf_alloc(const char *fmt, ...);
 char *vsprintf_alloc(const char *fmt, va_list args);
 
+static inline const char *OPTSTR(const char *str, const char *opt)
+{
+	return str ? str : opt;
+}
 static inline const char *NULLSTR(const char *str)
 {
-	return str ? str : "<NULLSTR>";
+	return OPTSTR(str, "<NULLSTR>");
 }
 
 static inline bool
@@ -29,5 +33,5 @@ prefix(const char *pre, const char *str)
 #include "basic/macros.error.h"
 
 #include "basic/macros.alloc.h"
-#include "basic/debug-print.h"
+#include "debug/print.h"
 #include "basic/resource-tracker.h"

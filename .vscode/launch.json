@@ -3,16 +3,37 @@
 	// 悬停以查看现有属性的描述。
 	// 欲了解更多信息，请访问: https://go.microsoft.com/fwlink/?linkid=830387
 	"version": "0.2.0",
+	"inputs": [
+		{
+			"id": "program",
+			"type": "pickString",
+			"description": "启动程序",
+			"options": [
+				{
+					"label": "test-binary",
+					"value": "test-binary/test"
+				},
+				{
+					"label": "BurningTool",
+					"value": "gui/BurningTool"
+				},
+			]
+		}
+	],
 	"configurations": [
 		{
 			"name": "(gdb) 启动",
 			"type": "cppdbg",
 			"request": "launch",
-			"program": "${workspaceFolder}/build-vscode/test-binary/test",
+			"program": "${workspaceFolder}/build-vscode-${env:HOSTNAME}${env:COMPUTERNAME}/${input:program}",
 			"args": [],
 			"stopAtEntry": false,
-			"cwd": "${workspaceFolder}/build-vscode",
+			"cwd": "${workspaceFolder}/build-vscode-${env:HOSTNAME}${env:COMPUTERNAME}",
 			"environment": [
+				{
+					"name": "PATH",
+					"value": "${env:PATH}:${command:cmake.getLaunchTargetDirectory}"
+				},
 				{
 					"name": "LD_PRELOAD",
 					"value": "/usr/lib64/libasan.so.6"
@@ -32,7 +53,8 @@
 					"text": "-gdb-set disassembly-flavor intel",
 					"ignoreFailures": true
 				}
-			]
+			],
+			"visualizerFile": "/root/.vscode-server-insiders/data/User/workspaceStorage/0a10780273df37d22318baa12ed06247/tonka3000.qtvsctools/qt.natvis.xml"
 		}
 	]
 }

@@ -5,7 +5,7 @@
 #include <stdlib.h>
 
 #include "lock.h"
-#include "debug-print.h"
+#include "debug/print.h"
 
 typedef struct disposable_list_element disposable_list_element_t;
 typedef struct disposable_list disposable_list_t;
@@ -27,14 +27,14 @@ disposable __toDisposable(dispose_function callback, void *userData, const char 
 	if (0)                                                                                                  \
 		callback((disposable_list_t *)NULL, userData);                                                      \
 	__toDisposable((dispose_function)(callback), (void *)(userData), #callback "(" #userData ")", __func__, \
-				   __FILENAME__, __LINE__);                                                                 \
+				   __FILE__, __LINE__);                                                                     \
 })
 #else
 disposable _toDisposable(dispose_function callback, void *userData);
-#define toDisposable(callback, userData) __extension__({             \
-	if (0)                                                           \
-		callback((disposable_list_t *)NULL, userData);               \
-	_toDisposable((dispose_function)(callback), (void *)(userData)); \
+#define toDisposable(callback, userData) __extension__({                                          \
+	if (0)                                                                                        \
+		callback((disposable_list_t *)NULL, userData);                                            \
+	_toDisposable((dispose_function)(callback), (void *)(userData), #callback "(" #userData ")"); \
 })
 #endif
 
@@ -51,12 +51,12 @@ void dispose_list_cancel(disposable_list_t *source, disposable element);
 void dispose_all(disposable_list_t *target);
 void dispose(disposable target);
 
-#define DECALRE_DISPOSE(function_name, context_type)                                         \
-	DECALRE_DISPOSE_HEADER(function_name, context_type)                                      \
-	{                                                                                        \
-		debug_print("[dispose] - " #function_name "(" #context_type " [%p])", (void *)_ctx); \
-		dispose_list_cancel(this, toDisposable(function_name, _ctx));                        \
-		context_type *context = _ctx;                                                        \
+#define DECALRE_DISPOSE(function_name, context_type)                                                          \
+	DECALRE_DISPOSE_HEADER(function_name, context_type)                                                       \
+	{                                                                                                         \
+		debug_print(KBURN_LOG_DEBUG, "[dispose] - " #function_name "(" #context_type " [%p])", (void *)_ctx); \
+		dispose_list_cancel(this, toDisposable(function_name, _ctx));                                         \
+		context_type *context = _ctx;                                                                         \
 		if (1)
 
 #define DECALRE_DISPOSE_HEADER(function_name, context_type) \

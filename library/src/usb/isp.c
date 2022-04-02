@@ -21,7 +21,7 @@ static inline usbIspCommandTaget convertTarget(kburnUsbIspCommandTaget i)
 
 kburn_err_t kburnUsbIspLedControl(kburnDeviceNode *node, uint8_t pin, struct kburnColor color)
 {
-	debug_print("%s:", __func__);
+	debug_trace_function();
 	usbIspCommandPacket request = {
 		.command = USB_ISP_COMMAND_WRITE_DEVICE,
 		.target = USB_ISP_COMMAND_TARGET_LED,
@@ -40,7 +40,7 @@ kburn_err_t kburnUsbIspLedControl(kburnDeviceNode *node, uint8_t pin, struct kbu
 
 kburn_err_t kburnUsbIspGetMemorySize(kburnDeviceNode *node, kburnUsbIspCommandTaget target, kburnDeviceMemorySizeInfo *out_dev_info)
 {
-	debug_print("%s:", __func__);
+	debug_trace_function();
 #define READ_CAPACITY_LENGTH 0x08
 
 	usbIspCommandPacket request = {
@@ -140,7 +140,7 @@ static kburn_err_t write_normalized(kburnDeviceNode *node, kburnUsbIspCommandTag
 
 kburn_err_t kburnUsbIspWriteChunk(kburnDeviceNode *node, const kburnDeviceMemorySizeInfo dev_info, kburn_stor_block_t start_block, void *buffer, uint32_t length)
 {
-	debug_print("%s:", __func__);
+	debug_trace_function();
 	IfErrorReturn(
 		check_input(node, start_block, length, dev_info));
 
@@ -152,7 +152,7 @@ kburn_err_t kburnUsbIspWriteChunk(kburnDeviceNode *node, const kburnDeviceMemory
 
 kburn_err_t kburnUsbIspReadChunk(kburnDeviceNode *node, const kburnDeviceMemorySizeInfo dev_info, kburn_stor_block_t start_block, uint32_t length, void *buffer)
 {
-	debug_print("%s:", __func__);
+	debug_trace_function();
 	IfErrorReturn(
 		check_input(node, start_block, length, dev_info));
 

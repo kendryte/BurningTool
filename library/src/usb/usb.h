@@ -53,7 +53,7 @@ kburn_err_t open_single_usb_port(KBCTX scope, struct libusb_device *dev, kburnDe
 kburnDeviceNode *usb_device_find(KBCTX scope, uint16_t vid, uint16_t pid, const uint8_t *serial);
 
 #define debug_print_libusb_result(msg, err, ...) \
-	debug_print(msg ": %s[%d] %s", __VA_ARGS__ __VA_OPT__(, ) libusb_error_name(err), (int)err, libusb_strerror(err));
+	debug_print(err < 0 ? KBURN_LOG_ERROR : KBURN_LOG_DEBUG, msg ": %s[%d] %s", __VA_ARGS__ __VA_OPT__(, ) libusb_error_name(err), (int)err, libusb_strerror(err));
 
 #define debug_print_libusb_error(msg, err, ...) __extension__({        \
 	if (err < 0)                                                       \

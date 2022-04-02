@@ -14,7 +14,7 @@ void driver_get_devinfo_free(kburnSerialDeviceInfo deviceInfo)
 
 kburnSerialDeviceInfo driver_get_devinfo(const char *path)
 {
-	debug_print("driver_get_devinfo(%s)", path);
+	debug_trace_function("%s", path);
 
 	struct udev_device *dev = NULL;
 	struct udev_enumerate *query = NULL;
@@ -52,7 +52,7 @@ kburnSerialDeviceInfo driver_get_devinfo(const char *path)
 
 		if (strcmp(node, path) == 0)
 		{
-			debug_print("driver_get_devinfo: found device");
+			debug_print(KBURN_LOG_ERROR, "driver_get_devinfo: found device");
 
 			pstr = udev_device_get_property_value(dev, "SUBSYSTEM");
 			if (pstr && (strcmp(pstr, "tty") == 0))

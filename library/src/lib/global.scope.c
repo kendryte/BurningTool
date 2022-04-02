@@ -10,6 +10,8 @@ uint32_t dbg_index = 0;
 
 kburn_err_t kburnCreate(KBCTX *ppCtx)
 {
+	debug_trace_function();
+
 	DeferEnabled;
 
 	dbg_index++;
@@ -65,16 +67,14 @@ kburn_err_t kburnCreate(KBCTX *ppCtx)
 
 void kburnGlobalDestroy()
 {
-	debug_print("kburnGlobalDestroy()");
+	debug_trace_function();
 	dispose_all(lib_global_scope);
 	disposable_list_deinit(lib_global_scope);
-	debug_print("kburnGlobalDestroy() DONE");
 }
 
 void kburnDestroy(KBCTX scope)
 {
-	debug_print("kburnDestroy(%p)", (void *)scope);
+	debug_trace_function("(%p)", (void *)scope);
 	dispose(bindToList(lib_global_scope, toDisposable(dispose_all_and_deinit, scope->threads)));
 	dispose(bindToList(lib_global_scope, toDisposable(dispose_all_and_deinit, scope->disposables)));
-	debug_print("kburnDestroy(%p) DONE", (void *)scope);
 }

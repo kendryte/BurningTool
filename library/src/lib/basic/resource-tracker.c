@@ -3,7 +3,7 @@
 #include <stdint.h>
 #include <stdlib.h>
 #include "resource-tracker.h"
-#include "debug-print.h"
+#include "debug/print.h"
 
 static inline void do_cleanup(const resource_tracker_element element)
 {
@@ -25,10 +25,10 @@ void resource_tracker_done(resource_tracker_t *tracker)
 {
 	if (!tracker->successed)
 	{
-		debug_print_bundle("function return without confirm, release all resource: $b(%d)", tracker->__debug, tracker->size);
+		debug_print_dbg(KBURN_LOG_WARN, tracker->__debug, "function return without confirm, release all resource: %s(%d)", DEBUG_OBJ_TITLE(tracker->__debug), tracker->size);
 		for (int i = tracker->size - 1; i >= 0; i--)
 		{
-			debug_print_bundle(" * $b", tracker->element[i].__debug);
+			debug_print_dbg(KBURN_LOG_WARN, tracker->element[i].__debug, " * %s", DEBUG_OBJ_TITLE(tracker->element[i].__debug));
 			do_cleanup(tracker->element[i]);
 		}
 	}
@@ -38,7 +38,7 @@ void resource_tracker_done(resource_tracker_t *tracker)
 		{
 			if (tracker->element[i].force)
 			{
-				debug_print_bundle(" * [force] $b", tracker->element[i].__debug);
+				debug_print_dbg(KBURN_LOG_INFO, tracker->element[i].__debug, " * [force] %s", DEBUG_OBJ_TITLE(tracker->element[i].__debug));
 				do_cleanup(tracker->element[i]);
 			}
 		}

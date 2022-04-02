@@ -19,7 +19,7 @@ DECALRE_DISPOSE_END()
 
 kburn_err_t kburnStartWaitingDevices(KBCTX scope)
 {
-	debug_print("kburnStartWaitingDevices() [already_init=%d]", scope->monitor_inited);
+	debug_trace_function("already_init=%d", scope->monitor_inited);
 	if (scope->monitor_inited)
 		return KBurnNoErr;
 
@@ -58,14 +58,14 @@ kburn_err_t kburnStartWaitingDevices(KBCTX scope)
 
 void kburnWaitDevicePause(KBCTX scope)
 {
-	debug_print("kburnWaitDevicePause()");
+	debug_trace_function();
 
 	usb_monitor_pause(scope);
 	serial_monitor_pause(scope);
 }
 kburn_err_t kburnWaitDeviceResume(KBCTX scope)
 {
-	debug_print("kburnWaitDeviceResume()");
+	debug_trace_function();
 
 	kburn_err_t r = serial_monitor_resume(scope);
 	if (r != 0)

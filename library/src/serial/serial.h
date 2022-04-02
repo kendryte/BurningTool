@@ -94,7 +94,7 @@ size_t serial_isp_packet_size(const isp_request_t *packet);
 	memset(__isp_packet_memory, 0, __isp_packet_memory_size);                      \
 	isp_request_t *pointer_name = (void *)__isp_packet_memory;                     \
 	pointer_name->data_len = data_length;                                          \
-	debug_print("[alloc] %ld bytes, data len=%d", __isp_packet_memory_size, pointer_name->data_len)
+	debug_print(KBURN_LOG_TRACE, "[alloc] %ld bytes, data len=%d", __isp_packet_memory_size, pointer_name->data_len)
 
 void slip_error(kburnSerialDeviceNode *node, slip_error_t err);
 

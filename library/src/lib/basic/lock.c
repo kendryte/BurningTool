@@ -1,11 +1,10 @@
-#define _GNU_SOURCE
+#define has_kb_mutex 1
 #include <pthread.h>
 #include <string.h>
 #include <stdbool.h>
 #include <stdint.h>
 #include <stdlib.h>
 #include <errno.h>
-#include "debug-print.h"
 #include "sleep.h"
 
 #define THREAD_TITLE_BUFF_SIZE 32
@@ -19,6 +18,8 @@ typedef struct kb_mutex
 	int line;
 } kb_mutex_t;
 
+#include "debug/print.h"
+
 pthread_mutex_t *_init_lock()
 {
 	// debug_print("[lock] init");
@@ -26,7 +27,7 @@ pthread_mutex_t *_init_lock()
 	pthread_mutex_t *ret = calloc(1, sizeof(pthread_mutex_t));
 	if (ret == NULL)
 	{
-		debug_print("  ! memory error");
+		debug_print(KBURN_LOG_ERROR, "  ! memory error");
 		return NULL;
 	}
 	pthread_mutexattr_init(&attr);
@@ -36,7 +37,7 @@ pthread_mutex_t *_init_lock()
 }
 void _deinit_lock(pthread_mutex_t **mutex)
 {
-	debug_print("[lock] deinit");
+	debug_print(KBURN_LOG_TRACE, "[lock] deinit");
 	m_assert0(pthread_mutex_destroy(*mutex), "unlock fail");
 	free(*mutex);
 	*mutex = NULL;
@@ -44,13 +45,13 @@ void _deinit_lock(pthread_mutex_t **mutex)
 
 void _lock(pthread_mutex_t *mutex)
 {
-	// print_buffer("  lock", (void *)mutex, sizeof(pthread_mutex_t));
+	// debug_print(KBURN_LOG_TRACE, "  lock", (void *)mutex, sizeof(pthread_mutex_t));
 	m_assert0(pthread_mutex_lock(mutex), "pthread_mutex_lock failed");
 }
 
 void _unlock(pthread_mutex_t *mutex)
 {
-	// print_buffer("unlock", (void *)mutex, sizeof(pthread_mutex_t));
+	// debug_print(KBURN_LOG_TRACE, "unlock", (void *)mutex, sizeof(pthread_mutex_t));
 	m_assert0(pthread_mutex_unlock(mutex), "pthread_mutex_unlock failed");
 }
 
@@ -60,6 +61,7 @@ kb_mutex_t *__init_lock()
 	mlock->mutex = _init_lock();
 	return mlock;
 }
+
 void __deinit_lock(kb_mutex_t **pmlock)
 {
 	kb_mutex_t *mlock = *pmlock;
@@ -72,10 +74,10 @@ void __deinit_lock(kb_mutex_t **pmlock)
 
 static inline void _dbg_ln(const char *msg, const char *varname, const char *file, int line)
 {
-	debug_print(RED("%s"), msg);
+	debug_print(KBURN_LOG_ERROR, COLOR_FMT("%s"), COLOR_ARG(RED, msg));
 	char buff[THREAD_TITLE_BUFF_SIZE] = {0};
 	pthread_getname_np(pthread_self(), buff, THREAD_TITLE_BUFF_SIZE);
-	debug_print_location(file, line, "[thread: %s] try lock - %s", buff, varname);
+	debug_print_location(KBURN_LOG_ERROR, file, line, "[thread: %s] try lock - %s", buff, varname);
 }
 
 void __lock(kb_mutex_t *mlock, const char *varname, const char *file, int line)
@@ -97,7 +99,7 @@ void __lock(kb_mutex_t *mlock, const char *varname, const char *file, int line)
 	if (re == ETIMEDOUT)
 	{
 		_dbg_ln("can not aquire lock in 5s", varname, file, line);
-		debug_print_location(mlock->file, mlock->line, "[thread: %s] hold by %s", mlock->holder, mlock->varname);
+		debug_print_location(KBURN_LOG_ERROR, mlock->file, mlock->line, "[thread: %s] hold by %s", mlock->holder, mlock->varname);
 
 		_lock(mlock->mutex);
 	}

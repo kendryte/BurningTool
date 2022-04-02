@@ -3,7 +3,8 @@
 
 kburn_err_t usb_device_hello(kburnDeviceNode *node)
 {
-	debug_print("usb_device_hello:");
+	debug_trace_function();
+
 	usbIspCommandPacket request = {
 		.command = USB_ISP_COMMAND_HELLO,
 	};

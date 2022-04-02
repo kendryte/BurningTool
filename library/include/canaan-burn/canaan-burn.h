@@ -104,7 +104,14 @@ PUBLIC kburn_err_t kburnOpenUSB(KBCTX scope, uint16_t vid, uint16_t pid, const u
  */
 PUBLIC kburn_err_t kburnPollUSB(KBCTX scope);
 
+/**
+ * 设备列表
+ */
+PUBLIC kburn_err_t kburnGetSerialList();
+PUBLIC kburn_err_t kburnGetUSBList();
 DEFINE_END
+
+#include "./parts/debug.h"
 
 #include "./parts/serial.config.h"
 #include "./parts/serial.isp.h"

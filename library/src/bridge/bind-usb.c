@@ -1,9 +1,10 @@
+#include "debug/print.h"
 #include "usb.h"
 #include "protocol.h"
 
 kburn_err_t usb_device_serial_bind(kburnDeviceNode *node)
 {
-	debug_print("usb_device_serial_bind:");
+	debug_trace_function();
 	m_assert(node->bind_id != 0, "call alloc_new_bind_id before this");
 
 	char output[512];
@@ -22,11 +23,11 @@ kburn_err_t usb_device_serial_bind(kburnDeviceNode *node)
 
 		if (node->serial->isUsbBound)
 		{
-			debug_print(" * bind success @ usb");
+			debug_print(KBURN_LOG_INFO, " * bind success @ usb");
 			return KBurnNoErr;
 		}
 	}
 
-	debug_print(" * bind " YELLO("failed") " @ usb");
+	debug_print(KBURN_LOG_INFO, " * bind " COLOR_FMT("failed") " @ usb", COLOR_ARG(YELLOW));
 	return KBurnNoErr;
 }

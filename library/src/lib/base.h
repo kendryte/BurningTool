@@ -23,3 +23,18 @@
 #define __VaridicMacro_Helper3(A0, A1, A2, A3, FN, ...) FN
 #define __VaridicMacro_Helper4(A0, A1, A2, A3, A4, FN, ...) FN
 #define __VaridicMacro_Helper5(A0, A1, A2, A3, A4, A5, FN, ...) FN
+
+#define SELECT(NAME, NUM) CONCAT(NAME##_, NUM)
+
+#define GET_COUNT(_1, _2, _3, _4, _5, _6, COUNT, ...) COUNT
+#define VA_SIZE(...) GET_COUNT(__VA_ARGS__ __VA_OPT__(, ) 6, 5, 4, 3, 2, 1, 0)
+
+#define __VaridicMacro_Select(NAME, ...) \
+	SELECT(NAME, VA_SIZE(__VA_ARGS__))   \
+	(__VA_ARGS__)
+
+#define __VaridicMacro_First(a, ...) a
+#define __VaridicMacro_Shift(a, ...) \
+	__VA_OPT__(, )                   \
+	__VA_ARGS__
+#define __VaridicMacro_Opt(default, ...) __VaridicMacro_First(__VA_ARGS__ __VA_OPT__(, ) default)

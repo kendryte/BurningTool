@@ -33,7 +33,7 @@ bool _should_insert_waitting_list(kburnDeviceNode *node)
 
 void _recreate_waitting_list(KBCTX scope)
 {
-	debug_print("\tportlist::recreate_waitting_list()");
+	debug_trace_function();
 	port_link_element *curs = NULL;
 
 	memset(scope->waittingDevice->list, 0, sizeof(scope->waittingDevice->list));
@@ -43,7 +43,7 @@ void _recreate_waitting_list(KBCTX scope)
 	{
 		if (_should_insert_waitting_list(curs->node))
 		{
-			debug_print("\t\t%s", curs->node->serial->path);
+			debug_print(KBURN_LOG_DEBUG, "  * %s", curs->node->serial->path);
 			scope->waittingDevice->list[itr] = curs->node;
 
 			itr++;
@@ -53,5 +53,5 @@ void _recreate_waitting_list(KBCTX scope)
 			}
 		}
 	}
-	debug_print("\t%lu items", itr);
+	debug_print(KBURN_LOG_DEBUG, "- %zu items", itr);
 }
