@@ -4,8 +4,9 @@
 #include "serial.h"
 #include "components/device-link-list.h"
 #include "bind-wait-list.h"
+#include "components/call-user-handler.h"
 
-disposable_list_t *lib_global_scope;
+disposable_list_t *lib_global_scope = NULL;
 uint32_t dbg_index = 0;
 
 kburn_err_t kburnCreate(KBCTX *ppCtx)
@@ -61,13 +62,18 @@ kburn_err_t kburnCreate(KBCTX *ppCtx)
 	dispose_list_add(lib_global_scope, toDisposable(dispose_all_and_deinit, dis));
 	dispose_list_add(lib_global_scope, toDisposable(dispose_all_and_deinit, threads));
 
+	IfErrorReturn(
+		global_init_user_handle_thread(*ppCtx));
+
 	DeferAbort;
-	return 0;
+	return KBurnNoErr;
 }
 
 void kburnGlobalDestroy()
 {
 	debug_trace_function();
+	if (lib_global_scope == NULL)
+		return;
 	dispose_all(lib_global_scope);
 	disposable_list_deinit(lib_global_scope);
 }
@@ -75,6 +81,8 @@ void kburnGlobalDestroy()
 void kburnDestroy(KBCTX scope)
 {
 	debug_trace_function("(%p)", (void *)scope);
+	if (lib_global_scope == NULL)
+		return;
 	dispose(bindToList(lib_global_scope, toDisposable(dispose_all_and_deinit, scope->threads)));
 	dispose(bindToList(lib_global_scope, toDisposable(dispose_all_and_deinit, scope->disposables)));
 }

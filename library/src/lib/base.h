@@ -38,3 +38,6 @@
 	__VA_OPT__(, )                   \
 	__VA_ARGS__
 #define __VaridicMacro_Opt(default, ...) __VaridicMacro_First(__VA_ARGS__ __VA_OPT__(, ) default)
+
+#include "basic/macros.error.h"
+#include "basic/macros.alloc.h"

@@ -1,3 +1,4 @@
+#include "basic/errors.h"
 #include "basic/lock.h"
 #include "components/call-user-handler.h"
 #include "components/device-link-list.h"

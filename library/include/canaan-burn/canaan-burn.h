@@ -7,7 +7,13 @@
 #include "./parts/prefix.h"
 #include "./parts/errors.h"
 #include "./parts/types.h"
+
+#if BURN_LIB_COMPILING
+#include "context.h"
+#else
 #include "./parts/context.h"
+#endif
+
 
 DEFINE_START
 

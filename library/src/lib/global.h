@@ -30,8 +30,5 @@ prefix(const char *pre, const char *str)
 	return strncmp(pre, str, strlen(pre)) == 0;
 }
 
-#include "basic/macros.error.h"
-
-#include "basic/macros.alloc.h"
 #include "debug/print.h"
 #include "basic/resource-tracker.h"

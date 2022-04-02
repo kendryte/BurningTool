@@ -1,3 +1,4 @@
+#include "basic/errors.h"
 #include "components/device-link-list.h"
 #include "serial.h"
 

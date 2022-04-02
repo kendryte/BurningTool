@@ -116,7 +116,7 @@ static uint32_t handle_one_device(kburnSerialDeviceNode *dev)
 	return false;
 }
 
-void pair_serial_ports_thread(KBCTX scope, const bool *const quit)
+void pair_serial_ports_thread(void *UNUSED(ctx), KBCTX scope, const bool *const quit)
 {
 	int delay = 100;
 	while (!*quit)

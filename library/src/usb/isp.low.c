@@ -1,3 +1,4 @@
+#include "basic/errors.h"
 #include "isp.low.h"
 #include "usb.h"
 #include "isp.h"

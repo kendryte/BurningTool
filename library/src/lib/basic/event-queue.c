@@ -1,17 +1,17 @@
 #include "global.h"
+#include "event-queue.h"
 
 typedef struct queue_struct
 {
 	void *data;
 	struct queue_struct *next;
-	bool free_when_destroy;
 } queue_struct;
 
 typedef struct queue_info
 {
 	queue_struct *first;
 	queue_struct *last;
-	kb_mutex_t mutex;
+	size_t length;
 } queue_info;
 
 kburn_err_t queue_create(queue_info **queue_ptr)
@@ -21,13 +21,11 @@ kburn_err_t queue_create(queue_info **queue_ptr)
 	*queue_ptr = MyAlloc(queue_info);
 	DeferCall(free, queue_ptr);
 
-	(*queue_ptr)->mutex = CheckNull(lock_init());
-
 	DeferAbort;
 	return KBurnNoErr;
 }
 
-static void *_queue_shift(queue_info *queue)
+void *queue_shift(queue_info *queue)
 {
 	if (queue->first == NULL)
 	{
@@ -39,21 +37,31 @@ static void *_queue_shift(queue_info *queue)
 		queue->last = NULL;
 	queue->first = old->next;
 
-	return old->data;
+	queue->length--;
+
+	void *ret = old->data;
+	free(old);
+	return ret;
 }
 
-void queue_destroy(queue_info *queue)
+size_t queue_size(queue_info *queue)
 {
-	lock(queue->mutex);
+	return queue->length;
+}
+
+void queue_destroy(queue_info *queue, pointer_handler element_handle)
+{
+	if (queue == NULL)
+		return;
+
 	void *ele;
-	while ((ele = _queue_shift(queue)) != NULL)
+	while ((ele = queue_shift(queue)) != NULL)
 	{
-		free(ele);
+		if (element_handle != NULL)
+			element_handle(ele);
 	}
-	kb_mutex_t mutex = queue->mutex;
+
 	free(queue);
-	unlock(mutex);
-	lock_deinit(&mutex);
 }
 
 kburn_err_t queue_push(queue_info *queue, void *data)
@@ -61,8 +69,6 @@ kburn_err_t queue_push(queue_info *queue, void *data)
 	queue_struct *new = MyAlloc(queue_struct);
 	new->data = data;
 
-	lock(queue->mutex);
-	// TODO: 当此处刚好与queue_destroy同时运行时，queue已经被释放，下面的读写都会造成崩溃
 	if (queue->first == NULL)
 	{
 		queue->first = new;
@@ -73,13 +79,8 @@ kburn_err_t queue_push(queue_info *queue, void *data)
 		queue->last->next = new;
 		queue->last = new;
 	}
-	unlock(queue->mutex);
+
+	queue->length++;
 
 	return KBurnNoErr;
-}
-
-void *queue_shift(queue_info *queue)
-{
-	autolock(queue->mutex);
-	return _queue_shift(queue);
 }

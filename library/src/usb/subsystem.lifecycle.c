@@ -1,7 +1,8 @@
+#include "basic/errors.h"
 #include "usb.h"
 #include <pthread.h>
 
-static void thread_libusb_handle_events(KBCTX scope, const bool *const quit)
+static void thread_libusb_handle_events(void *UNUSED(ctx), KBCTX scope, const bool *const quit)
 {
 	struct timeval timeout = {
 		.tv_sec = 1,
@@ -58,7 +59,7 @@ kburn_err_t usb_subsystem_init(KBCTX scope)
 	}
 	DeferCall(libusb_exit, scope->usb->libusb);
 
-	kburn_err_t err = thread_create("my libusb evt", thread_libusb_handle_events, scope, &scope->usb->libusb_thread);
+	kburn_err_t err = thread_create("my libusb evt", thread_libusb_handle_events, NULL, scope, &scope->usb->libusb_thread);
 	if (err != KBurnNoErr)
 		return err;
 

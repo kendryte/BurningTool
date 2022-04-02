@@ -1,6 +1,6 @@
+#include "basic/errors.h"
 #include "usb.h"
 #include <pthread.h>
-#include "basic/event-queue.h"
 
 bool libUsbHasWathcer = false;
 
@@ -82,40 +82,34 @@ static int on_event_threaded(struct libusb_context *ctx, struct libusb_device *d
 	data->dev = dev;
 	data->event = event;
 	data->user_data = user_data;
-	queue_push(scope->usb->queue, data);
+	event_thread_queue(scope->usb->event_queue, data);
 
 	return 0;
 }
 
-static void thread_event_process(KBCTX scope, const bool *const quit)
+static void init_list_all_usb_devices_threaded(void *UNUSED(_ctx), KBCTX scope, const bool *const q)
 {
-	init_list_all_usb_devices(scope);
+	if (!q)
+		init_list_all_usb_devices(scope);
+}
 
-	struct passing_data *recv;
-	while (!*quit)
-	{
-		recv = queue_shift(scope->usb->queue);
+static void pump_libusb_event(KBCTX UNUSED(scope), void *_evt)
+{
+	struct passing_data *recv = _evt;
 
-		if (recv == NULL)
-		{
-			do_sleep(1000);
-			continue;
-		}
+	debug_print(KBURN_LOG_DEBUG, "handle event in thread.");
+	on_event_sync(recv->ctx, recv->dev, recv->event, recv->user_data);
 
-		debug_print(KBURN_LOG_DEBUG, "handle event in thread.");
-		on_event_sync(recv->ctx, recv->dev, recv->event, recv->user_data);
-
-		free(recv);
-	}
+	free(_evt);
 }
 
 void usb_monitor_destroy(KBCTX scope)
 {
-	if (scope->usb->queue)
-	{
-		queue_destroy(scope->usb->queue);
-		scope->usb->queue = NULL;
-	}
+	if (!scope->usb->monitor_prepared)
+		return;
+	scope->usb->monitor_prepared = false;
+
+	event_thread_deinit(scope, &scope->usb->event_queue);
 }
 
 kburn_err_t usb_monitor_prepare(KBCTX scope)
@@ -141,21 +135,17 @@ kburn_err_t usb_monitor_prepare(KBCTX scope)
 
 	if (libUsbHasWathcer)
 	{
-		kburn_err_t err;
-
-		err = queue_create(&scope->usb->queue);
-		if (err != KBurnNoErr)
-			return err;
-
-		err = thread_create("my usb handle", thread_event_process, scope, &scope->usb->event_thread);
-		if (err != KBurnNoErr)
-			return err;
+		IfErrorReturn(
+			event_thread_init(scope, "libusb pump", pump_libusb_event, &scope->usb->event_queue));
 	}
 	else
 	{
 		m_abort("TODO: polling");
 		init_list_all_usb_devices(scope);
 	}
+
+	kbthread no_use;
+	thread_create("usb init scan", init_list_all_usb_devices_threaded, NULL, scope, &no_use);
 
 	return KBurnNoErr;
 }

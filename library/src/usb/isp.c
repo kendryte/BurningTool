@@ -1,3 +1,4 @@
+#include "basic/errors.h"
 #include <time.h>
 #include <string.h>
 #include "usb.h"

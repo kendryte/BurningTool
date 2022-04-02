@@ -1,5 +1,6 @@
 #include "components/device-link-list.h"
 #include "serial.h"
+#include "basic/errors.h"
 
 static void on_event(void *ctx, ser_dev_evt_t evt, const ser_dev_t *dev)
 {
@@ -31,7 +32,7 @@ void kburnOnSerialConfirm(KBCTX scope, on_device_handle handler_callback, void *
 	scope->serial->handler_callback_ctx = ctx;
 }
 
-static void first_init_list(KBCTX scope, const bool *const quit)
+static void first_init_list(void *UNUSED(ctx), KBCTX scope, const bool *const quit)
 {
 	debug_print(KBURN_LOG_INFO, "[init] init_list()");
 	ser_dev_list_t *lst;
@@ -88,7 +89,7 @@ kburn_err_t serial_monitor_prepare(KBCTX scope)
 		return KBurnNoErr;
 	}
 
-	thread_create("serial init list", first_init_list, scope, &scope->serial->init_list_thread);
+	thread_create("serial init list", first_init_list, NULL, scope, &scope->serial->init_list_thread);
 
 	return KBurnNoErr;
 }

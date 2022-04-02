@@ -1,7 +1,9 @@
+#include "thread.h"
+#include "context.h"
 #include <pthread.h>
 #include "global.h"
-#include "thread.h"
 #include "debug/print.h"
+#include "basic/errors.h"
 
 typedef struct thread_passing_object
 {
@@ -10,10 +12,11 @@ typedef struct thread_passing_object
 	bool quit;
 	pthread_t thread;
 	thread_function main;
+	void *user_data;
 	const char *debug_title;
 } thread_passing_object;
 
-static void thread_tell_quit(thread_passing_object *thread)
+void thread_tell_quit(thread_passing_object *thread)
 {
 	thread->quit = true;
 }
@@ -43,7 +46,7 @@ static void *start_routine_wrapper(void *_ctx)
 #endif
 
 	context->quit = false;
-	context->main(context->scope, &context->quit);
+	context->main(context->user_data, context->scope, &context->quit);
 	debug_print(KBURN_LOG_INFO, "[thread] \"%s\" finished", context->debug_title);
 
 	context->running = false;
@@ -58,7 +61,7 @@ static DECALRE_DISPOSE(set_null, thread_passing_object *)
 }
 DECALRE_DISPOSE_END()
 
-kburn_err_t thread_create(const char *debug_title, thread_function start_routine, KBCTX scope, thread_passing_object **out_thread)
+kburn_err_t thread_create(const char *debug_title, thread_function start_routine, void *context, KBCTX scope, thread_passing_object **out_thread)
 {
 	thread_passing_object *thread = MyAlloc(thread_passing_object);
 	*out_thread = thread;
@@ -70,6 +73,7 @@ kburn_err_t thread_create(const char *debug_title, thread_function start_routine
 
 	thread->scope = scope;
 	thread->main = start_routine;
+	thread->user_data = context;
 
 	int thread_ret = pthread_create(&thread->thread, NULL, start_routine_wrapper, thread);
 	if (thread_ret != 0)

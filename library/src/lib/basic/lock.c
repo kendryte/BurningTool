@@ -124,3 +124,8 @@ void __unlock(kb_mutex_t *mlock)
 	mlock->holder[0] = '\0';
 	mlock->varname = NULL;
 }
+
+pthread_mutex_t *__raw_lock(kb_mutex_t *mlock)
+{
+	return mlock->mutex;
+}

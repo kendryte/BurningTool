@@ -17,6 +17,7 @@ typedef struct kburnContext
 	struct disposable_list *const threads;
 	struct port_link_list *const openDeviceList;
 	struct waiting_list *const waittingDevice;
+	struct event_queue_thread *user_event;
 	bool monitor_inited;
 } kburnContext;
 

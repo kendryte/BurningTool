@@ -1,5 +1,6 @@
 #include "slip.h"
 #include "serial.h"
+#include "basic/errors.h"
 
 void recv_message(void *_ctx, uint8_t *UNUSED(data), uint32_t size)
 {

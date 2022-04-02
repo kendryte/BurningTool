@@ -2,8 +2,9 @@
 
 #include <stdlib.h>
 #include "global.h"
-#include "thread.h"
+#include "components/thread.h"
 #include "usb.types.h"
+#include "components/queued-thread.h"
 
 typedef struct usb_subsystem_context
 {
@@ -26,8 +27,7 @@ typedef struct usb_subsystem_context
 
 	kbthread libusb_thread;
 
-	struct queue_info *queue;
-	kbthread event_thread;
+	event_queue_thread_t event_queue;
 } usb_subsystem_context;
 
 kburn_err_t usb_subsystem_init(KBCTX scope);

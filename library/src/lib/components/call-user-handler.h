@@ -2,6 +2,8 @@
 
 #include "types.h"
 #include "base.h"
+#include "context.h"
+#include "basic/disposable.h"
 
 struct user_handler_wrap_data
 {
@@ -10,10 +12,7 @@ struct user_handler_wrap_data
 	kburnDeviceNode *device;
 };
 
-inline static void user_handler_wrap(const struct user_handler_wrap_data *const data)
-{
-	data->handler(data->device, data->context);
-}
+void user_handler_wrap(struct user_handler_wrap_data *data);
 
 #define DeferUserCallback(callback, device, always) __extension__({                                  \
 	struct user_handler_wrap_data *_user_handler_wrap_data = MyAlloc(struct user_handler_wrap_data); \
@@ -36,3 +35,5 @@ inline static void user_handler_wrap(const struct user_handler_wrap_data *const 
 	};                                                                                       \
 	user_handler_wrap(&_user_handler_wrap_data)                                              \
 })
+
+kburn_err_t global_init_user_handle_thread(KBCTX scope);

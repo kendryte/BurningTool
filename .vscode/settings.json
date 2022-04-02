@@ -85,6 +85,16 @@
 		"type_traits": "c",
 		"tuple": "c",
 		"protocol.h": "c",
-		"resource-tracker.h": "c"
+		"resource-tracker.h": "c",
+		"call-user-handler.h": "c",
+		"thread.h": "c",
+		"event-queue.h": "c",
+		"macros.error.h": "c",
+		"macros.alloc.h": "c",
+		"error.h": "c",
+		"future": "c",
+		"context.h": "c",
+		"queued-thread.h": "c",
+		"lock.h": "c"
 	}
 }

@@ -81,6 +81,7 @@ target_include_directories(canaan_burn
 
 target_include_directories(canaan_burn
   PUBLIC "${CMAKE_CURRENT_LIST_DIR}/include")
+
 target_include_directories(
   canaan_burn PRIVATE "${CMAKE_CURRENT_LIST_DIR}/include/canaan-burn/parts")
 
@@ -122,6 +123,6 @@ if(CMAKE_BUILD_TYPE STREQUAL "Debug")
   add_sanitizers(canaan_burn)
 endif()
 
-target_compile_options(canaan_burn PRIVATE -Wall -Wextra -pedantic -Werror) #  -Wno-error=format-zero-length=0
+target_compile_options(canaan_burn PRIVATE -Wall -Wextra -pedantic -Werror) # -Wno-error=format-zero-length=0
 
 target_compile_definitions(canaan_burn PRIVATE _GNU_SOURCE)
