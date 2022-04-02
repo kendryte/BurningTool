@@ -16,13 +16,13 @@ const char *test_null(const char *str)
 	return str ? str : "NULL";
 }
 
-bool verify(const kburnDeviceNode *dev, void *ctx)
+bool verify(void *ctx, const kburnDeviceNode *dev)
 {
 	cout << "ask connect: " << dev->serial->path << ", isUSB=" << dev->serial->deviceInfo.isUSB << endl;
 	return true;
 }
 
-void print_progress(const struct kburnDeviceNode *dev, size_t current, size_t length, void *ctx)
+void print_progress(void *ctx, const struct kburnDeviceNode *dev, size_t current, size_t length)
 {
 	cout << "loading: " << current << '/' << length << "\t " << (int)(current * 100 / length) << "%" << endl;
 }
@@ -34,7 +34,7 @@ static void perror(kburn_err_t e)
 	cout << "    - code: " << errs.code << endl;
 }
 
-void handle(kburnDeviceNode *dev, void *ctx)
+void handle(void *ctx, kburnDeviceNode *dev)
 {
 	cout << "Got Serial Device: " << dev->serial->path << endl;
 	cout << "  * isOpen: " << dev->serial->isOpen << endl;
@@ -58,7 +58,7 @@ void handle(kburnDeviceNode *dev, void *ctx)
 	}
 }
 
-void handle_usb(kburnDeviceNode *dev, void *ctx)
+void handle_usb(void *ctx, kburnDeviceNode *dev)
 {
 	kburn_err_t r;
 
@@ -113,7 +113,7 @@ void handle_usb(kburnDeviceNode *dev, void *ctx)
 		cout << "    - data wrong" << endl;
 }
 
-void disconnect(const kburnDeviceNode *dev, void *ctx)
+void disconnect(void *ctx, const kburnDeviceNode *dev)
 {
 	cout << "Disconnect: " << dev->serial->path << endl;
 	cout << "  * isOpen: " << dev->serial->isOpen << endl;

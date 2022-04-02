@@ -168,7 +168,7 @@ kburnSerialIspMemoryWrite(kburnSerialDeviceNode *node, const kburn_mem_address_t
 	debug_trace_function("base=0x%X, size=%ld, pages=%d", address, data_size, pages);
 
 	if (cb)
-		cb(get_node(node), 0, data_size, ctx);
+		cb(ctx, get_node(node), 0, data_size);
 
 	for (uint32_t page = 0; page < pages; page++)
 	{
@@ -190,7 +190,7 @@ kburnSerialIspMemoryWrite(kburnSerialDeviceNode *node, const kburn_mem_address_t
 		}
 
 		if (cb)
-			cb(get_node(node), page * BOARD_MEMORY_PAGE_SIZE + packet->data_len, data_size, ctx);
+			cb(ctx, get_node(node), page * BOARD_MEMORY_PAGE_SIZE + packet->data_len, data_size);
 	}
 
 	return true;

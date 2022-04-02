@@ -61,6 +61,6 @@ void __debug_leave(kburnLogType type)
 {
 	assert(debug_output - debug_buffer <= DEBUG_BUFFER_SIZE);
 	assert(debug_output[0] == '\0');
-	g_on_debug_callback(type, debug_buffer);
+	g_on_debug_callback(g_on_debug_callback_ctx, type, debug_buffer);
 	pthread_spin_unlock(&lock);
 }

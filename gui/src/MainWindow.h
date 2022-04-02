@@ -1,9 +1,13 @@
 #pragma once
 
 #include <QMainWindow>
+#include "common/logger.h"
 
 QT_BEGIN_NAMESPACE
-namespace Ui { class MainWindow; }
+namespace Ui
+{
+	class MainWindow;
+}
 QT_END_NAMESPACE
 
 class MainWindow : public QMainWindow
@@ -16,13 +20,11 @@ public:
 
 private slots:
 	void on_btnSelectImage_clicked();
-
 	void on_inputSysImage_returnPressed();
-
 	void on_btnOpenWebsite_triggered();
-
-	void on_actionw_triggered();
+	bool handleDeviceConnected(kburnDeviceNode *dev);
 
 private:
 	Ui::MainWindow *ui;
+	LogReceiver *logReceiver;
 };

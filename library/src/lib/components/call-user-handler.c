@@ -6,7 +6,7 @@ void user_callback_thread(KBCTX scope, void *_evt)
 	(void)scope;
 	const struct user_handler_wrap_data *data = _evt;
 
-	data->handler(data->device, data->context);
+	data->handler(data->context, data->device);
 }
 kburn_err_t global_init_user_handle_thread(KBCTX scope)
 {

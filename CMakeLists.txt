@@ -6,6 +6,7 @@ set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 project(BurningToolMeta)
 
 add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/library)
+
 # add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/cli)
 add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/gui)
 

@@ -1,5 +1,7 @@
+#include "main.h"
 #include "MainWindow.h"
 #include "ui_MainWindow.h"
+#include "common/logger.h"
 
 MainWindow::MainWindow(QWidget *parent)
 	: QMainWindow(parent), ui(new Ui::MainWindow)
@@ -9,10 +11,19 @@ MainWindow::MainWindow(QWidget *parent)
 	ui->mainTabView->removeTab(3);
 	ui->mainTabView->removeTab(2);
 	ui->mainTabView->setCurrentIndex(0);
+
+	logReceiver = new LogReceiver();
+	QObject::connect(logReceiver, &LogReceiver::onReceiveLine, this->ui->textLog, &LoggerWindow::append);
+
+	kburnOnSerialConnect(kb_context, reinterpret_cast<on_device_connect>(&MainWindow::handleDeviceConnected), this);
+
+	kburnStartWaitingDevices(kb_context);
+	// connect(this->ui, SIGNAL(destroy()), logReceiver, SLOT(xxx));
 }
 
 MainWindow::~MainWindow()
 {
+	delete logReceiver;
 	delete ui;
 }
 
@@ -27,18 +38,13 @@ void MainWindow::on_btnSelectImage_clicked()
 
 void MainWindow::on_inputSysImage_returnPressed()
 {
-
 }
-
 
 void MainWindow::on_btnOpenWebsite_triggered()
 {
-
 }
 
-
-void MainWindow::on_actionw_triggered()
+bool MainWindow::handleDeviceConnected(kburnDeviceNode *dev)
 {
-
+	return false;
 }
-
