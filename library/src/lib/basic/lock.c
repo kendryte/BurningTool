@@ -9,14 +9,14 @@ typedef struct kb_mutex {
 	const char *varname;
 	const char *file;
 	int line;
-} kb_mutex_t;
+} kb_mutex;
 
 #include "debug/print.h"
 #include "sleep.h"
-#include <errno.h>
 #include <stdbool.h>
 #include <stdint.h>
 #include <stdlib.h>
+#include <errno.h>
 #include <string.h>
 
 pthread_mutex_t *_init_lock() {
@@ -34,7 +34,10 @@ pthread_mutex_t *_init_lock() {
 }
 void _deinit_lock(pthread_mutex_t **mutex) {
 	debug_print(KBURN_LOG_TRACE, "[lock] deinit");
-	m_assert0(pthread_mutex_destroy(*mutex), "unlock fail");
+	int err = pthread_mutex_destroy(*mutex);
+	if (err != 0) {
+		debug_print(KBURN_LOG_ERROR, COLOR_FMT("failed pthread_mutex_destroy: %d: %s"), COLOR_ARG(YELLOW, err, strerror(err)));
+	}
 	free(*mutex);
 	*mutex = NULL;
 }
@@ -49,14 +52,14 @@ void _unlock(pthread_mutex_t *mutex) {
 	m_assert0(pthread_mutex_unlock(mutex), "pthread_mutex_unlock failed");
 }
 
-kb_mutex_t *__init_lock() {
-	kb_mutex_t *mlock = calloc(1, sizeof(kb_mutex_t));
+kb_mutex *__init_lock() {
+	kb_mutex *mlock = calloc(1, sizeof(kb_mutex));
 	mlock->mutex = _init_lock();
 	return mlock;
 }
 
-void __deinit_lock(kb_mutex_t **pmlock) {
-	kb_mutex_t *mlock = *pmlock;
+void __deinit_lock(kb_mutex **pmlock) {
+	kb_mutex *mlock = *pmlock;
 	*pmlock = NULL;
 
 	pthread_mutex_destroy(mlock->mutex);
@@ -64,14 +67,14 @@ void __deinit_lock(kb_mutex_t **pmlock) {
 	free(mlock);
 }
 
-static inline void _dbg_ln(const char *msg, const char *varname, const char *file, int line) {
+static inline void _dbg_ln(const char *msg, const char *varname, const char *RELEASE_UNUSED(file), int RELEASE_UNUSED(line)) {
 	debug_print(KBURN_LOG_ERROR, COLOR_FMT("%s"), COLOR_ARG(RED, msg));
 	char buff[THREAD_TITLE_BUFF_SIZE] = {0};
 	pthread_getname_np(pthread_self(), buff, THREAD_TITLE_BUFF_SIZE);
 	debug_print_location(KBURN_LOG_ERROR, file, line, "[thread: %s] try lock - %s", buff, varname);
 }
 
-void __lock(kb_mutex_t *mlock, const char *varname, const char *file, int line) {
+void __lock(kb_mutex *mlock, const char *varname, const char *file, int line) {
 	if (mlock == NULL) {
 		_dbg_ln("lock uninit mutex object", varname, file, line);
 		// no return
@@ -100,7 +103,7 @@ void __lock(kb_mutex_t *mlock, const char *varname, const char *file, int line) 
 	pthread_getname_np(pthread_self(), mlock->holder, THREAD_TITLE_BUFF_SIZE);
 }
 
-void __unlock(kb_mutex_t *mlock) {
+void __unlock(kb_mutex *mlock) {
 	// debug_print("unlock %p", (void *)mlock->mutex);
 	_unlock(mlock->mutex);
 	mlock->file = NULL;
@@ -109,4 +112,4 @@ void __unlock(kb_mutex_t *mlock) {
 	mlock->varname = NULL;
 }
 
-pthread_mutex_t *__raw_lock(kb_mutex_t *mlock) { return mlock->mutex; }
+pthread_mutex_t *__raw_lock(kb_mutex *mlock) { return mlock->mutex; }

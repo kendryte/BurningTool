@@ -5,6 +5,7 @@
 #include "../usb/private-types.h"
 #include "../usb/subsystem.h"
 #include "basic/resource-tracker.h"
+#include "canaan-burn/canaan-burn.h"
 
 static DECALRE_DISPOSE(_dispose, kburnContext) {
 	if (context->monitor_inited) {

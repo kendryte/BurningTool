@@ -13,6 +13,12 @@
 #define UNUSED(x)
 #endif
 
+#ifndef NDEBUG
+#define RELEASE_UNUSED(X) X
+#else
+#define RELEASE_UNUSED(X) UNUSED(X)
+#endif
+
 #define CONCAT(a, b) a##b
 
 #define STRINGIZE(x) STRINGIZE2(x)

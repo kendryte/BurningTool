@@ -2,10 +2,10 @@
 #include "basic/errors.h"
 #include "basic/string.h"
 #include "slip.h"
-#include <libusb.h>
-#include <sercomm/sercomm.h>
 #include <stdarg.h>
 #include <stdlib.h>
+#include <libusb.h>
+#include <sercomm/sercomm.h>
 
 void _copy_last_serial_io_error(kburnDeviceNode *node, uint32_t err) {
 	clear_error(node);
@@ -21,7 +21,7 @@ void _copy_last_libusb_error(kburnDeviceNode *node, int err) {
 	const char *desc = libusb_strerror(err);
 	size_t size = m_snprintf(NULL, 0, "%s: %s", name, desc);
 	char *buff = malloc(size + 1);
-	m_snprintf(buff, size + 1, "%s: %s", name, desc);
+	m_snprintf(buff, (size + 1), "%s: %s", name, desc);
 	node->error->errorMessage = buff;
 	debug_print(KBURN_LOG_INFO, "copy_last_libusb_error: %d - %s", err, node->error->errorMessage);
 }

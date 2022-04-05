@@ -1,6 +1,5 @@
 #include "base.h"
-#include "canaan-burn/canaan-burn.h"
-#include "types.h"
+#include "context.h"
 #include <stdio.h>
 
 static void default_log_callback(void *UNUSED(context), kburnLogType UNUSED(type), const char *message) {

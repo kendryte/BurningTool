@@ -1,7 +1,16 @@
 #pragma once
 
-#include "types.h"
 #include <stdbool.h>
+
+#define has_kb_mutex 1
+#ifndef NDEBUG
+#include <stdbool.h>
+typedef struct kb_mutex *kb_mutex_t;
+#else
+#include <pthread.h>
+typedef pthread_mutex_t *kb_mutex_t;
+#endif
+#include "canaan-burn/exported/types.h"
 
 /**
  * 库上下文，通过kburnCreate创建，所有函数都需要传此参数。主要用于跟踪内存资源

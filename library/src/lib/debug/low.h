@@ -1,7 +1,7 @@
 #pragma once
 
 #include "base.h"
-#include "types.h"
+#include "context.h"
 #include <stdarg.h>
 
 void __debug_enter();
@@ -10,7 +10,7 @@ extern char *const debug_output;
 extern const size_t debug_buffer_remain;
 char *debug_output_move(size_t size);
 void debug_printf(const char *fmt, ...) __attribute__((format(printf, 1, 2)));
-void __debug_vprintf(const char *fmt, va_list va);
+void debug_vprintf(const char *fmt, va_list va);
 void debug_puts(const char *message);
 
 #define DEBUG_START(level)                                                                                                                           \

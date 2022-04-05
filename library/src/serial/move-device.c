@@ -1,7 +1,7 @@
 #include "basic/lock.h"
+#include "context.h"
 #include "device.h"
 #include "private-types.h"
-#include "types.h"
 
 void copy_serial_device(kburnDeviceNode *src, kburnDeviceNode *dst) {
 	dst->serial->parent = dst;

@@ -7,6 +7,7 @@
 #include "lifecycle.h"
 #include "private-types.h"
 #include "subsystem.h"
+#include "canaan-burn/canaan-burn.h"
 #include <libusb.h>
 
 kburn_err_t kburnOpenUsb(KBCTX scope, uint16_t vid, uint16_t pid, const uint8_t *path) {
@@ -48,15 +49,15 @@ void kburnSetUsbFilter(KBCTX scope, int vid, int pid) {
 }
 
 kburnUsbDeviceList kburnGetUsbList(KBCTX scope) {
-	if (scope->list1 == NULL) {
-		scope->list1 = array_create(struct kburnUsbDeviceInfoSlice, 10);
-		if (scope->list1 == NULL) {
+	if (scope->list2 == NULL) {
+		scope->list2 = array_create(struct kburnUsbDeviceInfoSlice, 10);
+		if (scope->list2 == NULL) {
 			return (kburnUsbDeviceList){.size = 0, .list = NULL};
 		}
-		dispose_list_add(scope->disposables, toDisposable(array_destroy, scope->list1));
+		dispose_list_add(scope->disposables, toDisposable(array_destroy, scope->list2));
 	}
 
-	dynamic_array_t *array = scope->list1;
+	dynamic_array_t *array = scope->list2;
 	ssize_t list_size = list_usb_ports(scope, array->body, array->size);
 	if (list_size < 0) {
 		return (kburnUsbDeviceList){.size = 0, .list = NULL};
@@ -71,4 +72,4 @@ kburnUsbDeviceList kburnGetUsbList(KBCTX scope) {
 	return (kburnUsbDeviceList){.size = array->length, .list = array->body};
 }
 
-void kburnFreeUsbList(KBCTX scope) { array_destroy(scope->disposables, scope->list1); }
+void kburnFreeUsbList(KBCTX scope) { array_destroy(scope->disposables, scope->list2); }

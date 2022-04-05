@@ -57,7 +57,7 @@ function(load_binary target variable src)
 
 		string(REGEX REPLACE "[0-9a-f][0-9a-f]" "0x\\0," content_rep "${content}")
 
-		file(GENERATE
+		file(
 			WRITE "${tgt}"
 			"#include <stdint.h>\n#include <stddef.h>\nconst uint8_t ${variable}[${size}] = {\n${content_rep}\n};\nconst size_t ${variable}_size = ${size};"
 		)
@@ -88,9 +88,6 @@ push_source_code(canaan_burn bridge lib)
 
 target_include_directories(canaan_burn
 	PUBLIC "${CMAKE_CURRENT_LIST_DIR}/include")
-
-target_include_directories(
-	canaan_burn PRIVATE "${CMAKE_CURRENT_LIST_DIR}/include/canaan-burn/parts")
 
 # ##############################################################################
 find_package(libusb CONFIG REQUIRED)
@@ -128,9 +125,9 @@ if(CMAKE_BUILD_TYPE STREQUAL "Debug")
 	find_package(Sanitizers REQUIRED)
 
 	add_sanitizers(canaan_burn)
+else()
 endif()
 
-target_compile_options(canaan_burn PRIVATE -Wall -Wextra -pedantic -Werror
-) # -Wno-error=format-zero-length=0
+target_compile_options(canaan_burn PRIVATE -Wall -Wextra -pedantic -Werror) # -Wno-error=format-zero-length=0
 
 target_compile_definitions(canaan_burn PRIVATE _GNU_SOURCE)

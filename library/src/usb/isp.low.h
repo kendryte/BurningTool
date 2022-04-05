@@ -1,7 +1,8 @@
 #pragma once
 
-#include "canaan-burn/canaan-burn.h"
+#include "context.h"
 #include "isp.h"
+#include "canaan-burn/exported/usb.isp.h"
 #include <libusb.h>
 
 typedef enum usbIspCommand {

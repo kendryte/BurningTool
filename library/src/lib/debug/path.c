@@ -9,7 +9,7 @@
 #else
 #define FILE_LINE_FORMAT "%s:%d"
 #define FILE_LINE_VALUE(file_path, file_line) relative_path(file_path), file_line
-#define PREFIX_SIZE 16
+#define PREFIX_SIZE 42
 #endif
 
 const char *relative_path(const char *file_path) { return &file_path[strlen(PROJECT_ROOT) + 1]; }

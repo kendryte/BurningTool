@@ -6,6 +6,7 @@
 #include "math.h"
 #include "private-types.h"
 #include "subsystem.h"
+#include "canaan-burn/canaan-burn.h"
 
 static inline bool match_device(int vid, int pid, const struct libusb_device_descriptor *desc) {
 	if (vid != KBURN_VIDPID_FILTER_ANY && vid != desc->idVendor) {

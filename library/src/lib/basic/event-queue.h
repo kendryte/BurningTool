@@ -1,7 +1,7 @@
 #pragma once
 
 #include "base.h"
-#include "canaan-burn/canaan-burn.h"
+#include "context.h"
 
 typedef void (*pointer_handler)(void *data);
 typedef struct queue_info *queue_t;

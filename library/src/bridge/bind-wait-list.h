@@ -2,7 +2,7 @@
 
 #include "basic/disposable.h"
 #include "basic/lock.h"
-#include "canaan-burn/canaan-burn.h"
+#include "context.h"
 #include <stdbool.h>
 #include <stdint.h>
 #include <stdlib.h>

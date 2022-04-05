@@ -1,6 +1,7 @@
 #pragma once
 
 #include "./prefix.h"
+#include "./types.serial.h"
 
 DEFINE_START
 

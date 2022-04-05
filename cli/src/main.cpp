@@ -1,6 +1,6 @@
+#include <stddef.h>
 #include <canaan-burn/canaan-burn.h>
 #include <iostream>
-#include <stddef.h>
 
 using namespace std;
 

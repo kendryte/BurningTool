@@ -1,11 +1,12 @@
 #pragma once
 
 #include "components/thread.h"
-#include "serial.isp.h"
+#include "context.h"
 #include "slip.h"
-#include <sercomm/sercomm.h>
+#include "canaan-burn/exported/serial.isp.h"
 #include <stdint.h>
 #include <stdio.h>
+#include <sercomm/sercomm.h>
 
 enum kburnIspOperation {
 	ISP_ECHO = 0xC1,

@@ -2,6 +2,7 @@
 #include "device.h"
 #include "isp.low.h"
 #include "private-types.h"
+#include "canaan-burn/exported/usb.isp.h"
 #include <string.h>
 #include <time.h>
 

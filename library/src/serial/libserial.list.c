@@ -29,7 +29,7 @@ kburn_err_t init_list_all_serial_devices(KBCTX scope) {
 	return KBurnNoErr;
 }
 
-ssize_t list_serial_ports(KBCTX UNUSED(scope), struct kburnSerialDeviceInfoSlice *list, size_t max_size) {
+ssize_t list_serial_ports(KBCTX UNUSED(scope), struct kburnSerialDeviceInfoSlice list[], size_t max_size) {
 	debug_trace_function();
 
 	ser_dev_list_t *lst = ser_dev_list_get();

@@ -1,6 +1,6 @@
+#include <stdlib.h>
 #include <iostream>
 #include <libudev.h>
-#include <stdlib.h>
 #include <string.h>
 
 using namespace std;

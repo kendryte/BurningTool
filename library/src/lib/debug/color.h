@@ -1,7 +1,8 @@
 #pragma once
 
 #include "base.h"
-#include "debug.h"
+#include "context.h"
+#include "canaan-burn/exported/debug.h"
 #include <stddef.h>
 
 extern kburnDebugColors g_debug_colors;

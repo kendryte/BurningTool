@@ -16,18 +16,15 @@ typedef struct kburnDeviceError {
 } kburnDeviceError;
 
 #if !defined(has_kb_mutex)
-typedef struct kb_mutex *kb_mutex_t;
+typedef void *kb_mutex_t;
 #endif
-
-#include "./types.serial.h"
-#include "./types.usb.h"
 
 typedef struct kburnDeviceNode {
 	PCONST kburnDeviceError *const error;
 	PCONST void *chipInfo;
 	PCONST struct disposable_list *disposable_list;
-	kburnSerialDeviceNode *const serial;
-	kburnUsbDeviceNode *const usb;
+	struct kburnSerialDeviceNode *const serial;
+	struct kburnUsbDeviceNode *const usb;
 	PCONST struct kburnContext *const _scope;
 
 	PCONST bool destroy_in_progress;
@@ -57,5 +54,8 @@ declare_callback(void, on_device_remove, const kburnDeviceNode *dev);
 declare_callback(void, on_device_handle, kburnDeviceNode *dev);
 declare_callback(void, on_write_progress, const kburnDeviceNode *dev, size_t current, size_t length);
 declare_callback(void, on_debug_log, kburnLogType type, const char *message);
+
+#include "./types.serial.h"
+#include "./types.usb.h"
 
 DEFINE_END

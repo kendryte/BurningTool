@@ -5,6 +5,7 @@
 #include "lifecycle.h"
 #include "private-types.h"
 #include "subsystem.h"
+#include "canaan-burn/canaan-burn.h"
 #include <pthread.h>
 
 bool libUsbHasWathcer = false;

@@ -1,11 +1,10 @@
 #pragma once
 
-#define has_kb_mutex 1
+#include "context.h"
 #include <pthread.h>
 
 #ifndef NDEBUG
 #include <stdbool.h>
-typedef struct kb_mutex *kb_mutex_t;
 kb_mutex_t __init_lock();
 void __deinit_lock(kb_mutex_t *mutex);
 void __lock(kb_mutex_t mutex, const char *varname, const char *file, int line);
@@ -17,7 +16,6 @@ pthread_mutex_t *__raw_lock(kb_mutex_t mutex);
 #define lock_deinit(mutex) __deinit_lock(mutex)
 #define raw_lock(mutex) __raw_lock(mutex)
 #else
-typedef pthread_mutex_t *kb_mutex_t;
 void _lock(pthread_mutex_t *mutex);
 void _unlock(pthread_mutex_t *mutex);
 pthread_mutex_t *_init_lock();

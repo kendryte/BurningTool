@@ -1,6 +1,5 @@
-#include "canaan-burn/parts/errors.h"
+#include "canaan-burn/exported/errors.h"
 #include <error.h>
-
 #include <sys/types.h>
 typedef union error_convert {
 	struct {

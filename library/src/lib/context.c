@@ -11,6 +11,7 @@ disposable_list_t *lib_global_scope = NULL;
 static uint32_t dbg_index = 0;
 
 kburn_err_t kburnCreate(KBCTX *ppCtx) {
+	debug_trace_function("11");
 	debug_trace_function();
 
 	DeferEnabled;

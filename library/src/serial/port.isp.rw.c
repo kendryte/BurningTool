@@ -121,7 +121,9 @@ static isp_response_t *serial_isp_command_send_low(kburnSerialDeviceNode *node, 
 		}
 	}
 
+#ifndef NDEBUG
 	print_buffer(KBURN_LOG_TRACE, "MCU→PC", debug_buffer, debug_buffer_length);
+#endif
 	print_buffer(KBURN_LOG_TRACE, "[response]", node->isp->main_buffer, node->isp->main_buffer_length);
 
 	isp_response_t *response = (void *)node->isp->main_buffer;

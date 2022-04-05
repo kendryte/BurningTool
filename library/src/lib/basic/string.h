@@ -6,18 +6,20 @@
 #include <stdio.h>
 #include <string.h>
 
-static inline char *__empty_string(const char *UNUSED(_)) { return NULL; }
-static inline const char *__none_empty_string(const char *_) { return _; }
+static inline const char *__clang_happy_fmt_string(const char *_) { return _; }
+static inline size_t __smart_string_length(const char *s, size_t otherwise) { return (s == NULL) ? otherwise : strlen(s); }
 
 #define m_snprintf(output, size, fmt, ...)                                                                                                           \
 	__extension__({                                                                                                                                  \
-		snprintf(output, size, fmt __VA_OPT__(, ) __VA_ARGS__);                                                                                      \
-		(output == NULL) ? 0 : strlen(__none_empty_string(output));                                                                                  \
+		if (0)                                                                                                                                       \
+			(void)0;                                                                                                                                 \
+		size_t b = snprintf(output, size, fmt __VA_OPT__(, ) __VA_ARGS__);                                                                           \
+		__smart_string_length(output, b);                                                                                                            \
 	})
 #define m_vsnprintf(output, size, fmt, va)                                                                                                           \
 	__extension__({                                                                                                                                  \
-		vsnprintf(output, size, fmt, va);                                                                                                            \
-		(output == NULL) ? 0 : strlen(__none_empty_string(output));                                                                                  \
+		size_t b = vsnprintf(output, size, fmt, va);                                                                                                 \
+		__smart_string_length(output, b);                                                                                                            \
 	})
 
 #define buffer_make(name, size)                                                                                                                      \

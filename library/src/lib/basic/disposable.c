@@ -1,6 +1,5 @@
 #include "disposable.h"
 #include "debug/print.h"
-
 #include <stdlib.h>
 
 typedef struct disposable_list_element {
@@ -203,8 +202,8 @@ void dispose(disposable target) {
 	current->callback(r, current->object);
 
 	// debug_print("  * dispose callback return, size=%d", target->size);
-	m_assert(plength - 1 == r->size, "not call to dispose_list_delete(): %s at %s:%d", current->__debug.title, current->__debug.file,
-			 current->__debug.line);
+	m_assert(plength - 1 == r->size, "not call to dispose_list_delete(): %s at %s", DEBUG_OBJ_TITLE(current->__debug),
+			 DEBUG_OBJ_PATH(current->__debug));
 }
 
 DECALRE_DISPOSE(free_pointer, void) { free(context); }

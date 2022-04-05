@@ -1,7 +1,7 @@
 #include "port.options.h"
 #include "debug/print.h"
-#include "serial.config.h"
-#include "types.serial.h"
+#include "canaan-burn/exported/serial.config.h"
+#include "canaan-burn/exported/types.serial.h"
 #include <sercomm/sercomm.h>
 
 ser_opts_t opts = {

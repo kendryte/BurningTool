@@ -3,7 +3,6 @@
 #include "basic/sleep.h"
 #include "context.h"
 #include "debug/print.h"
-
 #include <pthread.h>
 
 typedef struct thread_passing_object {
@@ -19,10 +18,10 @@ typedef struct thread_passing_object {
 void thread_tell_quit(thread_passing_object *thread) { thread->quit = true; }
 
 DECALRE_DISPOSE(destroy_thread, thread_passing_object) {
-	debug_print(KBURN_LOG_DEBUG, COLOR_FMT("[thread]") " wait quit: %s", COLOR_ARG(YELLOW, context->debug_title));
+	debug_print(KBURN_LOG_DEBUG, COLOR_FMT("[thread]") " wait quit: %s", COLOR_ARG(YELLOW), context->debug_title);
 	thread_tell_quit(context);
 	pthread_join(context->thread, NULL);
-	debug_print(KBURN_LOG_INFO, COLOR_FMT("[thread]") " %s quit success", COLOR_ARG(GREEN, context->debug_title));
+	debug_print(KBURN_LOG_INFO, COLOR_FMT("[thread]") " %s quit success", COLOR_ARG(GREEN), context->debug_title);
 	free(context);
 }
 DECALRE_DISPOSE_END()

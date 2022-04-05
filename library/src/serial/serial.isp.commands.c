@@ -6,7 +6,7 @@
 #include "isp.h"
 #include "low.h"
 #include "private-types.h"
-#include "serial.config.h"
+#include "canaan-burn/exported/serial.config.h"
 
 slip_error_t _serial_isp_slip_send_request(kburnSerialDeviceNode *node, isp_request_t *command);
 

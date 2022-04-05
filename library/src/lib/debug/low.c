@@ -1,10 +1,10 @@
 #include "assert.h"
 #include "basic/string.h"
 #include "user-callback.h"
-#include <assert.h>
-#include <pthread.h>
 #include <stdarg.h>
 #include <stdio.h>
+#include <assert.h>
+#include <pthread.h>
 
 #define DEBUG_BUFFER_SIZE 4096
 
@@ -25,7 +25,7 @@ void debug_printf(const char *fmt, ...) {
 	va_end(va);
 }
 
-void __debug_vprintf(const char *fmt, va_list va) { debug_output_move(m_vsnprintf(debug_output, debug_buffer_remain, fmt, va)); }
+void debug_vprintf(const char *fmt, va_list va) { debug_output_move(m_vsnprintf(debug_output, debug_buffer_remain, fmt, va)); }
 
 void debug_puts(const char *message) { debug_output_move(m_snprintf(debug_output, debug_buffer_remain, "%s", message)); }
 

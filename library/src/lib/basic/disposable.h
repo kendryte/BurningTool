@@ -1,17 +1,17 @@
 #pragma once
 
+#include "debug/path.h"
+#include "debug/print.h"
+#include "lock.h"
 #include <stdbool.h>
 #include <stdint.h>
 #include <stdlib.h>
-
-#include "debug/print.h"
-#include "lock.h"
 
 typedef struct disposable_list_element disposable_list_element_t;
 typedef struct disposable_list disposable_list_t;
 typedef void (*dispose_function)(disposable_list_t *this, void *userData);
 
-typedef struct debug_bundle disposable_debug;
+typedef struct_debug_bundle disposable_debug;
 
 typedef struct disposable {
 	void *object;
@@ -29,7 +29,7 @@ disposable __toDisposable(dispose_function callback, void *userData, const char 
 		__toDisposable((dispose_function)(callback), (void *)(userData), #callback "(" #userData ")", __func__, __FILE__, __LINE__);                 \
 	})
 #else
-disposable _toDisposable(dispose_function callback, void *userData);
+disposable _toDisposable(dispose_function callback, void *userData, const char *debug_title);
 #define toDisposable(callback, userData)                                                                                                             \
 	__extension__({                                                                                                                                  \
 		if (0)                                                                                                                                       \

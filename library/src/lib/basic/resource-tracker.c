@@ -1,9 +1,9 @@
 #include "resource-tracker.h"
 #include "debug/print.h"
-#include <memory.h>
 #include <stdbool.h>
 #include <stdint.h>
 #include <stdlib.h>
+#include <memory.h>
 
 static inline void do_cleanup(const resource_tracker_element element) {
 	if (element.resource != NULL) {
@@ -35,7 +35,7 @@ void resource_tracker_done(resource_tracker_t *tracker) {
 	memset(tracker, 0, sizeof(resource_tracker_t));
 }
 void keep_resource(resource_tracker_t *tracker) { tracker->successed = true; }
-void *_track_resource(resource_tracker_t *tracker, void *resource, cleanup_function clean, bool always, const char *var, const char *file, int line) {
+void *_track_resource(resource_tracker_t *tracker, void *resource, cleanup_function clean, bool always, resource_tracker_debug dbg) {
 	m_assert_ptr(resource, "can not track null ptr");
 	uint8_t i = tracker->size++;
 	m_assert(i < MAX_TRACE, "resource tracker can not hold too many element");
@@ -43,25 +43,21 @@ void *_track_resource(resource_tracker_t *tracker, void *resource, cleanup_funct
 	tracker->element[i].callback = clean;
 	tracker->element[i].resource = resource;
 	tracker->element[i].force = always;
-	tracker->element[i].__debug.file = file;
-	tracker->element[i].__debug.line = line;
-	tracker->element[i].__debug.title = var;
+	tracker->element[i].__debug = dbg;
 	if (always)
 		tracker->hasAlways = true;
 
 	return resource;
 }
 
-void *_track_dispose(resource_tracker_t *tracker, disposable d, const char *var, const char *file, int line) {
+void *_track_dispose(resource_tracker_t *tracker, disposable d, resource_tracker_debug dbg) {
 	m_assert_ptr(d.list, "can not track disposable without add it to list");
 	uint8_t i = tracker->size++;
 	m_assert(i < MAX_TRACE, "resource tracker can not hold too many element");
 	memset(tracker->element + i, 0, sizeof(resource_tracker_element));
 	tracker->element[i].dispose_object = d;
 	tracker->element[i].force = false;
-	tracker->element[i].__debug.file = file;
-	tracker->element[i].__debug.line = line;
-	tracker->element[i].__debug.title = var;
+	tracker->element[i].__debug = dbg;
 
 	return d.object;
 }

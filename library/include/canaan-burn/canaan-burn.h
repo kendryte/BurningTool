@@ -1,17 +1,16 @@
 #pragma once
 
+#include "./exported/errors.h"
+#include "./exported/prefix.h"
+#include "./exported/types.h"
 #include <stdbool.h>
 #include <stddef.h>
 #include <stdint.h>
 
-#include "./parts/errors.h"
-#include "./parts/prefix.h"
-#include "./parts/types.h"
-
 #if BURN_LIB_COMPILING
 #include "context.h"
 #else
-#include "./parts/context.h"
+#include "./exported/context.h"
 #endif
 
 DEFINE_START
@@ -128,13 +127,11 @@ PUBLIC kburn_err_t kburnPollUsb(KBCTX scope);
 
 DEFINE_END
 
-#include "./parts/debug.h"
-
-#include "./parts/serial.config.h"
-#include "./parts/serial.isp.h"
-
-#include "./parts/usb.isp.h"
+#include "./exported/debug.h"
+#include "./exported/serial.config.h"
+#include "./exported/serial.isp.h"
+#include "./exported/usb.isp.h"
 
 #ifdef KBURN_ASSERT_SIZE
-#include "./parts/static-assert.h"
+#include "./exported/static-assert.h"
 #endif

@@ -1,5 +1,5 @@
 #pragma once
 
-#include "types.h"
+#include "context.h"
 
 kburnSerialDeviceInfo driver_get_devinfo(const char *path);

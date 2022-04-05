@@ -1,7 +1,7 @@
 #include "color.h"
 #include "base.h"
-#include "debug.h"
 #include "debug/print.h"
+#include "canaan-burn/exported/debug.h"
 
 kburnDebugColors g_debug_colors = {
 	.red = { .prefix = "\x1B[38;5;9m", .postfix = "\x1B[0m"},

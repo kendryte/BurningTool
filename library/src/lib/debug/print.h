@@ -7,36 +7,42 @@
 #include "./user-callback.h"
 #include "base.h"
 #include "basic/string.h"
-#include "types.h"
+#include "context.h"
 
-void _debug_print(const char *file, int line, const char *fmt, ...) __attribute__((format(printf, 3, 4)));
-#define debug_print(level, fmt, ...)                                                                                                                 \
-	if (0)                                                                                                                                           \
-		(void)_debug_print;                                                                                                                          \
-	DEBUG_START(level);                                                                                                                              \
-	_debug_print(__FILE__, __LINE__, fmt __VA_OPT__(, ) __VA_ARGS__);                                                                                \
-	DEBUG_END()
+#define debug_print(level, fmt, ...) debug_print_location(level, __FILE__, __LINE__, fmt __VA_OPT__(, ) __VA_ARGS__)
 #define TODO debug_print("\x1B[38;5;11mTODO: please impl %s()\x1B[0m", __func__)
 
-void _print_buffer(const char *file, int line, const char *dir, const uint8_t *buff, size_t size, size_t max_dump);
+size_t __print_buffer(char *output, size_t output_length, const char *dir, const uint8_t *buff, size_t size, size_t max_dump);
 #define print_buffer(level, dir, buff, size)                                                                                                         \
 	if (0)                                                                                                                                           \
-		(void)_print_buffer;                                                                                                                         \
+		(void)__print_buffer;                                                                                                                        \
 	DEBUG_START(level);                                                                                                                              \
-	_print_buffer(__FILE__, __LINE__, dir, buff, size, 24);                                                                                          \
+	debug_print_prefix(debug_output, debug_buffer_remain, __FILE__, __LINE__);                                                                       \
+	debug_output_move(__print_buffer(debug_output, debug_buffer_remain, dir, buff, size, 24));                                                       \
 	DEBUG_END()
 
 #define debug_print_location(level, file, line, fmt, ...)                                                                                            \
 	if (0)                                                                                                                                           \
-		(void)_debug_print;                                                                                                                          \
+		(void)0;                                                                                                                                     \
 	DEBUG_START(level);                                                                                                                              \
-	_debug_print(file, line, fmt __VA_OPT__(, ) __VA_ARGS__);                                                                                        \
+	debug_print_prefix(debug_output, debug_buffer_remain, file, line);                                                                               \
+	debug_printf(fmt __VA_OPT__(, ) __VA_ARGS__);                                                                                                    \
 	DEBUG_END()
 
-void _debug_trace_function(const char *file, int line, const char *func, const char *fmt, ...) __attribute__((format(printf, 4, 5)));
+#ifndef NDEBUG
+#define INCLUDE_FILE_LINE 1
+#else
+#define INCLUDE_FILE_LINE 0
+#endif
+
 #define debug_trace_function(...)                                                                                                                    \
 	if (0)                                                                                                                                           \
-		(void)_debug_trace_function;                                                                                                                 \
+		(void)0;                                                                                                                                     \
 	DEBUG_START(KBURN_LOG_TRACE);                                                                                                                    \
-	_debug_trace_function(__FILE__, __LINE__, __func__, __VaridicMacro_Opt(__empty_string(""), __VA_ARGS__) __VaridicMacro_Shift(__VA_ARGS__));      \
+	debug_print_prefix(debug_output, debug_buffer_remain, __FILE__, __LINE__);                                                                       \
+	if (INCLUDE_FILE_LINE)                                                                                                                           \
+		debug_printf("[%.*s] ", basename_to_ext_length(__FILE__), basename(__FILE__));                                                               \
+	debug_printf(COLOR_FMT("%s") "(", COLOR_ARG(GREY, __func__));                                                                                    \
+	debug_printf(__VaridicMacro_Opt(__clang_happy_fmt_string(""), __VA_ARGS__) __VaridicMacro_Shift(__VA_ARGS__));                                   \
+	debug_printf(")");                                                                                                                               \
 	DEBUG_END()

@@ -1,10 +1,10 @@
 #include "main.h"
+#include <stddef.h>
 #include <canaan-burn/canaan-burn.h>
 #include <cassert>
 #include <cstring>
 #include <iomanip>
 #include <iostream>
-#include <stddef.h>
 #include <string>
 #include <vector>
 

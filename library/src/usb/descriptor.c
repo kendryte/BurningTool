@@ -4,8 +4,8 @@
 #include "context.h"
 #include "device.h"
 #include "private-types.h"
-#include <libusb.h>
 #include <stdio.h>
+#include <libusb.h>
 
 kburn_err_t usb_get_vid_pid_path(struct libusb_device *dev, uint16_t *out_vid, uint16_t *out_pid, uint8_t out_path[MAX_USB_PATH_LENGTH]) {
 	struct libusb_device_descriptor desc;

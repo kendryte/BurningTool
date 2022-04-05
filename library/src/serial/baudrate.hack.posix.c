@@ -2,9 +2,9 @@
 #include "device.h"
 #include "low.h"
 #include "private-types.h"
+#include <stdint.h>
 #include <errno.h>
 #include <fcntl.h>
-#include <stdint.h>
 #include <string.h>
 #include <sys/ioctl.h>
 #include <termios.h>

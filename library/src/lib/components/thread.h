@@ -2,7 +2,7 @@
 
 #include "basic/disposable.h"
 #include "context.h"
-#include "errors.h"
+#include "canaan-burn/exported/debug.h"
 #include <stdbool.h>
 
 typedef void (*thread_function)(void *context, KBCTX scope, const bool *const quit);

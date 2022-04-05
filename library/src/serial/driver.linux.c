@@ -1,8 +1,8 @@
 #include "basic/resource-tracker.h"
 #include "context.h"
 #include "private-types.h"
-#include <libudev.h>
 #include <stdlib.h>
+#include <libudev.h>
 
 #define get_number_prop(store, PROP, base)                                                                                                           \
 	pstr = udev_device_get_property_value(dev, PROP);                                                                                                \

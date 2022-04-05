@@ -3,7 +3,6 @@
 #include "basic/event-queue.h"
 #include "context.h"
 #include "thread.h"
-#include "types.h"
 #include <pthread.h>
 
 typedef struct event_queue_thread *event_queue_thread_t;
