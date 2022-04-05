@@ -8,7 +8,7 @@
 #include <pthread.h>
 
 disposable_list_t *lib_global_scope = NULL;
-uint32_t dbg_index = 0;
+static uint32_t dbg_index = 0;
 
 kburn_err_t kburnCreate(KBCTX *ppCtx) {
 	debug_trace_function();

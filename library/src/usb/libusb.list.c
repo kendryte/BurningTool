@@ -1,8 +1,11 @@
 #include "components/call-user-handler.h"
 #include "components/device-link-list.h"
 #include "descriptor.h"
+#include "device.h"
 #include "lifecycle.h"
+#include "math.h"
 #include "private-types.h"
+#include "subsystem.h"
 
 static inline bool match_device(int vid, int pid, const struct libusb_device_descriptor *desc) {
 	if (vid != KBURN_VIDPID_FILTER_ANY && vid != desc->idVendor) {
@@ -20,27 +23,27 @@ libusb_device *get_usb_device(struct libusb_context *libusb, uint16_t vid, uint1
 	debug_trace_function("%d, %d, %.8s", vid, pid, in_path);
 	libusb_device *ret = NULL;
 	libusb_device **list;
-	ssize_t cnt = libusb_get_device_list(libusb, &list);
-	if (cnt < LIBUSB_SUCCESS) {
-		debug_print_libusb_error("get_usb_device: libusb_get_device_list()", cnt);
-		return ret;
+	ssize_t r = libusb_get_device_list(libusb, &list);
+	if (!check_libusb(r)) {
+		debug_print_libusb_error("libusb_get_device_list()", r);
+		return NULL;
 	}
-	for (int i = 0; i < cnt; i++) {
+	for (int i = 0; i < r; i++) {
 		libusb_device *dev = list[i];
 		struct libusb_device_descriptor desc;
 
-		int r = libusb_get_device_descriptor(dev, &desc);
-		if (r < 0)
+		r = libusb_get_device_descriptor(dev, &desc);
+		if (!check_libusb(r))
 			continue;
 
 		if (!match_device(vid, pid, &desc))
 			continue;
 
-		uint8_t path[MAX_PATH_LENGTH] = {0};
+		uint8_t path[MAX_USB_PATH_LENGTH] = {0};
 		if (usb_get_device_path(dev, path) < LIBUSB_SUCCESS)
 			continue;
 
-		if (strncmp((const char *)path, (const char *)in_path, MAX_PATH_LENGTH) == 0) {
+		if (strncmp((const char *)path, (const char *)in_path, MAX_USB_PATH_LENGTH) == 0) {
 			ret = dev;
 			libusb_ref_device(ret);
 			break;
@@ -56,12 +59,16 @@ kburn_err_t init_list_all_usb_devices(KBCTX scope) {
 	struct libusb_device_descriptor desc;
 
 	libusb_device **list;
-	ssize_t cnt = libusb_get_device_list(scope->usb->libusb, &list);
-	for (int i = 0; i < cnt; i++) {
+	ssize_t r = libusb_get_device_list(scope->usb->libusb, &list);
+	if (!check_libusb(r)) {
+		debug_print_libusb_error("libusb_get_device_list()", r);
+		return r;
+	}
+	for (int i = 0; i < r; i++) {
 		libusb_device *dev = list[i];
 
-		int r = libusb_get_device_descriptor(dev, &desc);
-		if (r < 0) {
+		r = libusb_get_device_descriptor(dev, &desc);
+		if (!check_libusb(r)) {
 			debug_print_libusb_error("[init/poll] libusb_get_device_descriptor()", r);
 			continue;
 		}
@@ -72,7 +79,7 @@ kburn_err_t init_list_all_usb_devices(KBCTX scope) {
 			continue;
 		}
 
-		uint8_t path[MAX_PATH_LENGTH] = {0};
+		uint8_t path[MAX_USB_PATH_LENGTH] = {0};
 		if (usb_get_device_path(dev, path) < LIBUSB_SUCCESS) {
 			debug_print(KBURN_LOG_ERROR, "[init/poll] \tget path failed.");
 			continue;
@@ -92,4 +99,46 @@ kburn_err_t init_list_all_usb_devices(KBCTX scope) {
 	libusb_free_device_list(list, true);
 
 	return KBurnNoErr;
+}
+
+size_t list_usb_ports(KBCTX scope, struct kburnUsbDeviceInfoSlice *out, size_t max_size) {
+	debug_trace_function();
+
+	if (!scope->usb->libusb)
+		usb_subsystem_init(scope);
+
+	libusb_device **list;
+	ssize_t count = libusb_get_device_list(scope->usb->libusb, &list);
+	if (!check_libusb(count)) {
+		debug_print_libusb_error("libusb_get_device_list()", count);
+		return count;
+	}
+	size_t index = 0;
+	for (size_t i = 0; i < (size_t)count; i++) {
+		libusb_device *dev = list[i];
+		struct libusb_device_descriptor desc;
+		int r = libusb_get_device_descriptor(dev, &desc);
+		if (!check_libusb(r)) {
+			debug_print_libusb_error("libusb_get_device_descriptor()", r);
+			continue;
+		}
+
+		if (index > max_size) {
+			index++;
+			continue;
+		}
+
+		out[index].idProduct = desc.idProduct;
+		out[index].idVendor = desc.idVendor;
+
+		r = usb_get_device_path(dev, &out[index].path[0]);
+		if (!kburn_not_error(r)) {
+			debug_print_libusb_error("usb_get_device_path()", r);
+		}
+
+		index++;
+	}
+	libusb_free_device_list(list, true);
+
+	return index;
 }

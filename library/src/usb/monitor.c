@@ -19,7 +19,7 @@ struct passing_data {
 static int on_event_sync(struct libusb_context *UNUSED(ctx), struct libusb_device *dev, libusb_hotplug_event event, void *user_data) {
 	KBCTX scope = user_data;
 	uint16_t vid, pid;
-	uint8_t path[MAX_PATH_LENGTH] = {0};
+	uint8_t path[MAX_USB_PATH_LENGTH] = {0};
 
 	if (LIBUSB_HOTPLUG_EVENT_DEVICE_ARRIVED == event) {
 		debug_print(KBURN_LOG_INFO, "libusb event: ARRIVED");

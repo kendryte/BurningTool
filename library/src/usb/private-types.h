@@ -57,21 +57,29 @@ typedef struct usb_subsystem_context {
 	})
 
 #define check_libusb(err) (err >= LIBUSB_SUCCESS)
+#define log_libusb_only(err, msg, ...) debug_print_libusb_result(msg, err __VA_OPT__(, ) __VA_ARGS__);
 #define set_node_error_with_log(err, msg, ...)                                                                                                       \
-	if (0)                                                                                                                                           \
-		(void)0;                                                                                                                                     \
-	debug_print_libusb_result(msg, err __VA_OPT__(, ) __VA_ARGS__);                                                                                  \
-	copy_last_libusb_error(node, err);                                                                                                               \
-	err = make_error_code(KBURN_ERROR_KIND_USB, err);
+	__extension__({                                                                                                                                  \
+		if (0)                                                                                                                                       \
+			(void)0;                                                                                                                                 \
+		debug_print_libusb_result(msg, err __VA_OPT__(, ) __VA_ARGS__);                                                                              \
+		copy_last_libusb_error(node, err);                                                                                                           \
+		err = make_error_code(KBURN_ERROR_KIND_USB, err);                                                                                            \
+	})
+
 #define IfUsbErrorLogReturn(action)                                                                                                                  \
-	if (0)                                                                                                                                           \
-		(void)0;                                                                                                                                     \
-	IfErrorReturn(check_libusb, action, set_node_error_with_log)
+	__extension__({                                                                                                                                  \
+		if (0)                                                                                                                                       \
+			(void)0;                                                                                                                                 \
+		IfErrorReturn(check_libusb, action, set_node_error_with_log);                                                                                \
+	})
+
 #define set_node_error(err, msg)                                                                                                                     \
 	if (0)                                                                                                                                           \
 		(void)0;                                                                                                                                     \
 	copy_last_libusb_error(node, err);                                                                                                               \
 	err = make_error_code(KBURN_ERROR_KIND_USB, err);
+
 #define IfUsbErrorReturn(action)                                                                                                                     \
 	if (0)                                                                                                                                           \
 		(void)0;                                                                                                                                     \

@@ -7,7 +7,7 @@
 #include <libusb.h>
 #include <stdio.h>
 
-kburn_err_t usb_get_vid_pid_path(struct libusb_device *dev, uint16_t *out_vid, uint16_t *out_pid, uint8_t out_path[MAX_PATH_LENGTH]) {
+kburn_err_t usb_get_vid_pid_path(struct libusb_device *dev, uint16_t *out_vid, uint16_t *out_pid, uint8_t out_path[MAX_USB_PATH_LENGTH]) {
 	struct libusb_device_descriptor desc;
 
 	int r = libusb_get_device_descriptor(dev, &desc);
@@ -21,10 +21,12 @@ kburn_err_t usb_get_vid_pid_path(struct libusb_device *dev, uint16_t *out_vid, u
 	return usb_get_device_path(dev, out_path);
 }
 
-kburn_err_t usb_get_device_path(struct libusb_device *dev, uint8_t path[MAX_PATH_LENGTH]) {
-	memset(path, 0, MAX_PATH_LENGTH);
+kburn_err_t usb_get_device_path(struct libusb_device *dev, uint8_t path[MAX_USB_PATH_LENGTH]) {
+	path[0] = libusb_get_bus_number(dev);
 
-	IfErrorReturn(libusb_get_port_numbers(dev, path, MAX_PATH_LENGTH - 1));
+	int actual = IfErrorReturn(check_libusb, libusb_get_port_numbers(dev, path + 1, MAX_USB_PATH_LENGTH), log_libusb_only);
+
+	memset(path + 1 + actual, 0, MAX_USB_PATH_LENGTH - 1 - actual);
 
 	return KBurnNoErr;
 }
@@ -57,10 +59,10 @@ kburn_err_t usb_get_field(kburnDeviceNode *node, uint8_t type, uint8_t *output) 
 	return KBurnNoErr;
 }
 
-const char *usb_debug_path_string(const uint8_t *path) {
-	static char debug[MAX_PATH_LENGTH * 3 + 1] = "";
+const char *usb_debug_path_string(const uint8_t path[MAX_USB_PATH_LENGTH]) {
+	static char debug[MAX_USB_PATH_LENGTH * 3 + 1] = "";
 	char *debug_itr = debug;
-	for (int i = 0; i < MAX_PATH_LENGTH - 1; i++) {
+	for (int i = 0; i < MAX_USB_PATH_LENGTH - 1; i++) {
 		debug_itr += sprintf(debug_itr, "%02x:", path[i]);
 	}
 	*(debug_itr - 1) = '\0';

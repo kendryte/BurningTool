@@ -1,6 +1,7 @@
 #pragma once
 
 #include "./prefix.h"
+#include "./types.h"
 
 enum KBurnSerialConfigByteSize { KBurnSerialConfigByteSize_8, KBurnSerialConfigByteSize_7, KBurnSerialConfigByteSize_6, KBurnSerialConfigByteSize_5 };
 
@@ -14,17 +15,36 @@ enum KBurnSerialConfigParity {
 
 enum KBurnSerialConfigStopBits { KBurnSerialConfigStopBitsOne, KBurnSerialConfigStopBitsOneHalf, KBurnSerialConfigStopBitsTwo };
 
-typedef struct kburnSerialDeviceInfo {
+#define MAX_SERIAL_PATH_SIZE 256
+#define MAX_DRIVER_NAME_SIZE 32
+
+struct kburnSerialDeviceInfoSlice {
 	PCONST bool isUSB;
 	PCONST bool isTTY;
-	PCONST char *path;
+	PCONST char path[MAX_SERIAL_PATH_SIZE];
 
 	PCONST uint16_t usbIdVendor;
 	PCONST uint16_t usbIdProduct;
 	PCONST uint16_t usbIdRevision;
 
 #ifdef __linux__
-	PCONST char *usbDriver;
+	PCONST char usbDriver[MAX_DRIVER_NAME_SIZE];
+	PCONST uint32_t deviceMajor;
+	PCONST uint32_t deviceMinor;
+#endif
+};
+
+typedef struct kburnSerialDeviceInfo {
+	PCONST bool isUSB;
+	PCONST bool isTTY;
+	PCONST char path[MAX_SERIAL_PATH_SIZE];
+
+	PCONST uint16_t usbIdVendor;
+	PCONST uint16_t usbIdProduct;
+	PCONST uint16_t usbIdRevision;
+
+#ifdef __linux__
+	PCONST char usbDriver[MAX_DRIVER_NAME_SIZE];
 	PCONST uint32_t deviceMajor;
 	PCONST uint32_t deviceMinor;
 #endif
@@ -55,5 +75,5 @@ typedef struct kburnSerialDeviceNode {
 
 typedef struct kburn_serial_device_list {
 	PCONST size_t size;
-	PCONST kburnSerialDeviceInfo *list;
-} * kburnSerialDeviceList;
+	PCONST struct kburnSerialDeviceInfoSlice *list;
+} kburnSerialDeviceList;

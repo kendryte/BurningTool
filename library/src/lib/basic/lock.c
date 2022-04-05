@@ -1,14 +1,8 @@
 #define has_kb_mutex 1
-#include "sleep.h"
-#include <errno.h>
+
 #include <pthread.h>
-#include <stdbool.h>
-#include <stdint.h>
-#include <stdlib.h>
-#include <string.h>
 
 #define THREAD_TITLE_BUFF_SIZE 32
-
 typedef struct kb_mutex {
 	pthread_mutex_t *mutex;
 	char holder[THREAD_TITLE_BUFF_SIZE];
@@ -18,6 +12,12 @@ typedef struct kb_mutex {
 } kb_mutex_t;
 
 #include "debug/print.h"
+#include "sleep.h"
+#include <errno.h>
+#include <stdbool.h>
+#include <stdint.h>
+#include <stdlib.h>
+#include <string.h>
 
 pthread_mutex_t *_init_lock() {
 	// debug_print("[lock] init");

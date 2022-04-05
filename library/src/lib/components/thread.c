@@ -30,6 +30,7 @@ DECALRE_DISPOSE_END()
 static void *start_routine_wrapper(void *_ctx) {
 	thread_passing_object *context = _ctx;
 	context->running = true;
+	context->quit = false;
 
 	debug_print(KBURN_LOG_INFO, "[thread] \"%s\" start", context->debug_title);
 	do_sleep(1000);
@@ -40,7 +41,6 @@ static void *start_routine_wrapper(void *_ctx) {
 	pthread_setname_np(context->thread, context->debug_title);
 #endif
 
-	context->quit = false;
 	context->main(context->user_data, context->scope, &context->quit);
 	debug_print(KBURN_LOG_INFO, "[thread] \"%s\" finished", context->debug_title);
 

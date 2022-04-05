@@ -8,14 +8,8 @@
 	pstr = udev_device_get_property_value(dev, PROP);                                                                                                \
 	store = pstr ? strtol(pstr, (char **)NULL, base) : 0
 
-void driver_get_devinfo_free(kburnSerialDeviceInfo deviceInfo) {
-	if (deviceInfo.usbDriver)
-		free(deviceInfo.usbDriver);
-	free(deviceInfo.path);
-}
-
 void m_udev_unref(struct udev *u) { udev_unref(u); }
-void m_udev_enumerate_unref(struct udev_enumerate *udev_enumerate) { m_udev_enumerate_unref(udev_enumerate); }
+void m_udev_enumerate_unref(struct udev_enumerate *udev_enumerate) { udev_enumerate_unref(udev_enumerate); }
 
 kburnSerialDeviceInfo driver_get_devinfo(const char *path) {
 	debug_trace_function("%s", path);
@@ -24,7 +18,7 @@ kburnSerialDeviceInfo driver_get_devinfo(const char *path) {
 	const char *pstr;
 	kburnSerialDeviceInfo ret;
 	memset(&ret, 0, sizeof(kburnSerialDeviceInfo));
-	ret.path = strdup(path);
+	snprintf(ret.path, MAX_SERIAL_PATH_SIZE, "%s", path);
 
 	struct udev *u = udev_new();
 	if (u == NULL)
@@ -68,7 +62,9 @@ kburnSerialDeviceInfo driver_get_devinfo(const char *path) {
 
 				pstr = udev_device_get_property_value(dev, "ID_USB_DRIVER");
 				if (pstr)
-					ret.usbDriver = strdup(pstr);
+					snprintf(ret.usbDriver, MAX_DRIVER_NAME_SIZE, "%s", pstr);
+			} else {
+				ret.isUSB = false;
 			}
 
 			get_number_prop(ret.deviceMajor, "MAJOR", 1);

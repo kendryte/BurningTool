@@ -15,9 +15,11 @@ static inline int64_t __kburn_err_t_unchange(int64_t t) { return t; }
 	})
 
 #define IfErrorReturn(...)                                                                                                                           \
-	if (0)                                                                                                                                           \
-		(void)0;                                                                                                                                     \
-	__VaridicMacro_Helper3(, ##__VA_ARGS__, _IfErrorReturn3(__VA_ARGS__), _IfErrorReturn3(__VA_ARGS__, default_log),                                 \
-						   _IfErrorReturn3(kburn_not_error, __VA_ARGS__, default_log), )
+	__extension__({                                                                                                                                  \
+		if (0)                                                                                                                                       \
+			(void)0;                                                                                                                                 \
+		__VaridicMacro_Helper3(, ##__VA_ARGS__, _IfErrorReturn3(__VA_ARGS__), _IfErrorReturn3(__VA_ARGS__, default_log),                             \
+							   _IfErrorReturn3(kburn_not_error, __VA_ARGS__, default_log), );                                                        \
+	})
 
 #define kburn_not_error(e) (e == KBurnNoErr)

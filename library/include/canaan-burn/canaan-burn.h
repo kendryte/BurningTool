@@ -114,8 +114,10 @@ PUBLIC kburn_err_t kburnOpenUsb(KBCTX scope, uint16_t vid, uint16_t pid, const u
 /**
  * 设备列表
  */
-PUBLIC kburnSerialDeviceList kburnGetSerialList();
-PUBLIC kburnUsbDeviceList kburnGetUSBList();
+PUBLIC kburnSerialDeviceList kburnGetSerialList(KBCTX scope);
+PUBLIC void kburnFreeSerialList(KBCTX scope);
+PUBLIC kburnUsbDeviceList kburnGetUsbList(KBCTX scope);
+PUBLIC void kburnFreeUsbList(KBCTX scope);
 
 /**
  * 单次扫描

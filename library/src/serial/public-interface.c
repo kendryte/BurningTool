@@ -1,4 +1,6 @@
 #include "base.h"
+#include "basic/array.h"
+#include "basic/number.h"
 #include "context.h"
 #include "debug/print.h"
 #include "libserial.list.h"
@@ -29,3 +31,29 @@ PUBLIC kburn_err_t kburnPollSerial(KBCTX scope) {
 
 	return init_list_all_serial_devices(scope);
 }
+
+kburnSerialDeviceList kburnGetSerialList(KBCTX scope) {
+	if (scope->list1 == NULL) {
+		scope->list1 = array_create(struct kburnSerialDeviceInfoSlice, 10);
+		if (scope->list1 == NULL) {
+			return (kburnSerialDeviceList){.size = 0, .list = NULL};
+		}
+		dispose_list_add(scope->disposables, toDisposable(array_destroy, scope->list1));
+	}
+
+	dynamic_array_t *array = scope->list1;
+	ssize_t list_size = list_serial_ports(scope, array->body, array->size);
+	if (list_size < 0) {
+		return (kburnSerialDeviceList){.size = 0, .list = NULL};
+	}
+	if ((size_t)list_size > array->size) {
+		array_fit(array, list_size + 5);
+		list_size = list_serial_ports(scope, array->body, array->size);
+	}
+
+	array->length = MIN(list_size, array->size);
+
+	return (kburnSerialDeviceList){.size = array->length, .list = array->body};
+}
+
+void kburnFreeSerialList(KBCTX scope) { array_destroy(scope->disposables, scope->list1); }

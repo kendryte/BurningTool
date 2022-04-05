@@ -44,7 +44,6 @@ DECALRE_DISPOSE(destroy_serial_port, kburnDeviceNode) {
 	if (serial->m_dev_handle != NULL)
 		ser_destroy(serial->m_dev_handle);
 
-	driver_get_devinfo_free(serial->deviceInfo);
 	serial->init = false;
 
 	unlock(serial->mutex);

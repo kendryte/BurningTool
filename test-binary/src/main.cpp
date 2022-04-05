@@ -53,7 +53,7 @@ void handle_usb(void *ctx, kburnDeviceNode *dev) {
 	cout << "Got Usb Device: " << endl;
 	cout << "  * serial port: " << (dev->serial->isUsbBound ? dev->serial->deviceInfo.path : "not bind") << endl;
 	cout << "  * usb port: ";
-	for (auto i = 0; i < MAX_PATH_LENGTH; i++) {
+	for (auto i = 0; i < MAX_USB_PATH_LENGTH; i++) {
 		cout << (uint8_t)dev->usb->deviceInfo.path[i] << " " << flush;
 	}
 	cout << endl;
@@ -115,13 +115,13 @@ int main(int argc, char **argv) {
 		return 1;
 	}
 
-	kburnOnDeviceDisconnect(context, disconnect, NULL);
-	kburnOnSerialConnect(context, verify, NULL);
-	kburnOnSerialConfirm(context, handle, NULL);
+	// kburnOnDeviceDisconnect(context, disconnect, NULL);
+	// kburnOnSerialConnect(context, verify, NULL);
+	// kburnOnSerialConfirm(context, handle, NULL);
 
-	kburnOnUsbConfirm(context, handle_usb, NULL);
+	// kburnOnUsbConfirm(context, handle_usb, NULL);
 
-	kburnStartWaitingDevices(context);
+	// kburnStartWaitingDevices(context);
 
 	// kburnOpenSerial(context, "/dev/ttyUSB0");
 	// testDevice(argv[1]);
@@ -132,8 +132,22 @@ int main(int argc, char **argv) {
 
 	// kburnOpenUsb(context, 0x0559, 0x4001, (const uint8_t *)"4b7e4b47");
 
-	printf("Press ENTER to stop monitoring\n");
-	getchar();
+	// printf("Press ENTER to stop monitoring\n");
+	// getchar();
+
+	auto list1 = kburnGetSerialList(context);
+	for (size_t i = 0; i < list1.size; i++) {
+		cout << "[" << i << "] " << list1.list[i].path << endl;
+	}
+
+	auto list2 = kburnGetUsbList(context);
+	for (size_t i = 0; i < list2.size; i++) {
+		cout << "[" << i << "]";
+		cout << " " << hex << (int)list2.list[i].idVendor << ":" << (int)list2.list[i].idProduct << dec << ":";
+		for (int j = 0; j < MAX_USB_PATH_LENGTH; j++)
+			cout << " " << (int)list2.list[i].path[j];
+		cout << endl;
+	}
 
 	kburnGlobalDestroy();
 

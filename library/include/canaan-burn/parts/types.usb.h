@@ -2,11 +2,22 @@
 
 #include "./prefix.h"
 
-#define MAX_PATH_LENGTH 8 // 当前usb最大7级，多一个0用于字符串比较
+#define MAX_USB_PATH_LENGTH 9 // 当前usb最大7级，首个字符是bus number，多一个0用于字符串比较
+
+struct kburnUsbDeviceInfoSlice {
+	PCONST uint16_t idVendor;
+	PCONST uint16_t idProduct;
+	PCONST uint8_t path[MAX_USB_PATH_LENGTH];
+	// #ifdef __linux__
+	// 	PCONST uint32_t major;
+	// 	PCONST uint32_t minor;
+	// #endif
+};
+
 typedef struct kburnUsbDeviceInfo {
 	PCONST uint16_t idVendor;
 	PCONST uint16_t idProduct;
-	PCONST uint8_t path[MAX_PATH_LENGTH];
+	PCONST uint8_t path[MAX_USB_PATH_LENGTH];
 	PCONST struct libusb_device_descriptor *descriptor;
 
 	PCONST uint8_t endpoint_in;	 /* 端点 in */
@@ -37,5 +48,5 @@ typedef struct kburnUsbDeviceNode {
 
 typedef struct kburn_usb_device_list {
 	PCONST size_t size;
-	PCONST kburnSerialDeviceInfo *list;
-} * kburnUsbDeviceList;
+	PCONST struct kburnUsbDeviceInfoSlice *list;
+} kburnUsbDeviceList;

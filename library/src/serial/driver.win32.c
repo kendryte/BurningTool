@@ -4,6 +4,9 @@
 #include <Setupapi.h>
 #include <windows.h>
 
-void driver_get_devinfo_free(kburnSerialDeviceInfo deviceInfo) { free(deviceInfo.path); }
-
-kburnSerialDeviceInfo driver_get_devinfo(const char *path) { return (kburnSerialDeviceInfo){.isTTY = false, .path = strdup(path)}; }
+kburnSerialDeviceInfo driver_get_devinfo(const char *path) {
+	kburnSerialDeviceInfo ret;
+	ret.isTTY = false;
+	snprintf(ret.path, MAX_SERIAL_PATH_SIZE, "%s", path);
+	return ret;
+}

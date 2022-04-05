@@ -15,12 +15,12 @@ typedef struct kburnDeviceError {
 	PCONST char *errorMessage;
 } kburnDeviceError;
 
-#ifndef has_kb_mutex
+#if !defined(has_kb_mutex)
 typedef struct kb_mutex *kb_mutex_t;
 #endif
 
-#include "types.serial.h"
-#include "types.usb.h"
+#include "./types.serial.h"
+#include "./types.usb.h"
 
 typedef struct kburnDeviceNode {
 	PCONST kburnDeviceError *const error;

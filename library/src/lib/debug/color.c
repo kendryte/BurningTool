@@ -1,3 +1,5 @@
+#include "color.h"
+#include "base.h"
 #include "debug.h"
 #include "debug/print.h"
 
