@@ -103,6 +103,7 @@ kburn_err_t open_single_usb_port(KBCTX scope, struct libusb_device *dev, bool us
 	node->usb->isOpen = true;
 	debug_print(KBURN_LOG_INFO, "usb port open success, handle=%p", (void *)node->usb->handle);
 
+	node->usb->deviceInfo.descriptor = MyAlloc(struct libusb_device_descriptor);
 	IfUsbErrorLogReturn(libusb_get_device_descriptor(dev, node->usb->deviceInfo.descriptor));
 	node->usb->deviceInfo.idVendor = node->usb->deviceInfo.descriptor->idVendor;
 	node->usb->deviceInfo.idProduct = node->usb->deviceInfo.descriptor->idProduct;

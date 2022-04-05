@@ -7,6 +7,7 @@
 #include "private-types.h"
 
 static void on_event(void *ctx, ser_dev_evt_t evt, const ser_dev_t *dev) {
+	return;
 	KBCTX scope = ctx;
 	switch (evt) {
 	case SER_DEV_EVT_ADDED:
@@ -16,8 +17,14 @@ static void on_event(void *ctx, ser_dev_evt_t evt, const ser_dev_t *dev) {
 	case SER_DEV_EVT_REMOVED:
 		debug_print(KBURN_LOG_INFO, "[monitor] remove : %s", dev->path);
 		kburnDeviceNode *device = get_device_by_serial_port_path(scope, dev->path);
-		if (device)
+		if (device) {
 			destroy_serial_port(device->disposable_list, device);
+		} else {
+			if (scope->on_disconnect.handler) {
+				debug_print(KBURN_LOG_DEBUG, "\tscope::on_disconnect()");
+				scope->on_disconnect.handler(scope->on_disconnect.context, NULL);
+			}
+		}
 
 		break;
 	}

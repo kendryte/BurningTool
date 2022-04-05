@@ -24,7 +24,7 @@ kburn_err_t usb_get_vid_pid_path(struct libusb_device *dev, uint16_t *out_vid, u
 kburn_err_t usb_get_device_path(struct libusb_device *dev, uint8_t path[MAX_USB_PATH_LENGTH]) {
 	path[0] = libusb_get_bus_number(dev);
 
-	int actual = IfErrorReturn(check_libusb, libusb_get_port_numbers(dev, path + 1, MAX_USB_PATH_LENGTH), log_libusb_only);
+	int actual = IfErrorReturn(check_libusb, libusb_get_port_numbers(dev, path + 1, MAX_USB_PATH_LENGTH - 2), log_libusb_only);
 
 	memset(path + 1 + actual, 0, MAX_USB_PATH_LENGTH - 1 - actual);
 

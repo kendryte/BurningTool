@@ -61,6 +61,7 @@ PUBLIC on_device_handle_t kburnOnSerialConfirm(KBCTX scope, on_device_handle han
 
 /**
  * 当端口断开时，调用此回调，用户可以进行一些清理，该回调执行完后，参数的设备结构会被释放
+ * 如果断开的设备没有打开过，dev=NULL，此时可以刷新可用端口列表
  **/
 PUBLIC on_device_remove_t kburnOnDeviceDisconnect(KBCTX scope, on_device_remove disconnect_callback, void *ctx);
 

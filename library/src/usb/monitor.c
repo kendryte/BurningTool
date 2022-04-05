@@ -42,8 +42,14 @@ static int on_event_sync(struct libusb_context *UNUSED(ctx), struct libusb_devic
 			return 0;
 
 		kburnDeviceNode *node = get_device_by_usb_port_path(scope, vid, pid, path);
-		if (node != NULL)
+		if (node != NULL) {
 			destroy_usb_port(node->disposable_list, node->usb);
+		} else {
+			if (scope->on_disconnect.handler) {
+				debug_print(KBURN_LOG_DEBUG, "\tscope::on_disconnect()");
+				scope->on_disconnect.handler(scope->on_disconnect.context, NULL);
+			}
+		}
 	} else {
 		debug_print(KBURN_LOG_ERROR, "Unhandled event %d\n", event);
 	}

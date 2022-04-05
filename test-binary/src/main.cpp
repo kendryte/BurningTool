@@ -53,8 +53,8 @@ void handle_usb(void *ctx, kburnDeviceNode *dev) {
 	cout << "Got Usb Device: " << endl;
 	cout << "  * serial port: " << (dev->serial->isUsbBound ? dev->serial->deviceInfo.path : "not bind") << endl;
 	cout << "  * usb port: ";
-	for (auto i = 0; i < MAX_USB_PATH_LENGTH; i++) {
-		cout << (uint8_t)dev->usb->deviceInfo.path[i] << " " << flush;
+	for (auto i = 0; i < MAX_USB_PATH_LENGTH - 1; i++) {
+		cout << hex << (uint8_t)dev->usb->deviceInfo.path[i] << dec << " " << flush;
 	}
 	cout << endl;
 	cout << "    usb vid: 0x" << hex << dev->usb->deviceInfo.idVendor << dec << endl;
@@ -97,6 +97,10 @@ void handle_usb(void *ctx, kburnDeviceNode *dev) {
 }
 
 void disconnect(void *ctx, const kburnDeviceNode *dev) {
+	if (dev == NULL) {
+		cout << "unrelated device disconnected" << endl;
+		return;
+	}
 	cout << "Disconnect: " << dev->serial->deviceInfo.path << endl;
 	cout << "  * isOpen: " << dev->serial->isOpen << endl;
 	cout << "  * isConfirm: " << dev->serial->isConfirm << endl;
@@ -115,13 +119,15 @@ int main(int argc, char **argv) {
 		return 1;
 	}
 
-	// kburnOnDeviceDisconnect(context, disconnect, NULL);
-	// kburnOnSerialConnect(context, verify, NULL);
-	// kburnOnSerialConfirm(context, handle, NULL);
+	// kburnSetUsbFilter(context, KBURN_VIDPID_FILTER_ANY, KBURN_VIDPID_FILTER_ANY);
 
-	// kburnOnUsbConfirm(context, handle_usb, NULL);
+	kburnOnDeviceDisconnect(context, disconnect, NULL);
+	kburnOnSerialConnect(context, verify, NULL);
+	kburnOnSerialConfirm(context, handle, NULL);
 
-	// kburnStartWaitingDevices(context);
+	kburnOnUsbConfirm(context, handle_usb, NULL);
+
+	kburnStartWaitingDevices(context);
 
 	// kburnOpenSerial(context, "/dev/ttyUSB0");
 	// testDevice(argv[1]);
@@ -132,15 +138,16 @@ int main(int argc, char **argv) {
 
 	// kburnOpenUsb(context, 0x0559, 0x4001, (const uint8_t *)"4b7e4b47");
 
-	// printf("Press ENTER to stop monitoring\n");
-	// getchar();
+	printf("Press ENTER to stop monitoring\n");
+	getchar();
 
 	auto list1 = kburnGetSerialList(context);
+	auto list2 = kburnGetUsbList(context);
+
 	for (size_t i = 0; i < list1.size; i++) {
 		cout << "[" << i << "] " << list1.list[i].path << endl;
 	}
 
-	auto list2 = kburnGetUsbList(context);
 	for (size_t i = 0; i < list2.size; i++) {
 		cout << "[" << i << "]";
 		cout << " " << hex << (int)list2.list[i].idVendor << ":" << (int)list2.list[i].idProduct << dec << ":";
