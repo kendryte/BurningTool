@@ -68,10 +68,10 @@ kburn_err_t serial_port_init(kburnSerialDeviceNode *serial, const char *path) {
 	return KBurnNoErr;
 }
 
-kburn_err_t on_serial_device_attach(KBCTX scope, const char *path) {
+kburn_err_t on_serial_device_attach(KBCTX scope, const char *path, bool need_verify) {
 	DeferEnabled;
 
-	debug_print(KBURN_LOG_TRACE, COLOR_FMT("on_serial_device_attach") "(%s)", COLOR_ARG(GREEN), path);
+	debug_print(KBURN_LOG_TRACE, COLOR_FMT("on_serial_device_attach") "(%s, %d)", COLOR_ARG(GREEN), path, need_verify);
 
 	kburnDeviceNode *node = NULL;
 

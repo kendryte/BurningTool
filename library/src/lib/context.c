@@ -1,8 +1,8 @@
-#include "global.h"
+
+#include "../bridge/bind-wait-list.h"
 #include "../serial/private-types.h"
 #include "../usb/private-types.h"
 #include "basic/resource-tracker.h"
-#include "bind-wait-list.h"
 #include "components/call-user-handler.h"
 #include "components/device-link-list.h"
 #include <pthread.h>

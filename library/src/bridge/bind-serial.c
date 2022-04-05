@@ -1,11 +1,10 @@
+#include "../serial/move-device.h"
+#include "../serial/private-types.h"
 #include "basic/sleep.h"
 #include "bind-wait-list.h"
 #include "components/device-link-list.h"
 #include "debug/print.h"
 #include "device.h"
-#include "global.h"
-#include "move-device.h"
-#include "private-types.h"
 #include "protocol.h"
 
 static void push_buffer(char *tgt, size_t *tgt_i, const char *src, const size_t src_size) {

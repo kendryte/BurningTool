@@ -1,6 +1,8 @@
 #pragma once
 
 #include "base.h"
+#include <stdarg.h>
+#include <stdbool.h>
 #include <stdio.h>
 #include <string.h>
 
@@ -24,3 +26,11 @@ static inline const char *__none_empty_string(const char *_) { return _; }
 	char *name = CONCAT(name, _base);
 #define buffer_remain(name) (size_t)(CONCAT(name, _length) - (name - CONCAT(name, _base)))
 #define buffer_move(name) name +=
+
+char *sprintf_alloc(const char *fmt, ...);
+char *vsprintf_alloc(const char *fmt, va_list args);
+
+static inline const char *OPTSTR(const char *str, const char *opt) { return str ? str : opt; }
+static inline const char *NULLSTR(const char *str) { return OPTSTR(str, "<NULLSTR>"); }
+
+static inline bool prefix(const char *pre, const char *str) { return strncmp(pre, str, strlen(pre)) == 0; }

@@ -2,6 +2,7 @@
 #include "basic/errors.h"
 #include "components/device-link-list.h"
 #include "device.h"
+#include "libserial.list.h"
 #include "lifecycle.h"
 #include "private-types.h"
 
@@ -10,7 +11,7 @@ static void on_event(void *ctx, ser_dev_evt_t evt, const ser_dev_t *dev) {
 	switch (evt) {
 	case SER_DEV_EVT_ADDED:
 		debug_print(KBURN_LOG_INFO, "[monitor] connect: %s", dev->path);
-		on_serial_device_attach(scope, dev->path);
+		on_serial_device_attach(scope, dev->path, true);
 		break;
 	case SER_DEV_EVT_REMOVED:
 		debug_print(KBURN_LOG_INFO, "[monitor] remove : %s", dev->path);
@@ -23,29 +24,8 @@ static void on_event(void *ctx, ser_dev_evt_t evt, const ser_dev_t *dev) {
 }
 
 static void first_init_list(void *UNUSED(ctx), KBCTX scope, const bool *const quit) {
-	debug_print(KBURN_LOG_INFO, "[init] init_list()");
-	ser_dev_list_t *lst;
-
-	lst = ser_dev_list_get();
-	if (!lst) {
-		debug_print(KBURN_LOG_ERROR, "serial port list get failed: %s", sererr_last());
-		return;
-	}
-
-	ser_dev_list_t *item;
-
-	ser_dev_list_foreach(item, lst) {
-		if (*quit)
-			break;
-
-		if (prefix("/dev/ttyS", item->dev.path)) {
-			continue;
-		}
-		debug_print(KBURN_LOG_INFO, "[init]   * %s", item->dev.path);
-		on_serial_device_attach(scope, item->dev.path);
-	}
-
-	ser_dev_list_destroy(lst);
+	if (!quit)
+		init_list_all_serial_devices(scope);
 }
 
 void serial_monitor_destroy(KBCTX scope) {

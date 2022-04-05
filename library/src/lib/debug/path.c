@@ -46,7 +46,7 @@ size_t _debug_format_prefix(char *output, size_t output_size, const char *file, 
 }
 
 #ifndef NDEBUG
-#include "global.h"
+
 size_t _debug_format_bundle_title(char *output, size_t output_size, debug_bundle e) {
 	size_t size = 0;
 	if (e.func)

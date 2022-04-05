@@ -22,7 +22,7 @@ kburn_err_t kburnOpenUsb(KBCTX scope, uint16_t vid, uint16_t pid, const uint8_t 
 }
 
 kburn_err_t kburnPollUsb(KBCTX scope) {
-	if (!scope->usb->libusb)
+	if (!scope->usb->subsystem_inited)
 		usb_subsystem_init(scope);
 
 	return init_list_all_usb_devices(scope);

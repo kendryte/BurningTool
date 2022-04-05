@@ -3,7 +3,7 @@
 #include "basic/sleep.h"
 #include "context.h"
 #include "debug/print.h"
-#include "global.h"
+
 #include <pthread.h>
 
 typedef struct thread_passing_object {

@@ -1,7 +1,6 @@
 #include "bind-wait-list.h"
 #include "components/device-link-list.h"
 #include "context.h"
-#include "global.h"
 
 waiting_list_t *waiting_list_init() {
 	waiting_list_t *ret = calloc(1, sizeof(waiting_list_t));

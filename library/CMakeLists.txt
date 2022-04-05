@@ -16,26 +16,37 @@ project(
 # ##############################################################################
 add_compile_definitions(BURN_LIB_COMPILING)
 
-file(GLOB_RECURSE PROJECT_SOURCES "src/*.c")
+function(push_source_code target src_dir)
+	file(GLOB_RECURSE NEW_SOURCES "src/${src_dir}/*.c")
 
-if(WIN32)
-	list(FILTER PROJECT_SOURCES EXCLUDE REGEX "\\.macos\\.c$")
-	list(FILTER PROJECT_SOURCES EXCLUDE REGEX "\\.linux\\.c$")
-	list(FILTER PROJECT_SOURCES EXCLUDE REGEX "\\.posix\\.c$")
-elseif(APPLE)
-	list(FILTER PROJECT_SOURCES EXCLUDE REGEX "\\.win32\\.c$")
-	list(FILTER PROJECT_SOURCES EXCLUDE REGEX "\\.linux\\.c$")
-elseif(UNIX)
-	list(FILTER PROJECT_SOURCES EXCLUDE REGEX "\\.win32\\.c$")
-	list(FILTER PROJECT_SOURCES EXCLUDE REGEX "\\.macos\\.c$")
-else()
-	message(FATAL_ERROR "不支持当前平台")
-endif()
+	if(WIN32)
+		list(FILTER NEW_SOURCES EXCLUDE REGEX "\\.macos\\.c$")
+		list(FILTER NEW_SOURCES EXCLUDE REGEX "\\.linux\\.c$")
+		list(FILTER NEW_SOURCES EXCLUDE REGEX "\\.posix\\.c$")
+	elseif(APPLE)
+		list(FILTER NEW_SOURCES EXCLUDE REGEX "\\.win32\\.c$")
+		list(FILTER NEW_SOURCES EXCLUDE REGEX "\\.linux\\.c$")
+	elseif(UNIX)
+		list(FILTER NEW_SOURCES EXCLUDE REGEX "\\.win32\\.c$")
+		list(FILTER NEW_SOURCES EXCLUDE REGEX "\\.macos\\.c$")
+	else()
+		message(FATAL_ERROR "不支持当前平台")
+	endif()
 
-add_library(canaan_burn SHARED "${PROJECT_SOURCES}")
-set_property(TARGET canaan_burn PROPERTY C_STANDARD 17)
+	target_sources("${target}" PRIVATE "${NEW_SOURCES}")
 
-macro(load_binary target variable src)
+	set(inc_dirs "${CMAKE_CURRENT_LIST_DIR}/src/${src_dir}")
+
+	foreach(dir IN LISTS ARGN)
+		list(APPEND inc_dirs "${CMAKE_CURRENT_LIST_DIR}/src/${dir}")
+	endforeach()
+
+	foreach(file IN LISTS NEW_SOURCES)
+		set_source_files_properties("${file}" PROPERTIES INCLUDE_DIRECTORIES "${inc_dirs}")
+	endforeach()
+endfunction()
+
+function(load_binary target variable src)
 	file(RELATIVE_PATH rel_path "${CMAKE_CURRENT_LIST_DIR}" "${src}")
 	set(tgt "${CMAKE_CURRENT_BINARY_DIR}/${rel_path}.generate.c")
 	set(tgt_hdr "${CMAKE_CURRENT_BINARY_DIR}/gen-include/generated.${variable}.h")
@@ -46,7 +57,7 @@ macro(load_binary target variable src)
 
 		string(REGEX REPLACE "[0-9a-f][0-9a-f]" "0x\\0," content_rep "${content}")
 
-		file(
+		file(GENERATE
 			WRITE "${tgt}"
 			"#include <stdint.h>\n#include <stddef.h>\nconst uint8_t ${variable}[${size}] = {\n${content_rep}\n};\nconst size_t ${variable}_size = ${size};"
 		)
@@ -59,25 +70,21 @@ macro(load_binary target variable src)
 	target_include_directories("${target}"
 		PRIVATE "${CMAKE_CURRENT_BINARY_DIR}/gen-include")
 	target_sources("${target}" PRIVATE "${tgt}")
-endmacro()
+endfunction()
+
+add_library(canaan_burn SHARED)
+set_property(TARGET canaan_burn PROPERTY C_STANDARD 17)
+set_property(TARGET canaan_burn PROPERTY LINKER_LANGUAGE C)
 
 load_binary(canaan_burn "usb_isp_buffer" "${CMAKE_CURRENT_LIST_DIR}/usbisp.bin")
-
-set_target_properties(canaan_burn PROPERTIES LINKER_LANGUAGE C)
-
-get_target_property(MY_PROJECT_SOURCES canaan_burn SOURCES)
 
 file(GLOB_RECURSE PUBLIC_HEADER "include/canaan-burn/*.h")
 set_target_properties(canaan_burn PROPERTIES PUBLIC_HEADER "${PUBLIC_HEADER}")
 
-target_include_directories(canaan_burn
-	PRIVATE "${CMAKE_CURRENT_LIST_DIR}/src/bridge")
-target_include_directories(canaan_burn
-	PRIVATE "${CMAKE_CURRENT_LIST_DIR}/src/lib")
-target_include_directories(canaan_burn
-	PRIVATE "${CMAKE_CURRENT_LIST_DIR}/src/serial")
-target_include_directories(canaan_burn
-	PRIVATE "${CMAKE_CURRENT_LIST_DIR}/src/usb")
+push_source_code(canaan_burn lib)
+push_source_code(canaan_burn usb lib)
+push_source_code(canaan_burn serial lib)
+push_source_code(canaan_burn bridge lib)
 
 target_include_directories(canaan_burn
 	PUBLIC "${CMAKE_CURRENT_LIST_DIR}/include")

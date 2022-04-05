@@ -1,7 +1,7 @@
 #include "device-link-list.h"
+#include "../../bridge/bind-wait-list.h"
 #include "basic/resource-tracker.h"
-#include "bind-wait-list.h"
-#include "global.h"
+
 #include <stdlib.h>
 #include <string.h>
 

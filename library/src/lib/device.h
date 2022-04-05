@@ -2,7 +2,7 @@
 
 #include "basic/disposable.h"
 #include "context.h"
-#include "global.h"
+
 #include "serial.isp.h"
 
 DECALRE_DISPOSE_HEADER(destroy_device, kburnDeviceNode);
