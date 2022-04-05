@@ -1,5 +1,11 @@
+#include "subsystem.h"
+#include "base.h"
+#include "basic/disposable.h"
 #include "basic/errors.h"
-#include "usb.h"
+#include "basic/resource-tracker.h"
+#include "monitor.h"
+#include "private-types.h"
+#include <libusb.h>
 #include <pthread.h>
 
 static void thread_libusb_handle_events(void *UNUSED(ctx), KBCTX scope, const bool *const quit) {

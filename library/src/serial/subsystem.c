@@ -1,5 +1,6 @@
+#include "components/thread.h"
+#include "private-types.h"
 #include "protocol.h"
-#include "serial.h"
 
 kburn_err_t serial_subsystem_init(KBCTX scope) {
 	debug_trace_function();

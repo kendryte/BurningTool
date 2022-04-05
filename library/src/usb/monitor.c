@@ -1,5 +1,10 @@
 #include "basic/errors.h"
-#include "usb.h"
+#include "components/device-link-list.h"
+#include "descriptor.h"
+#include "libusb.list.h"
+#include "lifecycle.h"
+#include "private-types.h"
+#include "subsystem.h"
 #include <pthread.h>
 
 bool libUsbHasWathcer = false;
@@ -22,12 +27,12 @@ static int on_event_sync(struct libusb_context *UNUSED(ctx), struct libusb_devic
 		if (ret < LIBUSB_SUCCESS)
 			return 0;
 
-		if (usb_device_find(scope, vid, pid, path) != NULL) {
+		if (get_device_by_usb_port_path(scope, vid, pid, path) != NULL) {
 			debug_print(KBURN_LOG_DEBUG, "port already open. (this may be issue)");
 			return 0;
 		}
 
-		kburn_err_t r = open_single_usb_port(scope, dev, NULL);
+		kburn_err_t r = open_single_usb_port(scope, dev, true, NULL);
 		if (r != KBurnNoErr)
 			debug_print(KBURN_LOG_ERROR, "failed open single port: %ld", r);
 	} else if (LIBUSB_HOTPLUG_EVENT_DEVICE_LEFT == event) {
@@ -36,7 +41,7 @@ static int on_event_sync(struct libusb_context *UNUSED(ctx), struct libusb_devic
 		if (ret < LIBUSB_SUCCESS)
 			return 0;
 
-		kburnDeviceNode *node = usb_device_find(scope, vid, pid, path);
+		kburnDeviceNode *node = get_device_by_usb_port_path(scope, vid, pid, path);
 		if (node != NULL)
 			destroy_usb_port(node->disposable_list, node->usb);
 	} else {
@@ -114,8 +119,7 @@ kburn_err_t usb_monitor_prepare(KBCTX scope) {
 	if (libUsbHasWathcer) {
 		IfErrorReturn(event_thread_init(scope, "libusb pump", pump_libusb_event, &scope->usb->event_queue));
 	} else {
-		m_abort("TODO: polling");
-		init_list_all_usb_devices(scope);
+		m_abort("TODO: platform not supported. require polling implement.");
 	}
 
 	kbthread no_use;

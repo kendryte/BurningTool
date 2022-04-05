@@ -9,17 +9,18 @@
 	"C_Cpp.clang_format_style": "file",
 	"C_Cpp.default.intelliSenseMode": "gcc-x64",
 	"cmake.configureArgs": [
-		"--trace-expand"
+		"--trace-expand",
+		"--trace-redirect=${workspaceFolder}/build-${env:HOSTNAME}${env:COMPUTERNAME}/cmake.trace.log"
 	],
 	"cmake.configureOnEdit": false,
 	"cmake.saveBeforeBuild": true,
 	"cmake.buildBeforeRun": true,
 	"cmake.clearOutputBeforeBuild": true,
 	"cmake.sourceDirectory": "${workspaceFolder}",
-	"cmake.buildDirectory": "${workspaceFolder}/build-vscode-${env:HOSTNAME}${env:COMPUTERNAME}",
-	"cmake.copyCompileCommands": "${workspaceRoot}/.vscode/compile_command.json",
+	"cmake.buildDirectory": "${workspaceFolder}/build-${env:HOSTNAME}${env:COMPUTERNAME}",
+	"cmake.copyCompileCommands": "${workspaceFolder}/.vscode/compile_command.json",
 	"cmake.exportCompileCommandsFile": true,
-	"cmake.skipConfigureIfCachePresent": true,
+	"cmake.skipConfigureIfCachePresent": false,
 	"cmake.cmakeCommunicationMode": "fileApi",
 	"cmakeLanguageSupport.enableFileAPI": true,
 	"cmake.enabledOutputParsers": [
@@ -30,7 +31,7 @@
 	"cmake.configureSettings": {
 		"CMAKE_TOOLCHAIN_FILE": "${workspaceFolder}/vcpkg/scripts/buildsystems/vcpkg.cmake",
 		"DISABLE_TERM_HYPERLINK": "yes",
-		"OpenGL_GL_PREFERENCE": "GLVND"
+		"OpenGL_GL_PREFERENCE": "GLVND",
 	},
 	"git.autoRepositoryDetection": false,
 	"search.exclude": {

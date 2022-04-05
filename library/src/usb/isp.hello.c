@@ -1,6 +1,12 @@
+#include "isp.h"
+#include "basic/disposable.h"
 #include "basic/errors.h"
+#include "basic/resource-tracker.h"
+#include "context.h"
+#include "descriptor.h"
+#include "device.h"
 #include "isp.low.h"
-#include "usb.h"
+#include "private-types.h"
 
 kburn_err_t usb_device_hello(kburnDeviceNode *node) {
 	debug_trace_function();
@@ -9,16 +15,11 @@ kburn_err_t usb_device_hello(kburnDeviceNode *node) {
 		.command = USB_ISP_COMMAND_HELLO,
 	};
 
-	int r;
 	uint32_t expected_tag = rand();
 
 	/* 批量传输的三个阶段，命令阶段，数据阶段，状态阶段 */
 	/* 命令阶段 */
-	r = usb_lowlevel_command_send(node->usb->handle, node->usb->deviceInfo.endpoint_out, request, LIBUSB_ENDPOINT_OUT, 0, expected_tag);
-	if (r < LIBUSB_SUCCESS) {
-		copy_last_libusb_error(node, r);
-		return make_error_code(KBURN_ERROR_KIND_USB, r);
-	}
+	IfErrorSetReturn(usb_lowlevel_command_send(node->usb->handle, node->usb->deviceInfo.endpoint_out, request, LIBUSB_ENDPOINT_OUT, 0, expected_tag));
 	/* 数据阶段 */
 
 	/* 没有数据阶段了*/

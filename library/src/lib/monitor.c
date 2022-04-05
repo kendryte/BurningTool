@@ -1,5 +1,10 @@
-#include "serial.h"
-#include "usb.h"
+#include "../usb/monitor.h"
+#include "../serial/monitor.h"
+#include "../serial/private-types.h"
+#include "../serial/subsystem.h"
+#include "../usb/private-types.h"
+#include "../usb/subsystem.h"
+#include "basic/resource-tracker.h"
 
 static DECALRE_DISPOSE(_dispose, kburnContext) {
 	if (context->monitor_inited) {

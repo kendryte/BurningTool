@@ -1,4 +1,6 @@
-#include "serial.h"
+#include "low.h"
+#include "device.h"
+#include "port.options.h"
 
 static bool open(kburnSerialDeviceNode *node, ser_opts_t opts) {
 	m_assert(node->m_dev_handle == NULL, "duplicate call to serial port open");
@@ -25,7 +27,7 @@ static bool open(kburnSerialDeviceNode *node, ser_opts_t opts) {
 }
 
 void serial_low_close(kburnSerialDeviceNode *node) {
-	debug_trace_function("node[%s]", node->path);
+	debug_trace_function("node[%s]", node->deviceInfo.path);
 	if (node->isOpen) {
 		ser_close(node->m_dev_handle);
 		node->isOpen = false;
@@ -37,15 +39,15 @@ void serial_low_close(kburnSerialDeviceNode *node) {
 }
 
 bool serial_low_open(kburnSerialDeviceNode *node) {
-	debug_trace_function("node[%s]", node->path);
-	return open(node, get_current_serial_options(node->path));
+	debug_trace_function("node[%s]", node->deviceInfo.path);
+	return open(node, get_current_serial_options(node->deviceInfo.path));
 }
 
 void serial_low_flush_all(kburnSerialDeviceNode *node) { ser_flush(node->m_dev_handle, SER_QUEUE_ALL); }
 
 bool serial_low_switch_baudrate(kburnSerialDeviceNode *node, uint32_t speed) {
 	serial_low_close(node);
-	ser_opts_t opts = get_current_serial_options(node->path);
+	ser_opts_t opts = get_current_serial_options(node->deviceInfo.path);
 	opts.baudrate = speed;
 	return open(node, opts);
 }

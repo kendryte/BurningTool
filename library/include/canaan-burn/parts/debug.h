@@ -18,10 +18,6 @@ typedef struct kburnDebugColors {
 PUBLIC void kburnSetLogBufferEnabled(bool enable);
 PUBLIC kburnDebugColors kburnSetColors(kburnDebugColors color_list);
 
-struct debug_callback {
-	on_debug_log callback;
-	void *call_context;
-};
-PUBLIC struct debug_callback kburnSetLogCallback(on_debug_log callback, void *call_context);
+PUBLIC on_debug_log_t kburnSetLogCallback(on_debug_log callback, void *call_context);
 
 DEFINE_END

@@ -44,10 +44,18 @@ typedef enum kburnLogType {
 	KBURN_LOG_ERROR,
 } kburnLogType;
 
-typedef bool (*on_device_connect)(void *ctx, const kburnDeviceNode *dev);
-typedef void (*on_device_remove)(void *ctx, const kburnDeviceNode *dev);
-typedef void (*on_device_handle)(void *ctx, kburnDeviceNode *dev);
-typedef void (*on_write_progress)(void *ctx, const kburnDeviceNode *dev, size_t current, size_t length);
-typedef void (*on_debug_log)(void *ctx, kburnLogType type, const char *message);
+#define CONCAT(a, b) a##b
+#define declare_callback(ret, name, ...)                                                                                                             \
+	typedef ret (*name)(void *ctx, __VA_ARGS__);                                                                                                     \
+	typedef struct CONCAT(name, _callback_bundle) {                                                                                                  \
+		name handler;                                                                                                                                \
+		void *context;                                                                                                                               \
+	} CONCAT(name, _t)
+
+declare_callback(bool, on_device_connect, const kburnDeviceNode *dev);
+declare_callback(void, on_device_remove, const kburnDeviceNode *dev);
+declare_callback(void, on_device_handle, kburnDeviceNode *dev);
+declare_callback(void, on_write_progress, const kburnDeviceNode *dev, size_t current, size_t length);
+declare_callback(void, on_debug_log, kburnLogType type, const char *message);
 
 DEFINE_END

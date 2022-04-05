@@ -1,7 +1,9 @@
 #pragma once
 
 #include "basic/disposable.h"
+#include "context.h"
 #include "global.h"
+#include "serial.isp.h"
 
 DECALRE_DISPOSE_HEADER(destroy_device, kburnDeviceNode);
 
@@ -25,6 +27,8 @@ void _copy_last_serial_io_error(kburnDeviceNode *node, uint32_t err);
 void _copy_last_libusb_error(kburnDeviceNode *node, int err);
 void _set_error(kburnDeviceNode *node, enum kburnErrorKind kind, int32_t code, const char *errstr, ...) __attribute__((format(printf, 4, 5)));
 void _clear_error(kburnDeviceNode *node);
+
+void slip_error(kburnSerialDeviceNode *node, int err);
 
 kburn_err_t create_empty_device_instance(KBCTX scope, kburnDeviceNode **output);
 void device_instance_collect(KBCTX scope, kburnDeviceNode *instance);

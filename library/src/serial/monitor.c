@@ -1,6 +1,9 @@
+#include "base.h"
 #include "basic/errors.h"
 #include "components/device-link-list.h"
-#include "serial.h"
+#include "device.h"
+#include "lifecycle.h"
+#include "private-types.h"
 
 static void on_event(void *ctx, ser_dev_evt_t evt, const ser_dev_t *dev) {
 	KBCTX scope = ctx;
@@ -17,15 +20,6 @@ static void on_event(void *ctx, ser_dev_evt_t evt, const ser_dev_t *dev) {
 
 		break;
 	}
-}
-
-void kburnOnSerialConnect(KBCTX scope, on_device_connect verify_callback, void *ctx) {
-	scope->serial->verify_callback = verify_callback;
-	scope->serial->verify_callback_ctx = ctx;
-}
-void kburnOnSerialConfirm(KBCTX scope, on_device_handle handler_callback, void *ctx) {
-	scope->serial->handler_callback = handler_callback;
-	scope->serial->handler_callback_ctx = ctx;
 }
 
 static void first_init_list(void *UNUSED(ctx), KBCTX scope, const bool *const quit) {

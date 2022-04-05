@@ -1,5 +1,6 @@
 #include "thread.h"
 #include "basic/errors.h"
+#include "basic/sleep.h"
 #include "context.h"
 #include "debug/print.h"
 #include "global.h"

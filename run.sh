@@ -8,4 +8,4 @@ if [[ $# -gt 0 ]] ;then
 	exec "$@"
 fi
 
-exec ./build-vscode-$HOSTNAME/gui/BurningTool
+exec ./build-$HOSTNAME/gui/BurningTool

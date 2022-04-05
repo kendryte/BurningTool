@@ -1,8 +1,11 @@
+#include "device.h"
 #include "basic/errors.h"
 #include "basic/string.h"
-#include "serial.h"
+#include "slip.h"
 #include <libusb.h>
+#include <sercomm/sercomm.h>
 #include <stdarg.h>
+#include <stdlib.h>
 
 void _copy_last_serial_io_error(kburnDeviceNode *node, uint32_t err) {
 	clear_error(node);
@@ -45,7 +48,7 @@ void _clear_error(kburnDeviceNode *node) {
 	}
 }
 
-void slip_error(kburnSerialDeviceNode *node, slip_error_t err) {
+void slip_error(kburnSerialDeviceNode *node, int err) {
 	switch (err) {
 	case SLIP_ERROR_BUFFER_OVERFLOW:
 		set_error(node, KBURN_ERROR_KIND_SLIP, err, "SLIP_ERROR_BUFFER_OVERFLOW");

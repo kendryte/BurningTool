@@ -1,5 +1,8 @@
 #include "components/call-user-handler.h"
-#include "usb.h"
+#include "components/device-link-list.h"
+#include "descriptor.h"
+#include "lifecycle.h"
+#include "private-types.h"
 
 static inline bool match_device(int vid, int pid, const struct libusb_device_descriptor *desc) {
 	if (vid != KBURN_VIDPID_FILTER_ANY && vid != desc->idVendor) {
@@ -48,68 +51,6 @@ libusb_device *get_usb_device(struct libusb_context *libusb, uint16_t vid, uint1
 	return ret;
 }
 
-void free_all_unopend_usb_info(kburnUsbDeviceInfo **list) {
-	for (kburnUsbDeviceInfo **itr = list; *itr != NULL; itr++) {
-		free(*itr);
-	}
-}
-
-int get_all_unopend_usb_info(KBCTX scope, int vid, int pid, kburnUsbDeviceInfo **ret) {
-	struct libusb_context *libusb = scope->usb->libusb;
-	debug_trace_function("vid=%d, pid=%d", vid, pid);
-	libusb_device **list;
-	ssize_t cnt = libusb_get_device_list(libusb, &list);
-	if (cnt < 0) {
-		debug_print_libusb_error("get_all_unopend_usb_info: libusb_get_device_list()", cnt);
-		return -1;
-	}
-
-	*ret = calloc(cnt, sizeof(kburnUsbDeviceInfo *));
-	kburnUsbDeviceInfo *info = NULL;
-	m_assert_ptr(*ret, "memory error");
-
-	int found = 0;
-	for (int i = 0; i < cnt; i++) {
-		libusb_device *dev = list[i];
-		struct libusb_device_descriptor desc;
-
-		if (info == NULL)
-			info = calloc(1, sizeof(kburnUsbDeviceInfo));
-
-		int r = libusb_get_device_descriptor(dev, &desc);
-		if (r < 0) {
-			debug_print_libusb_error("get_all_unopend_usb_info: libusb_get_device_descriptor", r);
-			continue;
-		}
-
-		if (!match_device(vid, pid, &desc))
-			continue;
-
-		uint8_t path[MAX_PATH_LENGTH] = {0};
-		if (usb_get_device_path(dev, path) < LIBUSB_SUCCESS)
-			continue;
-
-		if (usb_device_find(scope, desc.idVendor, desc.idProduct, path) != NULL) {
-			debug_print(KBURN_LOG_DEBUG, "  * %s - already open", usb_debug_path_string(path));
-			continue;
-		} else {
-			debug_print(KBURN_LOG_DEBUG, "  * %s", usb_debug_path_string(path));
-		}
-
-		ret[found] = info;
-		info = NULL;
-		found++;
-	}
-	libusb_free_device_list(list, true);
-
-	if (info)
-		free(info);
-
-	debug_print(KBURN_LOG_DEBUG, "get_all_unopend_usb_info: found %d devices.", found);
-
-	return found;
-}
-
 kburn_err_t init_list_all_usb_devices(KBCTX scope) {
 	debug_trace_function("%.4x:%.4x", scope->usb->filter.vid, scope->usb->filter.pid);
 	struct libusb_device_descriptor desc;
@@ -139,13 +80,13 @@ kburn_err_t init_list_all_usb_devices(KBCTX scope) {
 
 		debug_print(KBURN_LOG_DEBUG, "[init/poll] \tpath: %s", usb_debug_path_string(path));
 
-		if (usb_device_find(scope, desc.idVendor, desc.idProduct, path) != NULL) {
+		if (get_device_by_usb_port_path(scope, desc.idVendor, desc.idProduct, path) != NULL) {
 			debug_print(KBURN_LOG_DEBUG, "[init/poll] \tdevice already opened, ignore.");
 			continue;
 		} else {
 			debug_print(KBURN_LOG_DEBUG, "[init/poll] \topen");
 
-			IfErrorReturn(open_single_usb_port(scope, dev, NULL));
+			IfErrorReturn(open_single_usb_port(scope, dev, true, NULL));
 		}
 	}
 	libusb_free_device_list(list, true);

@@ -36,7 +36,7 @@ void _recreate_waitting_list(KBCTX scope) {
 	size_t itr = 0;
 	for (curs = scope->openDeviceList->head; curs != NULL; curs = curs->next) {
 		if (_should_insert_waitting_list(curs->node)) {
-			debug_print(KBURN_LOG_DEBUG, "  * %s", curs->node->serial->path);
+			debug_print(KBURN_LOG_DEBUG, "  * %s", curs->node->serial->deviceInfo.path);
 			scope->waittingDevice->list[itr] = curs->node;
 
 			itr++;

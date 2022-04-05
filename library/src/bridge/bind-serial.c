@@ -1,9 +1,12 @@
+#include "basic/sleep.h"
 #include "bind-wait-list.h"
 #include "components/device-link-list.h"
 #include "debug/print.h"
+#include "device.h"
 #include "global.h"
+#include "move-device.h"
+#include "private-types.h"
 #include "protocol.h"
-#include "serial.h"
 
 static void push_buffer(char *tgt, size_t *tgt_i, const char *src, const size_t src_size) {
 	memcpy(tgt + *tgt_i, src, src_size);
@@ -126,7 +129,6 @@ void pair_serial_ports_thread(void *UNUSED(ctx), KBCTX scope, const bool *const 
 					debug_print(KBURN_LOG_ERROR, COLOR_FMT("bind target usb port gone, bind_id=%d, maybe disconnected?"), COLOR_ARG(RED, found_bind));
 					continue;
 				}
-				void copy_serial_device(kburnDeviceNode * _src, kburnDeviceNode * _dst);
 				copy_serial_device(serial_node, new_usb_node);
 
 				continue;

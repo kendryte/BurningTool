@@ -1,16 +1,9 @@
-#include "serial.h"
+#include "isp.h"
 
 size_t serial_isp_packet_size(const isp_request_t *packet) {
 	// debug_print("ISP_HEADER_SIZE=%ld", offsetof(isp_request_t, data));
 	// debug_print("packet->data_len=%d", packet->data_len);
 	return offsetof(isp_request_t, data) + packet->data_len;
-}
-
-isp_request_t *new_serial_isp_packet(uint32_t data_length) {
-	isp_request_t *ret = malloc(offsetof(isp_request_t, data) + data_length);
-	memset(ret, 0, offsetof(isp_request_t, data) + data_length);
-	ret->data_len = data_length;
-	return ret;
 }
 
 static uint32_t checksum(const isp_request_t *packet) {
@@ -34,6 +27,7 @@ static uint32_t checksum(const isp_request_t *packet) {
 	return ~crc;
 }
 
+/** unused */
 bool serial_isp_verify_checksum(isp_request_t *packet) { return checksum(packet) == packet->checksum; }
 
 void serial_isp_calculate_checksum(isp_request_t *packet) {

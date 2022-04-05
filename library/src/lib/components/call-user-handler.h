@@ -15,14 +15,14 @@ void user_handler_wrap(struct user_handler_wrap_data *data);
 
 #define DeferUserCallback(callback, device, always)                                                                                                  \
 	__extension__({                                                                                                                                  \
-		if (callback == NULL) {                                                                                                                      \
+		if (callback.handler == NULL) {                                                                                                              \
 			debug_print(KBURN_LOG_ERROR, "No handler registed for " #callback);                                                                      \
 		} else {                                                                                                                                     \
 			struct user_handler_wrap_data *_user_handler_wrap_data = MyAlloc(struct user_handler_wrap_data);                                         \
 			DeferFreeAlways(_user_handler_wrap_data);                                                                                                \
 			*_user_handler_wrap_data = (struct user_handler_wrap_data){                                                                              \
-				callback,                                                                                                                            \
-				callback##_ctx,                                                                                                                      \
+				callback.handler,                                                                                                                    \
+				callback.context,                                                                                                                    \
 				device,                                                                                                                              \
 			};                                                                                                                                       \
 			if (always)                                                                                                                              \
@@ -30,15 +30,6 @@ void user_handler_wrap(struct user_handler_wrap_data *data);
 			else                                                                                                                                     \
 				DeferCall(user_handler_wrap, _user_handler_wrap_data);                                                                               \
 		}                                                                                                                                            \
-	})
-#define CALL_USER(handler, device)                                                                                                                   \
-	__extension__({                                                                                                                                  \
-		struct user_handler_wrap_data _user_handler_wrap_data = (struct user_handler_wrap_data){                                                     \
-			callback,                                                                                                                                \
-			callback##_ctx,                                                                                                                          \
-			device,                                                                                                                                  \
-		};                                                                                                                                           \
-		user_handler_wrap(&_user_handler_wrap_data)                                                                                                  \
 	})
 
 kburn_err_t global_init_user_handle_thread(KBCTX scope);

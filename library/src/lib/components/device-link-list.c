@@ -1,4 +1,5 @@
 #include "device-link-list.h"
+#include "basic/resource-tracker.h"
 #include "bind-wait-list.h"
 #include "global.h"
 #include <stdlib.h>
@@ -107,7 +108,7 @@ static inline port_link_element *find_serial_device(KBCTX scope, const char *pat
 	for (curs = scope->openDeviceList->head; curs != NULL; curs = curs->next) {
 		if (!curs->node->serial->init)
 			continue;
-		if (strcmp(curs->node->serial->path, path) == 0)
+		if (strcmp(curs->node->serial->deviceInfo.path, path) == 0)
 			break;
 	}
 	return curs;

@@ -1,7 +1,11 @@
 #include "isp.low.h"
 #include "basic/errors.h"
+#include "basic/sleep.h"
+#include "device.h"
 #include "isp.h"
-#include "usb.h"
+#include "private-types.h"
+#include <stdlib.h>
+#include <string.h>
 
 #define RETRY_MAX 5
 #define REQUEST_SENSE_LENGTH 0x12

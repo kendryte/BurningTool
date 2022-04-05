@@ -30,6 +30,7 @@ enum KBurnCommonError {
 	KBurnUserCancel,
 };
 
+#pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wpedantic"
 enum kburnErrorKind {
 	KBURN_ERROR_KIND_COMMON = 0ULL,

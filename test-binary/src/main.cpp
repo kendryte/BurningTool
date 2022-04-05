@@ -13,7 +13,7 @@ using namespace std;
 const char *test_null(const char *str) { return str ? str : "NULL"; }
 
 bool verify(void *ctx, const kburnDeviceNode *dev) {
-	cout << "ask connect: " << dev->serial->path << ", isUSB=" << dev->serial->deviceInfo.isUSB << endl;
+	cout << "ask connect: " << dev->serial->deviceInfo.path << ", isUSB=" << dev->serial->deviceInfo.isUSB << endl;
 	return true;
 }
 
@@ -28,7 +28,7 @@ static void perror(kburn_err_t e) {
 }
 
 void handle(void *ctx, kburnDeviceNode *dev) {
-	cout << "Got Serial Device: " << dev->serial->path << endl;
+	cout << "Got Serial Device: " << dev->serial->deviceInfo.path << endl;
 	cout << "  * isOpen: " << dev->serial->isOpen << endl;
 	cout << "  * isConfirm: " << dev->serial->isConfirm << endl;
 	cout << "  * error status: " << dev->error->code << ", " << test_null(dev->error->errorMessage) << endl;
@@ -51,7 +51,7 @@ void handle_usb(void *ctx, kburnDeviceNode *dev) {
 	kburn_err_t r;
 
 	cout << "Got Usb Device: " << endl;
-	cout << "  * serial port: " << (dev->serial->isUsbBound ? dev->serial->path : "not bind") << endl;
+	cout << "  * serial port: " << (dev->serial->isUsbBound ? dev->serial->deviceInfo.path : "not bind") << endl;
 	cout << "  * usb port: ";
 	for (auto i = 0; i < MAX_PATH_LENGTH; i++) {
 		cout << (uint8_t)dev->usb->deviceInfo.path[i] << " " << flush;
@@ -59,7 +59,6 @@ void handle_usb(void *ctx, kburnDeviceNode *dev) {
 	cout << endl;
 	cout << "    usb vid: 0x" << hex << dev->usb->deviceInfo.idVendor << dec << endl;
 	cout << "    usb pid: 0x" << hex << dev->usb->deviceInfo.idProduct << dec << endl;
-	cout << "    usb serial number: " << test_null((char *)dev->usb->deviceInfo.strSerial) << endl;
 
 	cout << "  * error status: " << dev->error->code << ", " << test_null(dev->error->errorMessage) << endl;
 
@@ -98,7 +97,7 @@ void handle_usb(void *ctx, kburnDeviceNode *dev) {
 }
 
 void disconnect(void *ctx, const kburnDeviceNode *dev) {
-	cout << "Disconnect: " << dev->serial->path << endl;
+	cout << "Disconnect: " << dev->serial->deviceInfo.path << endl;
 	cout << "  * isOpen: " << dev->serial->isOpen << endl;
 	cout << "  * isConfirm: " << dev->serial->isConfirm << endl;
 	cout << "  * error status: " << dev->error->code << ", " << test_null(dev->error->errorMessage) << endl;
@@ -131,7 +130,7 @@ int main(int argc, char **argv) {
 	// kburnOpen("/dev/ttyUSB4");
 	// kburnOpen("/dev/ttyUSB5");
 
-	// kburnOpenUSB(context, 0x0559, 0x4001, (const uint8_t *)"4b7e4b47");
+	// kburnOpenUsb(context, 0x0559, 0x4001, (const uint8_t *)"4b7e4b47");
 
 	printf("Press ENTER to stop monitoring\n");
 	getchar();

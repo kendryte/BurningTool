@@ -1,5 +1,8 @@
 #include "basic/errors.h"
-#include "serial.h"
+#include "device.h"
+#include "isp.h"
+#include "low.h"
+#include "private-types.h"
 #include "slip.h"
 
 void recv_message(void *_ctx, uint8_t *UNUSED(data), uint32_t size) {
@@ -31,7 +34,7 @@ uint8_t write_byte(void *_ctx, uint8_t byte, bool end) {
 }
 
 void serial_isp_open(kburnSerialDeviceNode *node) {
-	debug_trace_function("node[%s]", node->path);
+	debug_trace_function("node[%s]", node->deviceInfo.path);
 	isp_state *isp = malloc(sizeof(isp_state));
 
 	isp->descriptor.buf = isp->main_buffer;

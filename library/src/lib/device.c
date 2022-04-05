@@ -1,20 +1,18 @@
+#include "device.h"
+#include "../usb/private-types.h"
+#include "basic/resource-tracker.h"
 #include "components/device-link-list.h"
-#include "serial.h"
-#include "usb.h"
 
-void kburnOnDeviceDisconnect(KBCTX scope, on_device_remove callback, void *ctx) {
-	scope->disconnect_callback = callback;
-	scope->disconnect_callback_ctx = ctx;
-}
+DEFINE_REGISTER_SWAPPER(kburnOnDeviceDisconnect, scope->on_disconnect, on_device_remove)
 
 DECALRE_DISPOSE(destroy_device, kburnDeviceNode) {
 	if (context->destroy_in_progress)
 		return;
 	context->destroy_in_progress = true;
 
-	if (context->disconnect_should_call && context->_scope->disconnect_callback) {
-		debug_print(KBURN_LOG_DEBUG, "\tdisconnect_callback()");
-		context->_scope->disconnect_callback(context, context->_scope->disconnect_callback_ctx);
+	if (context->disconnect_should_call && context->_scope->on_disconnect.handler) {
+		debug_print(KBURN_LOG_DEBUG, "\tscope::on_disconnect()");
+		context->_scope->on_disconnect.handler(context->_scope->on_disconnect.context, context);
 	}
 
 	clear_error(context);
@@ -69,11 +67,4 @@ kburn_err_t create_empty_device_instance(KBCTX scope, kburnDeviceNode **output) 
 
 	DeferAbort;
 	return KBurnNoErr;
-}
-
-kburnDeviceNode *kburnOpenSerial(KBCTX scope, const char *path) {
-	debug_print(KBURN_LOG_DEBUG, "kburnOpenSerial(%s)", path);
-	on_serial_device_attach(scope, path);
-
-	return get_device_by_serial_port_path(scope, path);
 }

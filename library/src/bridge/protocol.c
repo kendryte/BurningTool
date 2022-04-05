@@ -1,6 +1,8 @@
 #include "protocol.h"
 #include "basic/string.h"
+#include "debug/print.h"
 #include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
 
 #define SIGNATURE "{bind-usb-uart: 0x"

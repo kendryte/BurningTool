@@ -17,15 +17,16 @@ enum KBurnSerialConfigStopBits { KBurnSerialConfigStopBitsOne, KBurnSerialConfig
 typedef struct kburnSerialDeviceInfo {
 	PCONST bool isUSB;
 	PCONST bool isTTY;
+	PCONST char *path;
 
 	PCONST uint16_t usbIdVendor;
 	PCONST uint16_t usbIdProduct;
 	PCONST uint16_t usbIdRevision;
-	PCONST char *usbDriver;
 
 #ifdef __linux__
-	PCONST uint32_t major;
-	PCONST uint32_t minor;
+	PCONST char *usbDriver;
+	PCONST uint32_t deviceMajor;
+	PCONST uint32_t deviceMinor;
 #endif
 
 } kburnSerialDeviceInfo;
@@ -39,7 +40,6 @@ typedef struct kburnSerialDeviceNode {
 	PCONST bool isOpen;
 	PCONST bool isSwitchIsp;
 	PCONST bool isUsbBound;
-	const char *path;
 
 	PCONST uint32_t baudRate;
 	PCONST bool serial_isp_busy;
@@ -52,3 +52,8 @@ typedef struct kburnSerialDeviceNode {
 
 	PCONST kb_mutex_t mutex;
 } kburnSerialDeviceNode;
+
+typedef struct kburn_serial_device_list {
+	PCONST size_t size;
+	PCONST kburnSerialDeviceInfo *list;
+} * kburnSerialDeviceList;

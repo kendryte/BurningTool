@@ -1,6 +1,8 @@
+#include "../usb/isp.h"
+#include "basic/sleep.h"
 #include "debug/print.h"
+#include "device.h"
 #include "protocol.h"
-#include "usb.h"
 
 kburn_err_t usb_device_serial_bind(kburnDeviceNode *node) {
 	debug_trace_function();

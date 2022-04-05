@@ -1,6 +1,12 @@
-#include "serial.h"
 #include "basic/errors.h"
+#include "basic/sleep.h"
+#include "baudtate.h"
 #include "components/device-link-list.h"
+#include "device.h"
+#include "isp.h"
+#include "low.h"
+#include "private-types.h"
+#include "serial.config.h"
 
 slip_error_t _serial_isp_slip_send_request(kburnSerialDeviceNode *node, isp_request_t *command);
 
@@ -90,7 +96,7 @@ bool kburnSerialIspSetBaudrate(kburnSerialDeviceNode *node, uint32_t want_br) {
 }
 
 bool kburnSerialIspBootMemory(kburnSerialDeviceNode *node, kburn_mem_address_t address) {
-	debug_trace_function("node[%s], 0x%X", node->path, address);
+	debug_trace_function("node[%s], 0x%X", node->deviceInfo.path, address);
 	make_serial_isp_packet(packet, 0);
 
 	packet->op = ISP_MEMORY_BOOT;
@@ -126,9 +132,8 @@ bool kburnSerialIspBootMemory(kburnSerialDeviceNode *node, kburn_mem_address_t a
 	return true;
 }
 
-__attribute__((access(read_only, 3, 4))) bool kburnSerialIspMemoryWrite(kburnSerialDeviceNode *node, const kburn_mem_address_t address,
-																		const char *data, const size_t data_size, const on_write_progress cb,
-																		void *ctx) {
+bool kburnSerialIspMemoryWrite(kburnSerialDeviceNode *node, const kburn_mem_address_t address, const char *data, const size_t data_size,
+							   const on_write_progress cb, void *ctx) {
 	make_serial_isp_packet(packet, BOARD_MEMORY_PAGE_SIZE);
 	packet->op = ISP_MEMORY_WRITE;
 
@@ -164,7 +169,7 @@ __attribute__((access(read_only, 3, 4))) bool kburnSerialIspMemoryWrite(kburnSer
 
 bool kburnSerialIspRunProgram(kburnSerialDeviceNode *node, const void *programBuffer, size_t programBufferSize, on_write_progress page_callback,
 							  void *ctx) {
-	debug_trace_function("node[%s]", node->path);
+	debug_trace_function("node[%s]", node->deviceInfo.path);
 
 	greeting(node, false);
 

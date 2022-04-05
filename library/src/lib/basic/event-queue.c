@@ -1,5 +1,5 @@
 #include "event-queue.h"
-#include "global.h"
+#include "basic/resource-tracker.h"
 
 typedef struct queue_struct {
 	void *data;

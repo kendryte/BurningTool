@@ -41,3 +41,4 @@
 
 #include "basic/macros.alloc.h"
 #include "basic/macros.error.h"
+#include "basic/macros.function.h"

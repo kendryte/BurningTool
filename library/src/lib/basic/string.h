@@ -1,6 +1,7 @@
 #pragma once
 
 #include "base.h"
+#include <stdio.h>
 #include <string.h>
 
 static inline char *__empty_string(const char *UNUSED(_)) { return NULL; }

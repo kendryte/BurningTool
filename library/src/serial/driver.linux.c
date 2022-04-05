@@ -1,4 +1,6 @@
-#include "global.h"
+#include "basic/resource-tracker.h"
+#include "context.h"
+#include "private-types.h"
 #include <libudev.h>
 #include <stdlib.h>
 
@@ -9,37 +11,40 @@
 void driver_get_devinfo_free(kburnSerialDeviceInfo deviceInfo) {
 	if (deviceInfo.usbDriver)
 		free(deviceInfo.usbDriver);
+	free(deviceInfo.path);
 }
+
+void m_udev_unref(struct udev *u) { udev_unref(u); }
+void m_udev_enumerate_unref(struct udev_enumerate *udev_enumerate) { m_udev_enumerate_unref(udev_enumerate); }
 
 kburnSerialDeviceInfo driver_get_devinfo(const char *path) {
 	debug_trace_function("%s", path);
-
-	struct udev_device *dev = NULL;
-	struct udev_enumerate *query = NULL;
-	struct udev *u = NULL;
+	DeferEnabled;
 
 	const char *pstr;
-	struct udev_list_entry *list;
-	struct udev_list_entry *itr;
 	kburnSerialDeviceInfo ret;
 	memset(&ret, 0, sizeof(kburnSerialDeviceInfo));
+	ret.path = strdup(path);
 
-	u = udev_new();
+	struct udev *u = udev_new();
 	if (u == NULL)
-		goto exit;
+		return ret;
+	DeferCall(m_udev_unref, u);
 
 	/* create libudev enumerate */
-	query = udev_enumerate_new(u);
-	if (query == NULL) {
-		goto exit;
-	}
+	struct udev_enumerate *query = udev_enumerate_new(u);
+	if (query == NULL)
+		return ret;
+
+	DeferCall(m_udev_enumerate_unref, query);
 
 	udev_enumerate_add_match_subsystem(query, "tty");
 	udev_enumerate_scan_devices(query);
-	list = udev_enumerate_get_list_entry(query);
+	struct udev_list_entry *list = udev_enumerate_get_list_entry(query);
 
+	struct udev_list_entry *itr;
 	udev_list_entry_foreach(itr, list) {
-		dev = udev_device_new_from_syspath(u, udev_list_entry_get_name(itr));
+		struct udev_device *dev = udev_device_new_from_syspath(u, udev_list_entry_get_name(itr));
 
 		if (dev == NULL)
 			continue;
@@ -66,23 +71,16 @@ kburnSerialDeviceInfo driver_get_devinfo(const char *path) {
 					ret.usbDriver = strdup(pstr);
 			}
 
-			get_number_prop(ret.major, "MAJOR", 1);
-			get_number_prop(ret.minor, "MINOR", 1);
+			get_number_prop(ret.deviceMajor, "MAJOR", 1);
+			get_number_prop(ret.deviceMinor, "MINOR", 1);
 
+			udev_device_unref(dev);
 			break;
 		}
 
 		udev_device_unref(dev);
-		dev = NULL;
 	}
 
-exit:
-	if (query)
-		udev_enumerate_unref(query);
-	if (dev)
-		udev_device_unref(dev);
-	if (u)
-		udev_unref(u);
 	return ret;
 }
 

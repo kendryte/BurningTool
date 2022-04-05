@@ -1,4 +1,5 @@
 #include "global.h"
+#include "basic/string.h"
 #include <stdarg.h>
 #include <stdlib.h>
 #include <string.h>

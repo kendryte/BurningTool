@@ -25,15 +25,11 @@
 			"name": "(gdb) 启动",
 			"type": "cppdbg",
 			"request": "launch",
-			"program": "${workspaceFolder}/build-vscode-${env:HOSTNAME}${env:COMPUTERNAME}/${input:program}",
+			"program": "${command:cmake.launchTargetPath}",
 			"args": [],
 			"stopAtEntry": false,
-			"cwd": "${workspaceFolder}/build-vscode-${env:HOSTNAME}${env:COMPUTERNAME}",
+			"cwd": "${workspaceFolder}/build-${env:HOSTNAME}${env:COMPUTERNAME}",
 			"environment": [
-				{
-					"name": "PATH",
-					"value": "${env:PATH}:${command:cmake.getLaunchTargetDirectory}"
-				},
 				{
 					"name": "LD_PRELOAD",
 					"value": "/usr/lib64/libasan.so.6"
@@ -54,7 +50,7 @@
 					"ignoreFailures": true
 				}
 			],
-			"visualizerFile": "/root/.vscode-server-insiders/data/User/workspaceStorage/0a10780273df37d22318baa12ed06247/tonka3000.qtvsctools/qt.natvis.xml"
+			"visualizerFile": "/root/.vscode-server-insiders/data/User/workspaceStorage/0a10780273df37d22318baa12ed06247-1/tonka3000.qtvsctools/qt.natvis.xml"
 		}
 	]
 }

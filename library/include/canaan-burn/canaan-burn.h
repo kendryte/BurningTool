@@ -47,27 +47,32 @@ PUBLIC void kburnDestroy(KBCTX scope);
  * 直接打开端口，通常不应该调用这个函数
  * @param path 端口名称（路径）
  */
-PUBLIC kburnDeviceNode *kburnOpenSerial(KBCTX scope, const char *path);
+PUBLIC kburn_err_t kburnOpenSerial(KBCTX scope, const char *path);
 
 /**
  * 新设备连接回调，当返回false时，不试图连接（忽略该端口）
  */
-PUBLIC void kburnOnSerialConnect(KBCTX scope, on_device_connect verify_callback, void *ctx);
+PUBLIC on_device_connect_t kburnOnSerialConnect(KBCTX scope, on_device_connect verify_callback, void *ctx);
 
 /**
  * 当设备确认为k510后，用户程序在此处理
  */
-PUBLIC void kburnOnSerialConfirm(KBCTX scope, on_device_handle handler_callback, void *ctx);
+PUBLIC on_device_handle_t kburnOnSerialConfirm(KBCTX scope, on_device_handle handler_callback, void *ctx);
 
 /**
  * 当端口断开时，调用此回调，用户可以进行一些清理，该回调执行完后，参数的设备结构会被释放
  **/
-PUBLIC void kburnOnDeviceDisconnect(KBCTX scope, on_device_remove disconnect_callback, void *ctx);
+PUBLIC on_device_remove_t kburnOnDeviceDisconnect(KBCTX scope, on_device_remove disconnect_callback, void *ctx);
+
+/**
+ * 新设备连接回调，当返回false时，不试图连接（忽略该端口）
+ */
+PUBLIC on_device_connect_t kburnOnUsbConnect(KBCTX scope, on_device_connect verify_callback, void *ctx);
 
 /**
  * 新设备连接回调，当设备确认为k510后，用户程序在此处理
  */
-PUBLIC void kburnOnUsbConfirm(KBCTX scope, on_device_handle handle_callback, void *ctx);
+PUBLIC on_device_handle_t kburnOnUsbConfirm(KBCTX scope, on_device_handle handle_callback, void *ctx);
 
 /**
  * 开始监视串口+USB设备
@@ -76,10 +81,12 @@ PUBLIC void kburnOnUsbConfirm(KBCTX scope, on_device_handle handle_callback, voi
 PUBLIC kburn_err_t kburnStartWaitingDevices(KBCTX scope);
 /**
  * 开始监视USB设备
+ * **未实现**
  **/
 PUBLIC kburn_err_t kburnStartWaitingUsbDevices(KBCTX scope);
 /**
  * 开始监视串口设备
+ * **未实现**
  **/
 PUBLIC kburn_err_t kburnStartWaitingSerialDevices(KBCTX scope);
 
@@ -100,20 +107,22 @@ PUBLIC void kburnSetUsbFilter(KBCTX scope, int32_t vid, int32_t pid);
 
 /**
  * 直接打开端口，通常不应该调用这个函数
- * @param path 端口设备路径，最多7层
+ * @param path USB设备路径
  */
-PUBLIC kburn_err_t kburnOpenUSB(KBCTX scope, uint16_t vid, uint16_t pid, const uint8_t *path);
-
-/**
- * 单次扫描usb设备
- */
-PUBLIC kburn_err_t kburnPollUSB(KBCTX scope);
+PUBLIC kburn_err_t kburnOpenUsb(KBCTX scope, uint16_t vid, uint16_t pid, const uint8_t *path);
 
 /**
  * 设备列表
  */
-PUBLIC kburn_err_t kburnGetSerialList();
-PUBLIC kburn_err_t kburnGetUSBList();
+PUBLIC kburnSerialDeviceList kburnGetSerialList();
+PUBLIC kburnUsbDeviceList kburnGetUSBList();
+
+/**
+ * 单次扫描
+ */
+PUBLIC kburn_err_t kburnPollSerial(KBCTX scope);
+PUBLIC kburn_err_t kburnPollUsb(KBCTX scope);
+
 DEFINE_END
 
 #include "./parts/debug.h"

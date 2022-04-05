@@ -169,7 +169,8 @@ static uint8_t write_encoded_byte(slip_handler_s *slip, uint8_t byte) {
 
 	return 1;
 }
-__attribute__((access(read_only, 2, 3))) slip_error_t slip_send_message(slip_handler_s *slip, const uint8_t *data, uint32_t size) {
+
+slip_error_t slip_send_message(slip_handler_s *slip, const uint8_t *data, uint32_t size) {
 	uint32_t i;
 	uint8_t byte;
 	uint8_t crc_buf[2];

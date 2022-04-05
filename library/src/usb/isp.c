@@ -1,6 +1,7 @@
 #include "basic/errors.h"
+#include "device.h"
 #include "isp.low.h"
-#include "usb.h"
+#include "private-types.h"
 #include <string.h>
 #include <time.h>
 
@@ -37,25 +38,23 @@ kburn_err_t kburnUsbIspLedControl(kburnDeviceNode *node, uint8_t pin, struct kbu
 
 kburn_err_t kburnUsbIspGetMemorySize(kburnDeviceNode *node, kburnUsbIspCommandTaget target, kburnDeviceMemorySizeInfo *out_dev_info) {
 	debug_trace_function();
-#define READ_CAPACITY_LENGTH 0x08
 
 	usbIspCommandPacket request = {
 		.command = USB_ISP_COMMAND_READ_CAPACITY,
 		.target = convertTarget(target),
 	};
 	uint32_t expected_tag = rand();
+	kburn_stor_address_t buffer[2];
 
-	IfErrorReturn(usb_lowlevel_command_send(node->usb->handle, node->usb->deviceInfo.endpoint_out, request, LIBUSB_ENDPOINT_IN, READ_CAPACITY_LENGTH,
-											expected_tag));
+	IfErrorReturn(
+		usb_lowlevel_command_send(node->usb->handle, node->usb->deviceInfo.endpoint_out, request, LIBUSB_ENDPOINT_IN, sizeof(buffer), expected_tag));
 
-	uint8_t buffer[READ_CAPACITY_LENGTH];
-
-	IfErrorReturn(usb_lowlevel_transfer(node->usb, USB_READ, buffer, READ_CAPACITY_LENGTH));
+	IfErrorReturn(usb_lowlevel_transfer(node->usb, USB_READ, &buffer, sizeof(buffer)));
 
 	IfErrorReturn(usb_lowlevel_status_read(node->usb->handle, node->usb->deviceInfo.endpoint_in, expected_tag));
 
-	kburn_stor_address_t last_block_address = uchar2uint(&buffer[0]);
-	uint32_t block_size = uchar2uint(&buffer[4]);
+	kburn_stor_address_t last_block_address = be32toh(buffer[0]);
+	uint32_t block_size = be32toh(buffer[1]);
 	uint64_t storage_size = (uint64_t)(out_dev_info->last_block_address + 1) * out_dev_info->block_size;
 	*out_dev_info = (kburnDeviceMemorySizeInfo){
 		.device = target,

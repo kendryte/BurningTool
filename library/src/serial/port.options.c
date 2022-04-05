@@ -1,4 +1,8 @@
-#include "serial.h"
+#include "port.options.h"
+#include "debug/print.h"
+#include "serial.config.h"
+#include "types.serial.h"
+#include <sercomm/sercomm.h>
 
 ser_opts_t opts = {
 	.port = NULL,

@@ -1,5 +1,6 @@
 #pragma once
 
+#include "errors.h"
 #include "types.h"
 #include <stdint.h>
 

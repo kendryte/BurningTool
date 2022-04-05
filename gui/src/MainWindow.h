@@ -1,6 +1,6 @@
 #pragma once
 
-#include "common/logger.h"
+#include "common/BurnLibrary.h"
 #include <QMainWindow>
 
 QT_BEGIN_NAMESPACE
@@ -11,6 +11,7 @@ QT_END_NAMESPACE
 
 class MainWindow : public QMainWindow {
 	Q_OBJECT
+	KBCTX context;
 
   public:
 	MainWindow(QWidget *parent = nullptr);
@@ -24,5 +25,5 @@ class MainWindow : public QMainWindow {
 
   private:
 	Ui::MainWindow *ui;
-	LogReceiver *logReceiver;
+	BurnLibrary *logReceiver;
 };

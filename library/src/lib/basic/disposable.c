@@ -1,3 +1,4 @@
+#include "disposable.h"
 #include "debug/print.h"
 #include "global.h"
 #include <stdlib.h>

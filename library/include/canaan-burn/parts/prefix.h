@@ -29,3 +29,17 @@
 #define DEFINE_START
 #define DEFINE_END
 #endif
+
+#if __clang__
+#define arg_readonly(...)
+#define arg_writeonly(...)
+#define arg_cb(fn, arg) __attribute__((callback(fn, arg)))
+#elif __GNUC__
+#define arg_readonly(A, B) __attribute__((access(read_only, A, B)))
+#define arg_writeonly(A, B) __attribute__((access(write_only, A, B)))
+#define arg_cb(...)
+#else
+#define arg_readonly(...)
+#define arg_writeonly(...)
+#define arg_cb(...)
+#endif

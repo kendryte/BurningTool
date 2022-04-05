@@ -9,14 +9,16 @@ static void default_log_callback(void *UNUSED(context), kburnLogType UNUSED(type
 	fflush(stderr);
 }
 
-on_debug_log g_on_debug_callback = default_log_callback;
-void *g_on_debug_callback_ctx = NULL;
+on_debug_log_t g_on_debug = {
+	.handler = default_log_callback,
+	.context = NULL,
+};
 
-struct debug_callback kburnSetLogCallback(on_debug_log callback, void *call_context) {
-	g_on_debug_callback(g_on_debug_callback_ctx, KBURN_LOG_INFO, "logger switched");
-	struct debug_callback old = {.callback = g_on_debug_callback, .call_context = g_on_debug_callback_ctx};
-	g_on_debug_callback = callback;
-	g_on_debug_callback_ctx = call_context;
-	g_on_debug_callback(g_on_debug_callback_ctx, KBURN_LOG_INFO, "logger switched");
+void debug_callback_call(kburnLogType type, const char *message) { CALL_HANDLE(g_on_debug, type, message); }
+
+on_debug_log_t kburnSetLogCallback(on_debug_log callback, void *call_context) {
+	debug_callback_call(KBURN_LOG_INFO, "logger switched");
+	callback_register_swap(on_debug_log, g_on_debug, callback, call_context);
+	debug_callback_call(KBURN_LOG_INFO, "logger switched");
 	return old;
 }
