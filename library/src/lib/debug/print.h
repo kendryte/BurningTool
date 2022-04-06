@@ -1,11 +1,11 @@
 #pragma once
+#include "base.h"
 #include "./assert.h"
 #include "./color.h"
 #include "./level.h"
 #include "./low.h"
 #include "./path.h"
 #include "./user-callback.h"
-#include "base.h"
 #include "basic/string.h"
 #include "context.h"
 
@@ -41,7 +41,7 @@ size_t __print_buffer(char *output, size_t output_length, const char *dir, const
 	DEBUG_START(KBURN_LOG_TRACE);                                                                                                                    \
 	debug_print_prefix(debug_output, debug_buffer_remain, __FILE__, __LINE__);                                                                       \
 	if (INCLUDE_FILE_LINE)                                                                                                                           \
-		debug_printf("[%.*s] ", basename_to_ext_length(__FILE__), basename(__FILE__));                                                               \
+		debug_printf("[%.*s] ", basename_to_ext_length(__FILE__), cbasename(__FILE__));                                                              \
 	debug_printf(COLOR_FMT("%s") "(", COLOR_ARG(GREY, __func__));                                                                                    \
 	debug_printf(__VaridicMacro_Opt(__clang_happy_fmt_string(""), __VA_ARGS__) __VaridicMacro_Shift(__VA_ARGS__));                                   \
 	debug_printf(")");                                                                                                                               \

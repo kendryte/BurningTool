@@ -80,10 +80,12 @@ IfMacros:
   - KJ_IF_MAYBE
 IncludeBlocks: Merge
 IncludeCategories:
-  - Regex:           '^"canaan-burn/'
-    Priority:        2
-  - Regex:           '^"'
+  - Regex:           '^"base.h"$'
     Priority:        1
+  - Regex:           '^"canaan-burn/'
+    Priority:        20
+  - Regex:           '^"'
+    Priority:        10
   - Regex:           '^<std'
     Priority:        49
   - Regex:           '^<'

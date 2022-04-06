@@ -4,6 +4,7 @@
 #include <stddef.h>
 
 const char *relative_path(const char *file_path);
+const char *cbasename(const char *p);
 int basename_to_ext_length(const char *name);
 size_t _debug_format_prefix(char *output, size_t output_size, const char *file, int line);
 size_t _debug_format_path(char *output, size_t output_size, const char *file, const int line);

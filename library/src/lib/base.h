@@ -48,3 +48,13 @@
 #include "basic/macros.alloc.h"
 #include "basic/macros.error.h"
 #include "basic/macros.function.h"
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wcpp"
+#include "basic/macros.endian.h"
+#pragma GCC diagnostic pop
+
+#if WIN32
+#define FMT_SIZET "%lu"
+#else
+#define FMT_SIZET "%zu"
+#endif

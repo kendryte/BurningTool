@@ -43,7 +43,7 @@ static uint32_t handle_one_device(kburnSerialDeviceNode *dev) {
 		return false;
 	}
 
-	debug_print(KBURN_LOG_DEBUG, "\t%zu in serial buffer", in_buffer_size);
+	debug_print(KBURN_LOG_DEBUG, "\t" FMT_SIZET " in serial buffer", in_buffer_size);
 
 	for (size_t i = 0; i < tbuff_size; i++) {
 		if (tbuff[i] != '\xff')

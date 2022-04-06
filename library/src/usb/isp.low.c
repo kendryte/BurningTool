@@ -151,7 +151,8 @@ kburn_err_t usb_lowlevel_status_read(libusb_device_handle *handle, uint8_t endpo
 	print_buffer(KBURN_LOG_TRACE, "csw", (void *)&csw, sizeof(usbIspResponsePacket));
 
 	if (readed_size != sizeof(usbIspResponsePacket)) {
-		debug_print(KBURN_LOG_ERROR, "usb_lowlevel_status_read: received %d bytes (expected %ld)", readed_size, sizeof(usbIspResponsePacket));
+		debug_print(KBURN_LOG_ERROR, "usb_lowlevel_status_read: received %d bytes (expected " FMT_SIZET ")", readed_size,
+					sizeof(usbIspResponsePacket));
 	}
 
 	kburn_err_t ret = csw_status_parse(&csw, expected_operation_index);

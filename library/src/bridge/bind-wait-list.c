@@ -44,5 +44,5 @@ void _recreate_waitting_list(KBCTX scope) {
 			}
 		}
 	}
-	debug_print(KBURN_LOG_DEBUG, "- %zu items", itr);
+	debug_print(KBURN_LOG_DEBUG, "- " FMT_SIZET " items", itr);
 }

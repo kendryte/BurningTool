@@ -73,7 +73,7 @@ function(load_binary target variable src)
 endfunction()
 
 add_library(canaan_burn SHARED)
-set_property(TARGET canaan_burn PROPERTY C_STANDARD 17)
+set_property(TARGET canaan_burn PROPERTY C_STANDARD 23)
 set_property(TARGET canaan_burn PROPERTY LINKER_LANGUAGE C)
 
 load_binary(canaan_burn "usb_isp_buffer" "${CMAKE_CURRENT_LIST_DIR}/usbisp.bin")

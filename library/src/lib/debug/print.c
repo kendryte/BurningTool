@@ -12,6 +12,6 @@ size_t __print_buffer(char *output, size_t output_length, const char *dir, const
 	for (size_t i = 0; i < cnt; i++) {
 		ret += m_snprintf(output + ret, output_length - ret, "0x%02X ", buff[i]);
 	}
-	ret += m_snprintf(output + ret, output_length - ret, "| %zu bytes%s", size, COLOR_END(GREY));
+	ret += m_snprintf(output + ret, output_length - ret, "| " FMT_SIZET " bytes%s", size, COLOR_END(GREY));
 	return ret;
 }

@@ -15,18 +15,22 @@ class MainWindow : public QMainWindow {
 
   protected:
 	void showEvent(QShowEvent *ev);
+	void resizeEvent(QResizeEvent *ev) {
+		QMainWindow::resizeEvent(ev);
+		handleResize();
+	};
 
   public:
 	MainWindow(QWidget *parent = nullptr);
 	~MainWindow();
 
   private slots:
-	void on_btnSelectImage_clicked();
-	void on_inputSysImage_returnPressed();
+	void handleResize();
 	void on_btnOpenWebsite_triggered();
 	void on_btnStartBurn_clicked();
 	void handleDeviceStateChange(kburnDeviceNode *dev);
 	void handleSerialPortList(const QStringList &list);
+	void on_btnToggleLogWindow_clicked(bool checked);
 
   private:
 	Ui::MainWindow *ui;

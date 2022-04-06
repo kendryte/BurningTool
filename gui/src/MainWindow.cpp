@@ -6,6 +6,14 @@
 MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWindow) {
 	ui->setupUi(this);
 
+#ifndef NDEBUG
+	ui->btnToggleLogWindow->setChecked(true);
+#else
+	ui->debugLogView->setVisible(false);
+#endif
+	ui->debugLogView->layout()->removeWidget(ui->btnToggleLogWindow);
+	ui->btnToggleLogWindow->setParent(ui->mainTabView);
+
 	ui->mainTabView->removeTab(3);
 	ui->mainTabView->removeTab(2);
 	ui->mainTabView->setCurrentIndex(0);
@@ -27,7 +35,10 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
 void MainWindow::showEvent(QShowEvent *event) {
 	QMainWindow::showEvent(event);
 	library->start();
+	this->handleResize();
 }
+
+void MainWindow::handleResize() { ui->btnToggleLogWindow->move(ui->mainTabView->width() - ui->btnToggleLogWindow->width(), 0); }
 
 MainWindow::~MainWindow() {
 	delete library;
@@ -39,10 +50,14 @@ void MainWindow::handleSerialPortList(const QStringList &list) {
 	QString save(ui->inputComPortList->currentText());
 
 	bool custom = true;
-	for (int i = 0; i < ui->inputComPortList->count(); i++) {
-		if (ui->inputComPortList->itemText(i) == save) {
-			custom = false;
-			break;
+	if (save.isEmpty()) {
+		custom = false;
+	} else {
+		for (int i = 0; i < ui->inputComPortList->count(); i++) {
+			if (ui->inputComPortList->itemText(i) == save) {
+				custom = false;
+				break;
+			}
 		}
 	}
 
@@ -51,33 +66,30 @@ void MainWindow::handleSerialPortList(const QStringList &list) {
 	if (custom) {
 		ui->inputComPortList->setEditText(save);
 	} else {
-		ui->inputComPortList->setCurrentIndex(qMin(list.indexOf(save), 0));
+		int sel = qMax(list.indexOf(save), 0);
+		ui->inputComPortList->setCurrentIndex(sel);
 	}
 }
-
-#include <qfiledialog.h>
-void MainWindow::on_btnSelectImage_clicked() {
-	auto str = QFileDialog::getOpenFileName(this, tr("打开系统镜像"), tr(""));
-	if (str.isEmpty())
-		return;
-	ui->inputSysImage->setText(str);
-}
-
-void MainWindow::on_inputSysImage_returnPressed() {}
 
 void MainWindow::on_btnOpenWebsite_triggered() {}
 
 void MainWindow::handleDeviceStateChange(kburnDeviceNode *dev) {
 	QString val;
 	val += tr("Serial Device: ");
-	if (dev->serial->init) {
+	if (dev->serial->init || dev->serial->isUsbBound) {
 		val += dev->serial->deviceInfo.path;
+		val += '\n';
+		val += tr("  * init: ");
+		val += dev->serial->init ? tr("yes") : tr("no");
 		val += '\n';
 		val += tr("  * isOpen: ");
 		val += dev->serial->isOpen ? tr("yes") : tr("no");
 		val += '\n';
 		val += tr("  * isConfirm: ");
 		val += dev->serial->isConfirm ? tr("yes") : tr("no");
+		val += '\n';
+		val += tr("  * isUsbBound: ");
+		val += dev->serial->isUsbBound ? tr("yes") : tr("no");
 	} else {
 		val += tr("not connected");
 	}
@@ -114,3 +126,8 @@ void MainWindow::handleDeviceStateChange(kburnDeviceNode *dev) {
 }
 
 void MainWindow::on_btnStartBurn_clicked() { library->startBurn(ui->inputComPortList->currentText()); }
+
+void MainWindow::on_btnToggleLogWindow_clicked(bool checked) {
+	ui->debugLogView->setVisible(checked);
+	handleResize();
+}
