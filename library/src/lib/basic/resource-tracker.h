@@ -49,13 +49,13 @@ void *_track_dispose(resource_tracker_t *tracker, disposable d, resource_tracker
 	__extension__({                                                                                                                                  \
 		if (0)                                                                                                                                       \
 			cleaner(pointer);                                                                                                                        \
-		_track_resource(&_resource_tracker, (void *)pointer, (cleanup_function)cleaner, false, DEBUG_SAVE(#pointer));                                \
+		_track_resource(&_resource_tracker, (void *)pointer, (cleanup_function)cleaner, false, DEBUG_SAVE(#cleaner "(" #pointer ")"));               \
 	})
 #define DeferCallAlways(cleaner, pointer)                                                                                                            \
 	__extension__({                                                                                                                                  \
 		if (0)                                                                                                                                       \
 			cleaner(pointer);                                                                                                                        \
-		_track_resource(&_resource_tracker, (void *)pointer, (cleanup_function)cleaner, true, DEBUG_SAVE(#pointer));                                 \
+		_track_resource(&_resource_tracker, (void *)pointer, (cleanup_function)cleaner, true, DEBUG_SAVE(#cleaner "(" #pointer ")"));                \
 	})
 #define DeferFree(pointer) DeferCall(free, pointer)
 #define DeferFreeAlways(pointer) DeferCallAlways(free, pointer)

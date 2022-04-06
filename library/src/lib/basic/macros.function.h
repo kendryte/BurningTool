@@ -2,7 +2,6 @@
 
 #include "base.h"
 
-#define CALL_HANDLE(bundle, ...) bundle.handler(bundle.context, __VA_ARGS__)
 #define callback_register_swap(type, stor, new_cb, new_ctx)                                                                                          \
 	if (0)                                                                                                                                           \
 		(void)0;                                                                                                                                     \

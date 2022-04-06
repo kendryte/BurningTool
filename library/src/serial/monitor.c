@@ -7,7 +7,6 @@
 #include "private-types.h"
 
 static void on_event(void *ctx, ser_dev_evt_t evt, const ser_dev_t *dev) {
-	return;
 	KBCTX scope = ctx;
 	switch (evt) {
 	case SER_DEV_EVT_ADDED:

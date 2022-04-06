@@ -13,6 +13,9 @@ class MainWindow : public QMainWindow {
 	Q_OBJECT
 	KBCTX context;
 
+  protected:
+	void showEvent(QShowEvent *ev);
+
   public:
 	MainWindow(QWidget *parent = nullptr);
 	~MainWindow();
@@ -21,9 +24,11 @@ class MainWindow : public QMainWindow {
 	void on_btnSelectImage_clicked();
 	void on_inputSysImage_returnPressed();
 	void on_btnOpenWebsite_triggered();
-	bool handleDeviceConnected(kburnDeviceNode *dev);
+	void on_btnStartBurn_clicked();
+	void handleDeviceStateChange(kburnDeviceNode *dev);
+	void handleSerialPortList(const QStringList &list);
 
   private:
 	Ui::MainWindow *ui;
-	BurnLibrary *logReceiver;
+	BurnLibrary *library;
 };

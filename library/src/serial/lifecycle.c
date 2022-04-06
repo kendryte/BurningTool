@@ -2,6 +2,7 @@
 #include "basic/resource-tracker.h"
 #include "components/call-user-handler.h"
 #include "components/device-link-list.h"
+#include "components/lifecycle-helper.h"
 #include "device.h"
 #include "driver.h"
 #include "isp.h"
@@ -78,13 +79,11 @@ kburn_err_t on_serial_device_attach(KBCTX scope, const char *path, bool need_ver
 	DeferDispose(scope->disposables, node, destroy_device);
 	debug_print(KBURN_LOG_INFO, "new device created: %p", (void *)node);
 
-	DeferUserCallback(scope->serial->on_handle, node, true);
-
 	IfErrorReturn(serial_port_init(node->serial, path));
 	dispose_list_add(node->disposable_list, toDisposable(destroy_serial_port, node));
 
-	if (scope->serial->on_verify.handler != NULL) {
-		if (!CALL_HANDLE(scope->serial->on_verify, node)) {
+	if (need_verify && (scope->serial->on_verify.handler != NULL)) {
+		if (!CALL_HANDLE_SYNC(scope->serial->on_verify, node)) {
 			set_error(node, KBURN_ERROR_KIND_COMMON, KBurnUserCancel, "operation canceled by verify callback");
 			return make_error_code(KBURN_ERROR_KIND_COMMON, KBurnUserCancel);
 		}
@@ -109,5 +108,8 @@ kburn_err_t on_serial_device_attach(KBCTX scope, const char *path, bool need_ver
 	node->disconnect_should_call = true;
 
 	DeferAbort;
+
+	CALL_HANDLE_ASYNC(scope->serial->on_handle, node);
+
 	return KBurnNoErr;
 }

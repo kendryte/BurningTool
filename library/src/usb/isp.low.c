@@ -169,7 +169,7 @@ kburn_err_t usb_lowlevel_transfer(kburnUsbDeviceNode *node, enum InOut direction
 	}
 
 	int actual_size;
-	IfUsbErrorLogReturn(retry_libusb_bulk_transfer(
+	IfUsbErrorLogSetReturn(retry_libusb_bulk_transfer(
 		node->handle, direction == USB_WRITE ? node->deviceInfo.endpoint_out : node->deviceInfo.endpoint_in, buffer, size, &actual_size, 1000));
 
 	if (direction == USB_READ) {

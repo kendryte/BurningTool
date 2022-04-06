@@ -6,6 +6,7 @@
 #include "basic/sleep.h"
 #include "components/call-user-handler.h"
 #include "components/device-link-list.h"
+#include "components/lifecycle-helper.h"
 #include "descriptor.h"
 #include "device.h"
 #include "isp.h"
@@ -94,21 +95,19 @@ kburn_err_t open_single_usb_port(KBCTX scope, struct libusb_device *dev, bool us
 	DeferDispose(scope->disposables, node, destroy_device);
 	DeferDispose(node->disposable_list, node->usb, destroy_usb_port);
 
-	DeferUserCallback(scope->usb->on_handle, node, true);
-
 	node->usb->mutex = CheckNull(lock_init());
 	node->usb->device = dev;
 
-	IfUsbErrorLogReturn(libusb_open(dev, &node->usb->handle));
+	IfUsbErrorLogSetReturn(libusb_open(dev, &node->usb->handle));
 	node->usb->isOpen = true;
 	debug_print(KBURN_LOG_INFO, "usb port open success, handle=%p", (void *)node->usb->handle);
 
 	node->usb->deviceInfo.descriptor = MyAlloc(struct libusb_device_descriptor);
-	IfUsbErrorLogReturn(libusb_get_device_descriptor(dev, node->usb->deviceInfo.descriptor));
+	IfUsbErrorLogSetReturn(libusb_get_device_descriptor(dev, node->usb->deviceInfo.descriptor));
 	node->usb->deviceInfo.idVendor = node->usb->deviceInfo.descriptor->idVendor;
 	node->usb->deviceInfo.idProduct = node->usb->deviceInfo.descriptor->idProduct;
 
-	IfUsbErrorReturn(usb_get_device_path(dev, node->usb->deviceInfo.path));
+	IfUsbErrorSetReturn(usb_get_device_path(dev, node->usb->deviceInfo.path));
 
 	debug_print(KBURN_LOG_INFO, "  * vid: %04x", node->usb->deviceInfo.idVendor);
 	debug_print(KBURN_LOG_INFO, "  * pid: %04x", node->usb->deviceInfo.idProduct);
@@ -116,7 +115,7 @@ kburn_err_t open_single_usb_port(KBCTX scope, struct libusb_device *dev, bool us
 
 	if (user_verify) {
 		if (scope->usb->on_connect.handler != NULL) {
-			if (!CALL_HANDLE(scope->usb->on_connect, node)) {
+			if (!CALL_HANDLE_SYNC(scope->usb->on_connect, node)) {
 				set_error(node, KBURN_ERROR_KIND_COMMON, KBurnUserCancel, "operation canceled by verify callback");
 				return make_error_code(KBURN_ERROR_KIND_COMMON, KBurnUserCancel);
 			}
@@ -162,7 +161,7 @@ kburn_err_t open_single_usb_port(KBCTX scope, struct libusb_device *dev, bool us
 	node->usb->isClaim = true;
 	debug_print(KBURN_LOG_DEBUG, "libusb_claim_interface success");
 
-	IfUsbErrorReturn(get_endpoint(dev, &node->usb->deviceInfo.endpoint_in, &node->usb->deviceInfo.endpoint_out));
+	IfUsbErrorSetReturn(get_endpoint(dev, &node->usb->deviceInfo.endpoint_in, &node->usb->deviceInfo.endpoint_out));
 
 	IfErrorReturn(usb_device_hello(node));
 	debug_print(KBURN_LOG_DEBUG, "hello success.");
@@ -180,5 +179,8 @@ kburn_err_t open_single_usb_port(KBCTX scope, struct libusb_device *dev, bool us
 		*out_node = node;
 
 	DeferAbort;
+
+	CALL_HANDLE_ASYNC(scope->usb->on_handle, node);
+
 	return KBurnNoErr;
 }

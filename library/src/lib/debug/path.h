@@ -20,9 +20,11 @@ typedef struct debug_bundle {
 
 	int line;
 } debug_bundle;
-static inline debug_bundle DEBUG_SAVE(const char *title) {
-	return (debug_bundle){.title = title, ._null = '\0', .func = __func__, .file = __FILE__, .line = __LINE__};
+
+static inline debug_bundle __DEBUG_SAVE(const char *title, const char *file, int line, const char *func) {
+	return (debug_bundle){.title = title, ._null = '\0', .func = func, .file = file, .line = line};
 }
+#define DEBUG_SAVE(title) __DEBUG_SAVE(title, __FILE__, __LINE__, __func__)
 
 #define struct_debug_bundle struct debug_bundle
 

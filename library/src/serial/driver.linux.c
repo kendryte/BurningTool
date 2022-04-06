@@ -12,7 +12,7 @@ void m_udev_unref(struct udev *u) { udev_unref(u); }
 void m_udev_enumerate_unref(struct udev_enumerate *udev_enumerate) { udev_enumerate_unref(udev_enumerate); }
 
 kburnSerialDeviceInfo driver_get_devinfo(const char *path) {
-	debug_trace_function("%s", path);
+	debug_trace_function("path=%s", path);
 	DeferEnabled;
 
 	const char *pstr;

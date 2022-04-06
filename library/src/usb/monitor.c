@@ -157,15 +157,12 @@ kburn_err_t usb_monitor_resume(KBCTX scope) {
 
 	debug_print(KBURN_LOG_INFO, "\tlibusb_hotplug_register_callback: [%04x:%04x] libUsbHasWathcer=%d", scope->usb->filter.vid, scope->usb->filter.pid,
 				libUsbHasWathcer);
-	int ret = libusb_hotplug_register_callback(scope->usb->libusb, LIBUSB_HOTPLUG_EVENT_DEVICE_ARRIVED | LIBUSB_HOTPLUG_EVENT_DEVICE_LEFT, 0,
-											   scope->usb->filter.vid == KBURN_VIDPID_FILTER_ANY ? LIBUSB_HOTPLUG_MATCH_ANY : scope->usb->filter.vid,
-											   scope->usb->filter.pid == KBURN_VIDPID_FILTER_ANY ? LIBUSB_HOTPLUG_MATCH_ANY : scope->usb->filter.pid,
-											   LIBUSB_HOTPLUG_MATCH_ANY, libUsbHasWathcer ? on_event_threaded : on_event_sync, scope,
-											   &scope->usb->monitor_handle);
 
-	if (LIBUSB_SUCCESS != ret) {
-		debug_print_libusb_error("error creating a hotplug callback", ret);
-	}
+	IfUsbErrorLogReturn(libusb_hotplug_register_callback(
+		scope->usb->libusb, LIBUSB_HOTPLUG_EVENT_DEVICE_ARRIVED | LIBUSB_HOTPLUG_EVENT_DEVICE_LEFT, 0,
+		scope->usb->filter.vid == KBURN_VIDPID_FILTER_ANY ? LIBUSB_HOTPLUG_MATCH_ANY : scope->usb->filter.vid,
+		scope->usb->filter.pid == KBURN_VIDPID_FILTER_ANY ? LIBUSB_HOTPLUG_MATCH_ANY : scope->usb->filter.pid, LIBUSB_HOTPLUG_MATCH_ANY,
+		libUsbHasWathcer ? on_event_threaded : on_event_sync, scope, &scope->usb->monitor_handle));
 
-	return make_error_code(KBURN_ERROR_KIND_USB, ret);
+	return KBurnNoErr;
 }

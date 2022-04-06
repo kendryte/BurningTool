@@ -30,7 +30,7 @@
        </size>
       </property>
       <property name="currentIndex">
-       <number>3</number>
+       <number>1</number>
       </property>
       <widget class="QWidget" name="tabSettings">
        <attribute name="title">
@@ -339,13 +339,19 @@
                <verstretch>0</verstretch>
               </sizepolicy>
              </property>
+             <property name="editable">
+              <bool>true</bool>
+             </property>
             </widget>
            </item>
            <item>
-            <widget class="QLineEdit" name="lineEdit"/>
-           </item>
-           <item>
             <widget class="QCommandLinkButton" name="btnStartBurn">
+             <property name="maximumSize">
+              <size>
+               <width>130</width>
+               <height>16777215</height>
+              </size>
+             </property>
              <property name="text">
               <string>开始烧录</string>
              </property>
@@ -366,7 +372,7 @@
           <item>
            <layout class="QVBoxLayout" name="verticalLayout_9">
             <item>
-             <widget class="QLabel" name="label_2">
+             <widget class="QLabel" name="textPortInfo">
               <property name="text">
                <string>TextLabel</string>
               </property>
@@ -998,7 +1004,7 @@
      <x>0</x>
      <y>0</y>
      <width>1065</width>
-     <height>21</height>
+     <height>23</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuF_ile">

@@ -3,6 +3,8 @@
 #include "./prefix.h"
 #include "./types.h"
 
+DEFINE_START
+
 enum KBurnSerialConfigByteSize { KBurnSerialConfigByteSize_8, KBurnSerialConfigByteSize_7, KBurnSerialConfigByteSize_6, KBurnSerialConfigByteSize_5 };
 
 enum KBurnSerialConfigParity {
@@ -77,3 +79,5 @@ typedef struct kburn_serial_device_list {
 	PCONST size_t size;
 	PCONST struct kburnSerialDeviceInfoSlice *list;
 } kburnSerialDeviceList;
+
+DEFINE_END

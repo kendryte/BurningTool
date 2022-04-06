@@ -57,7 +57,7 @@ typedef struct usb_subsystem_context {
 	})
 
 #define check_libusb(err) (err >= LIBUSB_SUCCESS)
-#define log_libusb_only(err, msg, ...) debug_print_libusb_result(msg, err __VA_OPT__(, ) __VA_ARGS__);
+
 #define set_node_error_with_log(err, msg, ...)                                                                                                       \
 	__extension__({                                                                                                                                  \
 		if (0)                                                                                                                                       \
@@ -67,7 +67,7 @@ typedef struct usb_subsystem_context {
 		err = make_error_code(KBURN_ERROR_KIND_USB, err);                                                                                            \
 	})
 
-#define IfUsbErrorLogReturn(action)                                                                                                                  \
+#define IfUsbErrorLogSetReturn(action)                                                                                                               \
 	__extension__({                                                                                                                                  \
 		if (0)                                                                                                                                       \
 			(void)0;                                                                                                                                 \
@@ -80,14 +80,26 @@ typedef struct usb_subsystem_context {
 	copy_last_libusb_error(node, err);                                                                                                               \
 	err = make_error_code(KBURN_ERROR_KIND_USB, err);
 
-#define IfUsbErrorReturn(action)                                                                                                                     \
-	if (0)                                                                                                                                           \
-		(void)0;                                                                                                                                     \
-	IfErrorReturn(check_libusb, action, set_node_error)
+#define IfUsbErrorSetReturn(action)                                                                                                                  \
+	__extension__({                                                                                                                                  \
+		if (0)                                                                                                                                       \
+			(void)0;                                                                                                                                 \
+		IfErrorReturn(check_libusb, action, set_node_error);                                                                                         \
+	})
+
+#define log_libusb_only(err, msg, ...) debug_print_libusb_result(msg, err __VA_OPT__(, ) __VA_ARGS__);
+#define IfUsbErrorLogReturn(action)                                                                                                                  \
+	__extension__({                                                                                                                                  \
+		if (0)                                                                                                                                       \
+			(void)0;                                                                                                                                 \
+		IfErrorReturn(check_libusb, action, log_libusb_only);                                                                                        \
+	})
 
 #define set_node_k_error(err, msg) copy_last_libusb_error(node, err);
 
 #define IfErrorSetReturn(action)                                                                                                                     \
-	if (0)                                                                                                                                           \
-		(void)0;                                                                                                                                     \
-	IfErrorReturn(kburn_not_error, action, set_node_k_error)
+	__extension__({                                                                                                                                  \
+		if (0)                                                                                                                                       \
+			(void)0;                                                                                                                                 \
+		IfErrorReturn(kburn_not_error, action, set_node_k_error);                                                                                    \
+	})
