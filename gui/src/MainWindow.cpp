@@ -89,9 +89,10 @@ void MainWindow::handleDeviceStateChange(kburnDeviceNode *dev) {
 			val += QString::number(dev->usb->deviceInfo.path[i], 16) + QChar(':');
 		}
 		val.chop(1);
+		val += '\n';
 
 		val += "  * VID: " + QString::number(dev->usb->deviceInfo.idVendor, 16) + '\n';
-		val += "  * VID: " + QString::number(dev->usb->deviceInfo.idProduct, 16) + '\n';
+		val += "  * PID: " + QString::number(dev->usb->deviceInfo.idProduct, 16) + '\n';
 	} else {
 		val += tr("not connected");
 	}

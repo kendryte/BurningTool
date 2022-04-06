@@ -75,7 +75,7 @@ bool BurnLibrary::handleConnectSerial(const kburnDeviceNode *dev) {
 }
 bool BurnLibrary::handleConnectUsb(const kburnDeviceNode *dev) {
 	emit onConnectUsb(dev);
-	return false;
+	return true;
 }
 
 void BurnLibrary::reloadList() {
