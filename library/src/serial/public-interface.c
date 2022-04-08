@@ -1,13 +1,13 @@
 #include "base.h"
+#include "context.h"
 #include "basic/array.h"
 #include "basic/number.h"
-#include "context.h"
-#include "debug/print.h"
 #include "libserial.list.h"
 #include "lifecycle.h"
 #include "private-types.h"
 #include "subsystem.h"
 #include <stdint.h>
+#include "debug/print.h"
 
 kburn_err_t kburnOpenSerial(KBCTX scope, const char *path) {
 	debug_print(KBURN_LOG_DEBUG, "kburnOpenSerial(%s)", path);

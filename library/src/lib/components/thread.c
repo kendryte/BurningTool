@@ -1,9 +1,9 @@
 #include "thread.h"
+#include "context.h"
 #include "basic/errors.h"
 #include "basic/sleep.h"
-#include "context.h"
-#include "debug/print.h"
 #include <pthread.h>
+#include "debug/print.h"
 
 typedef struct thread_passing_object {
 	KBCTX scope;
@@ -17,7 +17,7 @@ typedef struct thread_passing_object {
 
 void thread_tell_quit(thread_passing_object *thread) { thread->quit = true; }
 
-DECALRE_DISPOSE(destroy_thread, thread_passing_object) {
+static DECALRE_DISPOSE(_destroy_thread, thread_passing_object) {
 	debug_print(KBURN_LOG_DEBUG, COLOR_FMT("[thread]") " wait quit: %s", COLOR_ARG(YELLOW), context->debug_title);
 	thread_tell_quit(context);
 	pthread_join(context->thread, NULL);
@@ -25,6 +25,8 @@ DECALRE_DISPOSE(destroy_thread, thread_passing_object) {
 	free(context);
 }
 DECALRE_DISPOSE_END()
+
+void thread_destroy(KBCTX scope, thread_passing_object *thread) { _destroy_thread(scope->threads, thread); }
 
 static void *start_routine_wrapper(void *_ctx) {
 	thread_passing_object *context = _ctx;
@@ -49,9 +51,6 @@ static void *start_routine_wrapper(void *_ctx) {
 	return NULL;
 }
 
-static DECALRE_DISPOSE(set_null, thread_passing_object *) { *context = NULL; }
-DECALRE_DISPOSE_END()
-
 kburn_err_t thread_create(const char *debug_title, thread_function start_routine, void *context, KBCTX scope, thread_passing_object **out_thread) {
 	thread_passing_object *thread = MyAlloc(thread_passing_object);
 	*out_thread = thread;
@@ -71,8 +70,7 @@ kburn_err_t thread_create(const char *debug_title, thread_function start_routine
 		return make_error_code(KBURN_ERROR_KIND_SYSCALL, thread_ret);
 	}
 
-	dispose_list_add(scope->threads, toDisposable(destroy_thread, thread));
-	dispose_list_add(scope->threads, toDisposable(set_null, out_thread));
+	dispose_list_add(scope->threads, toDisposable(_destroy_thread, thread));
 
 	return KBurnNoErr;
 }

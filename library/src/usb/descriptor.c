@@ -1,7 +1,7 @@
 #include "descriptor.h"
+#include "context.h"
 #include "basic/errors.h"
 #include "basic/sleep.h"
-#include "context.h"
 #include "device.h"
 #include "private-types.h"
 #include <stdio.h>

@@ -4,13 +4,13 @@
 #include "basic/lock.h"
 #include "basic/resource-tracker.h"
 #include "basic/sleep.h"
-#include "components/call-user-handler.h"
-#include "components/device-link-list.h"
-#include "components/lifecycle-helper.h"
 #include "descriptor.h"
 #include "device.h"
 #include "isp.h"
 #include "private-types.h"
+#include "components/call-user-handler.h"
+#include "components/device-link-list.h"
+#include "components/lifecycle-helper.h"
 #include <libusb.h>
 
 /****************************************************

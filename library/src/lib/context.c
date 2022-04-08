@@ -10,6 +10,14 @@
 disposable_list_t *lib_global_scope = NULL;
 static uint32_t dbg_index = 0;
 
+void kburnGlobalDestroy() {
+	debug_trace_function();
+	if (lib_global_scope == NULL)
+		return;
+	dispose_all(lib_global_scope);
+	disposable_list_deinit(lib_global_scope);
+}
+
 kburn_err_t kburnCreate(KBCTX *ppCtx) {
 	debug_trace_function("11");
 	debug_trace_function();
@@ -58,8 +66,10 @@ kburn_err_t kburnCreate(KBCTX *ppCtx) {
 		   },
 		   sizeof(kburnContext));
 
-	if (!lib_global_scope)
+	if (!lib_global_scope) {
+		atexit(kburnGlobalDestroy);
 		lib_global_scope = disposable_list_init("library global");
+	}
 
 	dispose_list_add(lib_global_scope, toDisposable(dispose_all_and_deinit, dis));
 	dispose_list_add(lib_global_scope, toDisposable(dispose_all_and_deinit, threads));
@@ -68,14 +78,6 @@ kburn_err_t kburnCreate(KBCTX *ppCtx) {
 
 	DeferAbort;
 	return KBurnNoErr;
-}
-
-void kburnGlobalDestroy() {
-	debug_trace_function();
-	if (lib_global_scope == NULL)
-		return;
-	dispose_all(lib_global_scope);
-	disposable_list_deinit(lib_global_scope);
 }
 
 void kburnDestroy(KBCTX scope) {

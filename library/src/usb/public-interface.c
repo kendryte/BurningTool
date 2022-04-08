@@ -2,11 +2,11 @@
 #include "basic/errors.h"
 #include "basic/lock.h"
 #include "basic/number.h"
-#include "components/call-user-handler.h"
 #include "libusb.list.h"
 #include "lifecycle.h"
 #include "private-types.h"
 #include "subsystem.h"
+#include "components/call-user-handler.h"
 #include "canaan-burn/canaan-burn.h"
 #include <libusb.h>
 

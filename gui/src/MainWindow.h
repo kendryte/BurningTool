@@ -24,6 +24,9 @@ class MainWindow : public QMainWindow {
 	MainWindow(QWidget *parent = nullptr);
 	~MainWindow();
 
+  signals:
+	void startBurn(const QString &sysImg);
+
   private slots:
 	void handleResize();
 	void on_btnOpenWebsite_triggered();

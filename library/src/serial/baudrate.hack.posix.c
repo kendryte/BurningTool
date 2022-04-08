@@ -252,7 +252,7 @@ bool hackdev_serial_low_switch_baudrate(kburnSerialDeviceNode *node, uint32_t sp
 
 	serial_low_flush_all(node);
 	do_sleep(500);
-	serial_low_drain_input(node);
+	serial_low_drain_input(node, NULL);
 
 	node->baudRate = speed;
 	return true;

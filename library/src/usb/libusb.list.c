@@ -1,11 +1,11 @@
-#include "components/call-user-handler.h"
-#include "components/device-link-list.h"
 #include "descriptor.h"
 #include "device.h"
 #include "lifecycle.h"
 #include "math.h"
 #include "private-types.h"
 #include "subsystem.h"
+#include "components/call-user-handler.h"
+#include "components/device-link-list.h"
 #include "canaan-burn/canaan-burn.h"
 
 static inline bool match_device(int vid, int pid, const struct libusb_device_descriptor *desc) {

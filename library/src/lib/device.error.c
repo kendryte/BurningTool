@@ -11,7 +11,7 @@ void _copy_last_serial_io_error(kburnDeviceNode *node, uint32_t err) {
 	clear_error(node);
 	node->error->code = make_error_code(KBURN_ERROR_KIND_SERIAL, err);
 	node->error->errorMessage = strdup(sererr_last());
-	debug_print(KBURN_LOG_ERROR, "copy_last_serial_io_error: %s", node->error->errorMessage);
+	debug_print(KBURN_LOG_ERROR, COLOR_FMT("copy_last_serial_io_error") ": %s", COLOR_ARG(RED), node->error->errorMessage);
 }
 
 void _copy_last_libusb_error(kburnDeviceNode *node, int err) {
@@ -23,7 +23,7 @@ void _copy_last_libusb_error(kburnDeviceNode *node, int err) {
 	char *buff = malloc(size + 1);
 	m_snprintf(buff, (size + 1), "%s: %s", name, desc);
 	node->error->errorMessage = buff;
-	debug_print(KBURN_LOG_INFO, "copy_last_libusb_error: %d - %s", err, node->error->errorMessage);
+	debug_print(KBURN_LOG_INFO, COLOR_FMT("copy_last_libusb_error") ": %d - %s", COLOR_ARG(RED), err, node->error->errorMessage);
 }
 
 void _set_error(kburnDeviceNode *node, enum kburnErrorKind kind, int32_t code, const char *error, ...) {
@@ -36,7 +36,7 @@ void _set_error(kburnDeviceNode *node, enum kburnErrorKind kind, int32_t code, c
 	node->error->errorMessage = vsprintf_alloc(error, args);
 	va_end(args);
 
-	debug_print(KBURN_LOG_ERROR, "set_error: %s", node->error->errorMessage);
+	debug_print(KBURN_LOG_ERROR, COLOR_FMT("set_error") ": %s", COLOR_ARG(RED), node->error->errorMessage);
 }
 
 void _clear_error(kburnDeviceNode *node) {

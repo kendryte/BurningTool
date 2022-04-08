@@ -1,5 +1,9 @@
 cmake_minimum_required(VERSION 3.5)
 
+if(POLICY CMP0087)
+	cmake_policy(SET CMP0087 NEW)
+endif()
+
 set(CMAKE_AUTOUIC ON)
 set(CMAKE_AUTOMOC ON)
 set(CMAKE_AUTORCC ON)
@@ -51,3 +55,20 @@ endif()
 
 add_dependencies(BurningTool canaan_burn)
 target_link_libraries(BurningTool PRIVATE canaan_burn)
+
+install(
+	TARGETS BurningTool
+	RUNTIME DESTINATION bin
+	LIBRARY DESTINATION lib
+	ARCHIVE DESTINATION lib
+)
+
+add_custom_command(
+	OUTPUT "${CMAKE_BINARY_DIR}/dist/bin/BurningTool${CMAKE_EXECUTABLE_SUFFIX}"
+	COMMAND ${CMAKE_COMMAND} --install "${CMAKE_BINARY_DIR}" --prefix "${CMAKE_BINARY_DIR}/dist" --verbose
+	DEPENDS "${CMAKE_CURRENT_BINARY_DIR}/BurningTool${CMAKE_EXECUTABLE_SUFFIX}"
+)
+add_custom_target(
+	INSTALL_DEBUG_FOLDER ALL
+	DEPENDS "${CMAKE_BINARY_DIR}/dist/bin/BurningTool${CMAKE_EXECUTABLE_SUFFIX}"
+)

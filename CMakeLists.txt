@@ -1,5 +1,9 @@
 cmake_minimum_required(VERSION 3.5)
 
+if(POLICY CMP0087)
+	cmake_policy(SET CMP0087 NEW)
+endif()
+
 set(BUILD_PARENT On)
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 

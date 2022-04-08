@@ -1,9 +1,9 @@
 #include "libserial.list.h"
 #include "basic/errors.h"
-#include "debug/print.h"
 #include "driver.h"
 #include "lifecycle.h"
 #include <sercomm/sercomm.h>
+#include "debug/print.h"
 
 kburn_err_t init_list_all_serial_devices(KBCTX scope) {
 	debug_trace_function();

@@ -28,6 +28,8 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
 	QObject::connect(library, &BurnLibrary::onHandleSerial, this, &MainWindow::handleDeviceStateChange);
 	QObject::connect(library, &BurnLibrary::onHandleUsb, this, &MainWindow::handleDeviceStateChange);
 
+	QObject::connect(this, &MainWindow::startBurn, library, &BurnLibrary::startBurn);
+
 	// kburnStartWaitingDevices(kb_context);
 	// connect(this->ui, SIGNAL(destroy()), logReceiver, SLOT(xxx));
 }
@@ -125,7 +127,7 @@ void MainWindow::handleDeviceStateChange(kburnDeviceNode *dev) {
 	ui->textPortInfo->setText(val);
 }
 
-void MainWindow::on_btnStartBurn_clicked() { library->startBurn(ui->inputComPortList->currentText()); }
+void MainWindow::on_btnStartBurn_clicked() { emit startBurn(ui->inputComPortList->currentText()); }
 
 void MainWindow::on_btnToggleLogWindow_clicked(bool checked) {
 	ui->debugLogView->setVisible(checked);

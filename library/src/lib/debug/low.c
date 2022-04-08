@@ -35,14 +35,14 @@ __attribute__((constructor)) void lock_constructor() { m_assert(pthread_spin_ini
 
 __attribute__((destructor)) void lock_destructor() { m_assert(pthread_spin_destroy(&lock) == 0, "lock destroy fail"); }
 
-void __debug_enter() {
+void _kb__debug_enter() {
 	pthread_spin_lock(&lock);
 	debug_output = debug_buffer;
 	debug_buffer_remain = DEBUG_BUFFER_SIZE;
 	debug_buffer[0] = '\0';
 }
 
-void __debug_leave(kburnLogType type) {
+void _kb__debug_leave(kburnLogType type) {
 	assert(debug_output - debug_buffer <= DEBUG_BUFFER_SIZE);
 	assert(debug_output[0] == '\0');
 	debug_callback_call(type, debug_buffer);

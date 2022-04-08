@@ -1,9 +1,9 @@
 #include "base.h"
 #include "context.h"
-#include "debug/print.h"
 #include <stdbool.h>
 #include <stdint.h>
 #include <Windows.h>
+#include "debug/print.h"
 
 // https://github.com/ingeniamc/sercomm/blob/master/include/sercomm/win/types.h
 struct ser {

@@ -3,7 +3,6 @@
 #include "base.h"
 #include "components/queued-thread.h"
 #include "components/thread.h"
-#include <libusb-1.0/libusb.h>
 #include <libusb.h>
 
 #define DEFAULT_VID 0x0559
@@ -12,6 +11,12 @@
 // Mass Storage Requests values. See section 3 of the Bulk-Only Mass Storage Class specifications
 // #define BOMS_RESET 0xFF
 // #define BOMS_GET_MAX_LUN 0xFE
+
+enum UsbEventMode {
+	USB_EVENT_UNKNOWN = 0,
+	USB_EVENT_POLLING,
+	USB_EVENT_CALLBACK,
+};
 
 typedef struct usb_subsystem_context {
 	struct {
@@ -28,9 +33,13 @@ typedef struct usb_subsystem_context {
 	struct libusb_context *libusb;
 	bool monitor_prepared;
 	bool monitor_enabled;
-	libusb_hotplug_callback_handle monitor_handle;
 
 	kbthread libusb_thread;
+	enum UsbEventMode event_mode;
+	union {
+		struct polling_context *polling_context;
+		libusb_hotplug_callback_handle event_handle;
+	};
 
 	event_queue_thread_t event_queue;
 } usb_subsystem_context;

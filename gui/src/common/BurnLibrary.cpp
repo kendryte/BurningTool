@@ -1,7 +1,9 @@
 #include "BurnLibrary.h"
+#include "BuringProcess.h"
 #include <canaan-burn/canaan-burn.h>
 #include <iostream>
 #include <QDebug>
+#include <QThreadPool>
 
 BurnLibrary::~BurnLibrary() {
 	kburnSetColors(previousColors);
@@ -21,7 +23,7 @@ void BurnLibrary::start() {
 		.red = {	.prefix = "<span style=\"color: red\">", .postfix = "</span>"},
 		.green = {  .prefix = "<span style=\"color: lime\">", .postfix = "</span>"},
 		.yellow = {.prefix = "<span style=\"color: yellow\">", .postfix = "</span>"},
-		.grey = { .prefix = "<span style=\"opacity: 0.5\">", .postfix = "</span>"},
+		.grey = {	 .prefix = "<span style=\"color: grey\">", .postfix = "</span>"},
 	});
 
 #pragma GCC diagnostic push
@@ -55,15 +57,18 @@ void BurnLibrary::start() {
 
 void BurnLibrary::startBurn(const QString &serialPath) {
 	int exists = knownSerialPorts.indexOf(serialPath);
+	FlashTask *task = new FlashTask(context);
 	if (exists < 0) {
-		kburnOpenSerial(context, serialPath.toLatin1().data());
+		task->setSystemImageFile(serialPath);
 	} else {
-		kburnOpenSerial(context, list.list[exists].path);
+		task->setSystemImageFile(list.list[exists].path);
 	}
+
+	QThreadPool::globalInstance()->start(task);
 }
 
 void BurnLibrary::handleDebugLog(kburnLogType level, const char *cstr) {
-	auto line = QString::fromLatin1(cstr);
+	auto line = QString::fromUtf8(cstr);
 	std::cerr << cstr << std::endl;
 	emit onDebugLog(line);
 }
@@ -91,7 +96,10 @@ void BurnLibrary::reloadList() {
 	for (auto i = 0; i < list.size; i++) {
 		QString r;
 		QTextStream(&r) << list.list[i].path << " - [" << list.list[i].usbIdVendor << ":" << list.list[i].usbIdProduct << "] "
-						<< list.list[i].usbDriver;
+#if !WIN32
+						<< list.list[i].usbDriver
+#endif
+			;
 		knownSerialPorts.append(r);
 	}
 

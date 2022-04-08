@@ -69,5 +69,13 @@ if (Test-Path "${buildDirectory}/compile_commands.json") {
 }
 
 if ($LASTEXITCODE -ne 0) {
-	return $LASTEXITCODE
+	if ($IsWindows) {
+		$suffix = '.exe'
+	} else {
+		$suffix = ''
+	}
+	Remove-Item -Verbose -Path ${buildDirectory}/dist/bin/*
+	Remove-Item -Verbose -Path "${buildDirectory}/gui/BurningTool${suffix}"
+	Remove-Item -Verbose -Path "${buildDirectory}/test-binary/test${suffix}"
+	exit $LASTEXITCODE
 }

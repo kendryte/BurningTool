@@ -1,6 +1,6 @@
 #include "../bridge/protocol.h"
-#include "components/thread.h"
 #include "private-types.h"
+#include "components/thread.h"
 
 kburn_err_t serial_subsystem_init(KBCTX scope) {
 	debug_trace_function();

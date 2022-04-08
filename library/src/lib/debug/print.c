@@ -1,11 +1,11 @@
 #include "print.h"
-#include "basic/string.h"
 #include "context.h"
+#include "basic/string.h"
 #include <stdarg.h>
 #include <stdio.h>
 #include <assert.h>
 
-size_t __print_buffer(char *output, size_t output_length, const char *dir, const uint8_t *buff, size_t size, size_t max_dump) {
+size_t _kb__print_buffer(char *output, size_t output_length, const char *dir, const uint8_t *buff, size_t size, size_t max_dump) {
 	size_t ret = 0;
 	ret += m_snprintf(output, output_length, "\n\t%s: %s", dir, COLOR_START(GREY));
 	size_t cnt = size > max_dump ? max_dump : size;

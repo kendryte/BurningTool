@@ -2,10 +2,10 @@
 #include "../serial/private-types.h"
 #include "basic/sleep.h"
 #include "bind-wait-list.h"
-#include "components/device-link-list.h"
-#include "debug/print.h"
 #include "device.h"
 #include "protocol.h"
+#include "components/device-link-list.h"
+#include "debug/print.h"
 
 static void push_buffer(char *tgt, size_t *tgt_i, const char *src, const size_t src_size) {
 	memcpy(tgt + *tgt_i, src, src_size);

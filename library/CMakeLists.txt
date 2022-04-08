@@ -41,8 +41,14 @@ function(push_source_code target src_dir)
 		list(APPEND inc_dirs "${CMAKE_CURRENT_LIST_DIR}/src/${dir}")
 	endforeach()
 
+	set(EXOPT -Wall -Wextra -pedantic -Werror)
+
 	foreach(file IN LISTS NEW_SOURCES)
-		set_source_files_properties("${file}" PROPERTIES INCLUDE_DIRECTORIES "${inc_dirs}")
+		set_source_files_properties("${file}" PROPERTIES
+			INCLUDE_DIRECTORIES "${inc_dirs}"
+			COMPILE_OPTIONS "${EXOPT}" # -Wno-error=format-zero-length=0
+			COMPILE_DEFINITIONS _GNU_SOURCE
+		)
 	endforeach()
 endfunction()
 
@@ -78,28 +84,23 @@ set_property(TARGET canaan_burn PROPERTY LINKER_LANGUAGE C)
 
 load_binary(canaan_burn "usb_isp_buffer" "${CMAKE_CURRENT_LIST_DIR}/usbisp.bin")
 
-file(GLOB_RECURSE PUBLIC_HEADER "include/canaan-burn/*.h")
-set_target_properties(canaan_burn PROPERTIES PUBLIC_HEADER "${PUBLIC_HEADER}")
-
 push_source_code(canaan_burn lib)
 push_source_code(canaan_burn usb lib)
 push_source_code(canaan_burn serial lib)
 push_source_code(canaan_burn bridge lib)
 
-target_include_directories(canaan_burn
-	PUBLIC "${CMAKE_CURRENT_LIST_DIR}/include")
+target_include_directories(canaan_burn PUBLIC "${CMAKE_CURRENT_LIST_DIR}/include")
 
-# ##############################################################################
+# ############################  USB  #######################################
 find_package(libusb CONFIG REQUIRED)
 target_include_directories(canaan_burn PRIVATE ${LIBUSB_INCLUDE_DIRS})
 target_link_libraries(canaan_burn PRIVATE ${LIBUSB_LIBRARIES})
 
+# ############################  SERIAL  #######################################
 if(WIN32)
-	include(
-		"${VCPKG_INSTALLED_DIR}/x64-windows/share/libsercomm/sercommConfig.cmake")
+	include("${VCPKG_INSTALLED_DIR}/x64-windows/share/libsercomm/sercommConfig.cmake")
 elseif(UNIX)
-	include(
-		"${VCPKG_INSTALLED_DIR}/x64-linux/share/libsercomm/sercommConfig.cmake")
+	include("${VCPKG_INSTALLED_DIR}/x64-linux/share/libsercomm/sercommConfig.cmake")
 elseif(APPLE)
 	# todo
 endif()
@@ -107,9 +108,34 @@ endif()
 # find_package(sercomm CONFIG REQUIRED)
 target_link_libraries(canaan_burn PRIVATE sercomm)
 
+# set(sercomm_srcs
+# "${CMAKE_CURRENT_LIST_DIR}/3rdparty/sercomm/sercomm/base.c"
+# "${CMAKE_CURRENT_LIST_DIR}/3rdparty/sercomm/sercomm/err.c"
+# "${CMAKE_CURRENT_LIST_DIR}/3rdparty/sercomm/sercomm/win/base.c"
+# "${CMAKE_CURRENT_LIST_DIR}/3rdparty/sercomm/sercomm/win/comms.c"
+# "${CMAKE_CURRENT_LIST_DIR}/3rdparty/sercomm/sercomm/win/err.c"
+# "${CMAKE_CURRENT_LIST_DIR}/3rdparty/sercomm/sercomm/win/dev.c"
+# )
+# target_sources(canaan_burn PRIVATE "${sercomm_srcs}")
+# target_include_directories(canaan_burn PRIVATE "${CMAKE_CURRENT_LIST_DIR}/3rdparty/sercomm/include/public")
+
+# set(DEF SER_BUILDING SER_WITH_ERRDESC)
+
+# foreach(file IN LISTS sercomm_srcs)
+# set_source_files_properties("${file}" PROPERTIES INCLUDE_DIRECTORIES "${CMAKE_CURRENT_LIST_DIR}/3rdparty/sercomm/include")
+# set_source_files_properties("${file}" PROPERTIES COMPILE_DEFINITIONS "${DEF}")
+# endforeach()
+
+# target_link_libraries(canaan_burn PRIVATE setupapi advapi32)
+
+# ############################  END #######################################
+if(WIN32)
+	target_link_libraries(canaan_burn PRIVATE ws2_32)
+endif()
+
 include("${CMAKE_CURRENT_LIST_DIR}/3rdparty/slip/CMakeLists.txt")
 
-if(CMAKE_BUILD_TYPE STREQUAL "Debug")
+if(CMAKE_BUILD_TYPE STREQUAL "Debug" AND NOT WIN32)
 	set(SANITIZE_ADDRESS "On")
 
 	# set(SANITIZE_MEMORY "On")
@@ -125,9 +151,13 @@ if(CMAKE_BUILD_TYPE STREQUAL "Debug")
 	find_package(Sanitizers REQUIRED)
 
 	add_sanitizers(canaan_burn)
-else()
 endif()
 
-target_compile_options(canaan_burn PRIVATE -Wall -Wextra -pedantic -Werror) # -Wno-error=format-zero-length=0
+install(TARGETS canaan_burn
+	EXPORT canaan_burn
+	LIBRARY DESTINATION lib
+	ARCHIVE DESTINATION lib
+	RUNTIME DESTINATION bin
+)
 
-target_compile_definitions(canaan_burn PRIVATE _GNU_SOURCE)
+install(DIRECTORY "${CMAKE_CURRENT_LIST_DIR}/include/canaan-burn" DESTINATION "include")

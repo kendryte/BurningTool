@@ -1,9 +1,9 @@
 #include "queued-thread.h"
+#include "context.h"
 #include "basic/errors.h"
 #include "basic/event-queue.h"
 #include "basic/lock.h"
 #include "basic/resource-tracker.h"
-#include "context.h"
 #include "thread.h"
 #include <pthread.h>
 
@@ -45,7 +45,7 @@ void event_queue_thread_main(void *_ctx, KBCTX scope, const bool *const quit) {
 
 void event_thread_deinit(KBCTX scope, event_queue_thread **queue_thread) {
 	if ((*queue_thread)->thread)
-		destroy_thread(scope->threads, (*queue_thread)->thread);
+		thread_destroy(scope, (*queue_thread)->thread);
 	event_thread_queue_deinit(scope->disposables, queue_thread);
 	*queue_thread = NULL;
 }

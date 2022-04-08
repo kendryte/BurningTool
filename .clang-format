@@ -82,11 +82,19 @@ IncludeBlocks: Merge
 IncludeCategories:
   - Regex:           '^"base.h"$'
     Priority:        1
+  - Regex:           '^"context.h"$'
+    Priority:        2
   - Regex:           '^"canaan-burn/'
     Priority:        20
+  - Regex:           '^"debug/'
+    Priority:        99
+  - Regex:           '^"components/'
+    Priority:        11
   - Regex:           '^"'
     Priority:        10
   - Regex:           '^<std'
+    Priority:        49
+  - Regex:           '^<windows.h>'
     Priority:        49
   - Regex:           '^<'
     Priority:        50

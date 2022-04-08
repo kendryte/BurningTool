@@ -52,6 +52,44 @@ bool serial_low_switch_baudrate(kburnSerialDeviceNode *node, uint32_t speed) {
 	return open(node, opts);
 }
 
+bool serial_low_write_data(kburnSerialDeviceNode *node, const void *data, size_t data_length, size_t *written) {
+	print_buffer(KBURN_LOG_TRACE, "PC→MCU", data, data_length);
+	int r = ser_write(node->m_dev_handle, data, data_length, written);
+	if (r != 0) {
+		copy_last_serial_io_error(node, r);
+		return false;
+	}
+
+	return true;
+}
+
+bool serial_low_read_data(kburnSerialDeviceNode *node, uint8_t **buffer, size_t *buffer_size, size_t *read) {
+	*read = 0;
+	size_t ava = 0;
+	int32_t err = ser_available(node->m_dev_handle, &ava);
+	if (err != 0) {
+		copy_last_serial_io_error(node, err);
+		return false;
+	}
+
+	if (ava > *buffer_size) {
+		debug_print(KBURN_LOG_WARN, "realloc happed, increase buffer size: " FMT_SIZET, ava);
+		*buffer_size = ava + 32;
+		*buffer = realloc(*buffer, *buffer_size);
+	}
+	if (ava == 0)
+		return true;
+
+	err = ser_read(node->m_dev_handle, *buffer, *buffer_size, read);
+	if (err != 0) {
+		copy_last_serial_io_error(node, err);
+		return false;
+	}
+
+	print_buffer(KBURN_LOG_TRACE, "MCU→PC", *buffer, *buffer_size);
+	return true;
+}
+
 void serial_low_output_nulls(kburnSerialDeviceNode *node, bool push_end_char) {
 	debug_trace_function("push_end_char=%d", push_end_char);
 	static char buff[128] = {
@@ -66,25 +104,25 @@ void serial_low_output_nulls(kburnSerialDeviceNode *node, bool push_end_char) {
 		ser_write(node->m_dev_handle, buff, 128, NULL);
 	}
 	serial_low_flush_all(node);
-	serial_low_drain_input(node);
+	serial_low_drain_input(node, NULL);
 }
-int32_t serial_low_drain_input(kburnSerialDeviceNode *node) {
-	int32_t bytes = 0;
+bool serial_low_drain_input(kburnSerialDeviceNode *node, size_t *drop_bytes) {
 	size_t ava = 0, recv = 0;
+	uint8_t buff[PRINT_BUFF_MAX];
 	while (true) {
 		int32_t err = ser_available(node->m_dev_handle, &ava);
 		if (err != 0) {
 			copy_last_serial_io_error(node, err);
-			return -1;
+			return false;
 		}
 
 		if (ava > 0) {
-			uint8_t buff[32];
-			ser_read(node->m_dev_handle, buff, 32, &recv);
-			bytes += recv;
-			print_buffer(KBURN_LOG_WARN, "extra bytes:", buff, recv);
+			ser_read(node->m_dev_handle, buff, PRINT_BUFF_MAX, &recv);
+			if (drop_bytes)
+				*drop_bytes += recv;
+			print_buffer(KBURN_LOG_WARN, "drop:", buff, recv);
 		} else {
-			return bytes;
+			return true;
 		}
 	}
 }

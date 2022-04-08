@@ -1,8 +1,9 @@
 #include "port.options.h"
-#include "debug/print.h"
+#include "context.h"
 #include "canaan-burn/exported/serial.config.h"
 #include "canaan-burn/exported/types.serial.h"
 #include <sercomm/sercomm.h>
+#include "debug/print.h"
 
 ser_opts_t opts = {
 	.port = NULL,
@@ -10,7 +11,7 @@ ser_opts_t opts = {
 	.bytesz = SER_BYTESZ_8,
 	.parity = SER_PAR_NONE,
 	.stopbits = SER_STOPB_ONE,
-	.timeouts = {.rd = 800, .wr = 200},
+	.timeouts = {.rd = 1000, .wr = 1000},
 };
 
 ser_opts_t get_current_serial_options(const char *path) {

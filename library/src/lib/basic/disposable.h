@@ -1,11 +1,11 @@
 #pragma once
 
-#include "debug/path.h"
-#include "debug/print.h"
 #include "lock.h"
 #include <stdbool.h>
 #include <stdint.h>
 #include <stdlib.h>
+#include "debug/path.h"
+#include "debug/print.h"
 
 typedef struct disposable_list_element disposable_list_element_t;
 typedef struct disposable_list disposable_list_t;

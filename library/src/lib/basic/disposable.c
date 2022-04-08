@@ -1,6 +1,6 @@
 #include "disposable.h"
-#include "debug/print.h"
 #include <stdlib.h>
+#include "debug/print.h"
 
 typedef struct disposable_list_element {
 	struct disposable_list_element *prev;

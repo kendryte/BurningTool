@@ -1,8 +1,8 @@
 #pragma once
 
-#include "components/thread.h"
 #include "context.h"
 #include "slip.h"
+#include "components/thread.h"
 #include "canaan-burn/exported/serial.isp.h"
 #include <stdint.h>
 #include <stdio.h>
@@ -44,9 +44,9 @@ typedef struct serial_subsystem_context {
 	on_device_handle_t on_handle;
 } serial_subsystem_context;
 
-#define SERIAL_CHUNK_SIZE 1064
-#define BOARD_MEMORY_PAGE_SIZE 1024
-#define MAX_COMMAND_SIZE 1024
+#define SERIAL_CHUNK_SIZE ((size_t)1064)
+#define BOARD_MEMORY_PAGE_SIZE ((size_t)1024)
+#define MAX_COMMAND_SIZE ((size_t)1024)
 
 typedef struct isp_state {
 	slip_descriptor_s descriptor;

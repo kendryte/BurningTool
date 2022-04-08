@@ -54,7 +54,7 @@
 #pragma GCC diagnostic pop
 
 #if WIN32
-#define FMT_SIZET "%lu"
+#define FMT_SIZET "%llu"
 #else
 #define FMT_SIZET "%zu"
 #endif

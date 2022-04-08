@@ -28,9 +28,9 @@ class BurnLibrary : public QObject {
 
 	void reloadList();
 	void start();
-	void startBurn(const QString &serialPath);
 
   public slots:
+	void startBurn(const QString &serialPath);
 
   private:
 	bool handleConnectSerial(const kburnDeviceNode *dev);

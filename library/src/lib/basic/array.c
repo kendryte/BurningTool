@@ -1,22 +1,22 @@
 #include "array.h"
-#include "debug/print.h"
 #include <stdbool.h>
 #include <stddef.h>
 #include <stdint.h>
 #include <stdlib.h>
 #include <string.h>
+#include "debug/print.h"
 
-dynamic_array_t *_array_create(size_t element_size, uint32_t init_size) {
+dynamic_array_t *_kb_array_create(size_t element_size, uint32_t init_size) {
 	dynamic_array_t *array = malloc(sizeof(dynamic_array_t));
 	if (array == NULL)
 		return array;
 
-	_array_make(array, element_size, init_size);
+	_kb_array_make(array, element_size, init_size);
 
 	array->free_self = true;
 	return array;
 }
-bool _array_make(dynamic_array_t *array, size_t element_size, uint32_t init_size) {
+bool _kb_array_make(dynamic_array_t *array, size_t element_size, uint32_t init_size) {
 	memset(array, 0, sizeof(dynamic_array_t));
 	array->element_size = element_size;
 	return array_resize(array, init_size);

@@ -10,6 +10,7 @@ class LoggerWindow : public QTextEdit {
   public slots:
 	void append(const QString &text);
 	void toggleAutoScroll() { autoScroll = !autoScroll; };
+	void clearScreen() { this->clear(); };
 	void scrollToBottom();
 	void resizeEvent(QResizeEvent *);
 

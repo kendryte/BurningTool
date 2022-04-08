@@ -3,12 +3,12 @@
 #include <stdio.h>
 
 const char *cbasename(const char *p) {
-	char *a = strchr(p, '/');
-	char *b = strchr(p, '\\');
+	char *a = strrchr(p, '/');
+	char *b = strrchr(p, '\\');
 	if (a > b) {
-		return a;
+		return a + 1;
 	} else {
-		return b;
+		return b + 1;
 	}
 }
 
@@ -26,7 +26,7 @@ const char *relative_path(const char *file_path) { return &file_path[strlen(PROJ
 
 int basename_to_ext_length(const char *name) {
 	name = cbasename(name);
-	char *found = strchr(name, '.');
+	char *found = strrchr(name, '.');
 	if (found == NULL)
 		return strlen(name);
 

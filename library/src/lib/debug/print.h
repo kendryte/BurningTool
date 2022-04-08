@@ -1,5 +1,6 @@
 #pragma once
 #include "base.h"
+#include "context.h"
 #include "./assert.h"
 #include "./color.h"
 #include "./level.h"
@@ -7,18 +8,19 @@
 #include "./path.h"
 #include "./user-callback.h"
 #include "basic/string.h"
-#include "context.h"
+#include <inttypes.h>
 
 #define debug_print(level, fmt, ...) debug_print_location(level, __FILE__, __LINE__, fmt __VA_OPT__(, ) __VA_ARGS__)
-#define TODO debug_print("\x1B[38;5;11mTODO: please impl %s()\x1B[0m", __func__)
+#define TODO debug_print(KBURN_LOG_ERROR, COLOR_FMT("TODO: please impl %s()"), COLOR_ARG(RED, __func__))
 
-size_t __print_buffer(char *output, size_t output_length, const char *dir, const uint8_t *buff, size_t size, size_t max_dump);
+#define PRINT_BUFF_MAX 24
+size_t _kb__print_buffer(char *output, size_t output_length, const char *dir, const uint8_t *buff, size_t size, size_t max_dump);
 #define print_buffer(level, dir, buff, size)                                                                                                         \
 	if (0)                                                                                                                                           \
-		(void)__print_buffer;                                                                                                                        \
+		(void)_kb__print_buffer;                                                                                                                     \
 	DEBUG_START(level);                                                                                                                              \
 	debug_print_prefix(debug_output, debug_buffer_remain, __FILE__, __LINE__);                                                                       \
-	debug_output_move(__print_buffer(debug_output, debug_buffer_remain, dir, buff, size, 24));                                                       \
+	debug_output_move(_kb__print_buffer(debug_output, debug_buffer_remain, dir, buff, size, PRINT_BUFF_MAX));                                        \
 	DEBUG_END()
 
 #define debug_print_location(level, file, line, fmt, ...)                                                                                            \
@@ -27,6 +29,16 @@ size_t __print_buffer(char *output, size_t output_length, const char *dir, const
 	DEBUG_START(level);                                                                                                                              \
 	debug_print_prefix(debug_output, debug_buffer_remain, file, line);                                                                               \
 	debug_printf(fmt __VA_OPT__(, ) __VA_ARGS__);                                                                                                    \
+	DEBUG_END()
+
+#define debug_print_win32(fmt, ...)                                                                                                                  \
+	if (0)                                                                                                                                           \
+		(void)0;                                                                                                                                     \
+	DEBUG_START(KBURN_LOG_ERROR);                                                                                                                    \
+	debug_print_prefix(debug_output, debug_buffer_remain, __FILE__, __LINE__);                                                                       \
+	debug_printf(fmt ": " __VA_OPT__(, ) __VA_ARGS__);                                                                                               \
+	debug_output_move(FormatMessage(FORMAT_MESSAGE_FROM_SYSTEM | FORMAT_MESSAGE_IGNORE_INSERTS, NULL, GetLastError(), 0, (LPSTR)debug_output,        \
+									debug_buffer_remain, NULL));                                                                                     \
 	DEBUG_END()
 
 #ifndef NDEBUG

@@ -1,10 +1,10 @@
 #include "base.h"
 #include "basic/errors.h"
-#include "components/device-link-list.h"
 #include "device.h"
 #include "libserial.list.h"
 #include "lifecycle.h"
 #include "private-types.h"
+#include "components/device-link-list.h"
 
 static void on_event(void *ctx, ser_dev_evt_t evt, const ser_dev_t *dev) {
 	KBCTX scope = ctx;

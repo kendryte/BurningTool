@@ -1,11 +1,11 @@
 #include "basic/errors.h"
 #include "basic/sleep.h"
 #include "baudtate.h"
-#include "components/device-link-list.h"
 #include "device.h"
 #include "isp.h"
 #include "low.h"
 #include "private-types.h"
+#include "components/device-link-list.h"
 #include "canaan-burn/exported/serial.config.h"
 
 slip_error_t _serial_isp_slip_send_request(kburnSerialDeviceNode *node, isp_request_t *command);
@@ -77,7 +77,7 @@ bool kburnSerialIspSetBaudrate(kburnSerialDeviceNode *node, uint32_t want_br) {
 	do_sleep(1000);
 
 	if (hackdev_serial_low_switch_baudrate(node, want_br) && greeting(node, false)) {
-		debug_print(KBURN_LOG_INFO, "switch driver attr success, baudrate to %d", KBURN_K510_BAUDRATE_USBISP);
+		debug_print(KBURN_LOG_INFO, "switch driver attr success, baudrate to %d", want_br);
 	} else {
 		debug_print(KBURN_LOG_ERROR, "kburnSerialIspSetBaudrate: switch driver attr failed");
 		if (!serial_low_switch_baudrate(node, want_br)) {
@@ -89,7 +89,7 @@ bool kburnSerialIspSetBaudrate(kburnSerialDeviceNode *node, uint32_t want_br) {
 			debug_print(KBURN_LOG_ERROR, "kburnSerialIspSetBaudrate: re-greeting failed");
 			return false;
 		}
-		debug_print(KBURN_LOG_INFO, "port re-opened with baudrate %d", KBURN_K510_BAUDRATE_USBISP);
+		debug_print(KBURN_LOG_INFO, "port re-opened with baudrate %d", want_br);
 	}
 
 	return true;
@@ -138,7 +138,7 @@ bool kburnSerialIspMemoryWrite(kburnSerialDeviceNode *node, const kburn_mem_addr
 	packet->op = ISP_MEMORY_WRITE;
 
 	const uint32_t pages = (data_size + BOARD_MEMORY_PAGE_SIZE - 1) / BOARD_MEMORY_PAGE_SIZE;
-	debug_trace_function("base=0x%X, size=%ld, pages=%d", address, data_size, pages);
+	debug_trace_function("base=0x%X, size=" FMT_SIZET ", pages=%d", address, data_size, pages);
 
 	if (cb)
 		cb(ctx, get_node(node), 0, data_size);
@@ -171,7 +171,9 @@ bool kburnSerialIspRunProgram(kburnSerialDeviceNode *node, const void *programBu
 							  void *ctx) {
 	debug_trace_function("node[%s]", node->deviceInfo.path);
 
-	greeting(node, false);
+	if (!greeting(node, false)) {
+		return false;
+	}
 
 	if (!kburnSerialIspMemoryWrite(node, KBURN_PROGRAM_BASE_ADDR, programBuffer, programBufferSize, page_callback, ctx)) {
 		return false;

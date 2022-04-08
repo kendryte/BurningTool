@@ -1,24 +1,27 @@
-#include "basic/errors.h"
-#include "components/device-link-list.h"
+#include "monitor.h"
+#include "base.h"
+#include "context.h"
 #include "descriptor.h"
 #include "libusb.list.h"
 #include "lifecycle.h"
 #include "private-types.h"
 #include "subsystem.h"
-#include "canaan-burn/canaan-burn.h"
+#include "components/device-link-list.h"
+#include "components/queued-thread.h"
 #include <pthread.h>
 
-bool libUsbHasWathcer = false;
+static void init_list_all_usb_devices_threaded(void *UNUSED(_ctx), KBCTX scope, const bool *const q) {
+	if (!q)
+		init_list_all_usb_devices(scope);
+}
 
-struct passing_data {
-	struct libusb_context *ctx;
-	struct libusb_device *dev;
-	libusb_hotplug_event event;
-	void *user_data;
-};
+static void _pump_libusb_event(struct passing_data *recv) {
+	debug_print(KBURN_LOG_DEBUG, "handle event in thread.");
 
-static int on_event_sync(struct libusb_context *UNUSED(ctx), struct libusb_device *dev, libusb_hotplug_event event, void *user_data) {
-	KBCTX scope = user_data;
+	libusb_hotplug_event event = ((struct passing_data *)recv)->event;
+	struct libusb_device *dev = ((struct passing_data *)recv)->dev;
+	KBCTX scope = ((struct passing_data *)recv)->scope;
+
 	uint16_t vid, pid;
 	uint8_t path[MAX_USB_PATH_LENGTH] = {0};
 
@@ -26,21 +29,21 @@ static int on_event_sync(struct libusb_context *UNUSED(ctx), struct libusb_devic
 		debug_print(KBURN_LOG_INFO, "libusb event: ARRIVED");
 		int ret = usb_get_vid_pid_path(dev, &vid, &pid, path);
 		if (ret < LIBUSB_SUCCESS)
-			return 0;
+			return;
 
 		if (get_device_by_usb_port_path(scope, vid, pid, path) != NULL) {
 			debug_print(KBURN_LOG_DEBUG, "port already open. (this may be issue)");
-			return 0;
+			return;
 		}
 
 		kburn_err_t r = open_single_usb_port(scope, dev, true, NULL);
 		if (r != KBurnNoErr)
-			debug_print(KBURN_LOG_ERROR, "failed open single port: %ld", r);
+			debug_print(KBURN_LOG_ERROR, "failed open single port: %" PRIu64, r);
 	} else if (LIBUSB_HOTPLUG_EVENT_DEVICE_LEFT == event) {
 		debug_print(KBURN_LOG_INFO, "libusb event: LEFT");
 		int ret = usb_get_vid_pid_path(dev, &vid, &pid, path);
 		if (ret < LIBUSB_SUCCESS)
-			return 0;
+			return;
 
 		kburnDeviceNode *node = get_device_by_usb_port_path(scope, vid, pid, path);
 		if (node != NULL) {
@@ -54,46 +57,22 @@ static int on_event_sync(struct libusb_context *UNUSED(ctx), struct libusb_devic
 	} else {
 		debug_print(KBURN_LOG_ERROR, "Unhandled event %d\n", event);
 	}
-	return 0;
 }
 
-static int on_event_threaded(struct libusb_context *ctx, struct libusb_device *dev, libusb_hotplug_event event, void *user_data) {
-	KBCTX scope = user_data;
+void pump_libusb_event(KBCTX UNUSED(scope), void *recv) {
+	_pump_libusb_event(recv);
+	free(recv);
+}
 
-	if (LIBUSB_HOTPLUG_EVENT_DEVICE_ARRIVED == event) {
-		debug_print(KBURN_LOG_DEBUG, "libusb event: " COLOR_FMT("ARRIVED"), COLOR_ARG(GREEN));
-	} else if (LIBUSB_HOTPLUG_EVENT_DEVICE_LEFT == event) {
-		debug_print(KBURN_LOG_DEBUG, "libusb event: " COLOR_FMT("LEFT"), COLOR_ARG(YELLOW));
-	} else {
-		debug_print(KBURN_LOG_WARN, "Unhandled event %d\n", event);
-	}
-
+void push_libusb_event(KBCTX scope, libusb_hotplug_event event, struct libusb_device *dev) {
 	struct passing_data *data = calloc(1, sizeof(struct passing_data));
 	if (data == NULL) {
 		debug_print(KBURN_LOG_ERROR, "memory error in libusb event thread");
-		return 0;
 	}
-	data->ctx = ctx;
+	data->scope = scope;
 	data->dev = dev;
 	data->event = event;
-	data->user_data = user_data;
 	event_thread_queue(scope->usb->event_queue, data);
-
-	return 0;
-}
-
-static void init_list_all_usb_devices_threaded(void *UNUSED(_ctx), KBCTX scope, const bool *const q) {
-	if (!q)
-		init_list_all_usb_devices(scope);
-}
-
-static void pump_libusb_event(KBCTX UNUSED(scope), void *_evt) {
-	struct passing_data *recv = _evt;
-
-	debug_print(KBURN_LOG_DEBUG, "handle event in thread.");
-	on_event_sync(recv->ctx, recv->dev, recv->event, recv->user_data);
-
-	free(_evt);
 }
 
 void usb_monitor_destroy(KBCTX scope) {
@@ -101,7 +80,16 @@ void usb_monitor_destroy(KBCTX scope) {
 		return;
 	scope->usb->monitor_prepared = false;
 
-	event_thread_deinit(scope, &scope->usb->event_queue);
+	if (scope->usb->event_queue) {
+		event_thread_deinit(scope, &scope->usb->event_queue);
+		scope->usb->event_queue = NULL;
+	}
+
+	if (scope->usb->event_mode == USB_EVENT_CALLBACK) {
+		usb_monitor_callback_destroy(scope);
+	} else {
+		usb_monitor_polling_destroy(scope);
+	}
 }
 
 kburn_err_t usb_monitor_prepare(KBCTX scope) {
@@ -116,17 +104,24 @@ kburn_err_t usb_monitor_prepare(KBCTX scope) {
 
 	scope->usb->monitor_prepared = true;
 
-	libUsbHasWathcer = libusb_has_capability(LIBUSB_CAP_HAS_HOTPLUG);
-	debug_print(KBURN_LOG_DEBUG, "libUsbHasWathcer: %d", libUsbHasWathcer);
+	if (libusb_has_capability(LIBUSB_CAP_HAS_HOTPLUG)) {
+		debug_print(KBURN_LOG_DEBUG, "libUsbHasWathcer: callback");
+		scope->usb->event_mode = USB_EVENT_CALLBACK;
+	} else {
+		debug_print(KBURN_LOG_DEBUG, "libUsbHasWathcer: polling");
+		scope->usb->event_mode = USB_EVENT_POLLING;
+	}
 
 	int r = libusb_set_option(scope->usb->libusb, LIBUSB_OPTION_LOG_LEVEL, LIBUSB_LOG_LEVEL_INFO);
 	if (r < 0)
 		debug_print_libusb_error("log level set failed", r);
 
-	if (libUsbHasWathcer) {
-		IfErrorReturn(event_thread_init(scope, "libusb pump", pump_libusb_event, &scope->usb->event_queue));
+	IfErrorReturn(event_thread_init(scope, "libusb pump", pump_libusb_event, &scope->usb->event_queue));
+
+	if (scope->usb->event_mode == USB_EVENT_CALLBACK) {
+		IfErrorReturn(usb_monitor_callback_prepare(scope));
 	} else {
-		m_abort("TODO: platform not supported. require polling implement.");
+		IfErrorReturn(usb_monitor_polling_prepare(scope));
 	}
 
 	kbthread no_use;
@@ -138,7 +133,12 @@ kburn_err_t usb_monitor_prepare(KBCTX scope) {
 void usb_monitor_pause(KBCTX scope) {
 	debug_trace_function();
 	if (scope->usb->monitor_enabled) {
-		libusb_hotplug_deregister_callback(scope->usb->libusb, scope->usb->monitor_handle);
+		if (scope->usb->event_mode == USB_EVENT_CALLBACK) {
+			usb_monitor_callback_pause(scope);
+		} else {
+			usb_monitor_polling_pause(scope);
+		}
+
 		scope->usb->monitor_enabled = false;
 		debug_print(KBURN_LOG_INFO, "USB monitor disabled");
 	}
@@ -155,14 +155,11 @@ kburn_err_t usb_monitor_resume(KBCTX scope) {
 			return r;
 	}
 
-	debug_print(KBURN_LOG_INFO, "\tlibusb_hotplug_register_callback: [%04x:%04x] libUsbHasWathcer=%d", scope->usb->filter.vid, scope->usb->filter.pid,
-				libUsbHasWathcer);
-
-	IfUsbErrorLogReturn(libusb_hotplug_register_callback(
-		scope->usb->libusb, LIBUSB_HOTPLUG_EVENT_DEVICE_ARRIVED | LIBUSB_HOTPLUG_EVENT_DEVICE_LEFT, 0,
-		scope->usb->filter.vid == KBURN_VIDPID_FILTER_ANY ? LIBUSB_HOTPLUG_MATCH_ANY : scope->usb->filter.vid,
-		scope->usb->filter.pid == KBURN_VIDPID_FILTER_ANY ? LIBUSB_HOTPLUG_MATCH_ANY : scope->usb->filter.pid, LIBUSB_HOTPLUG_MATCH_ANY,
-		libUsbHasWathcer ? on_event_threaded : on_event_sync, scope, &scope->usb->monitor_handle));
+	if (scope->usb->event_mode == USB_EVENT_CALLBACK) {
+		IfErrorReturn(usb_monitor_callback_resume(scope));
+	} else {
+		IfErrorReturn(usb_monitor_polling_resume(scope));
+	}
 
 	return KBurnNoErr;
 }

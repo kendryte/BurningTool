@@ -1,13 +1,13 @@
 #include "basic/errors.h"
 #include "basic/resource-tracker.h"
-#include "components/call-user-handler.h"
-#include "components/device-link-list.h"
-#include "components/lifecycle-helper.h"
 #include "device.h"
 #include "driver.h"
 #include "isp.h"
 #include "low.h"
 #include "private-types.h"
+#include "components/call-user-handler.h"
+#include "components/device-link-list.h"
+#include "components/lifecycle-helper.h"
 
 static bool confirm_port_is_ready(kburnSerialDeviceNode *node) {
 	if (!kburnSerialIspGreeting(node)) {
