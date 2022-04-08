@@ -243,9 +243,9 @@ static DECALRE_DISPOSE(quit_windows_thread, struct polling_context) {
 	// context->window;
 	DWORD threadId = GetWindowThreadProcessId(context->window, NULL);
 	debug_print(KBURN_LOG_INFO, "window thread id: %lu", threadId);
-		if(!PostThreadMessage(threadId, WM_QUIT, 0, 0)){
-			debug_print_win32("WIN32 PostThreadMessage Failed!");
-		}
+	if (!PostThreadMessage(threadId, WM_QUIT, 0, 0)) {
+		debug_print_win32("WIN32 PostThreadMessage Failed!");
+	}
 	//		PostMessageA(, WM_QUIT, 0, 0);
 }
 DECALRE_DISPOSE_END()
