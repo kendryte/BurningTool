@@ -26,7 +26,15 @@ static DECALRE_DISPOSE(_destroy_thread, thread_passing_object) {
 }
 DECALRE_DISPOSE_END()
 
-void thread_destroy(KBCTX scope, thread_passing_object *thread) { _destroy_thread(scope->threads, thread); }
+void thread_destroy(KBCTX scope, thread_passing_object *thread) {
+	if (!thread) {
+		return;
+	}
+	if (!thread->running || thread->quit) {
+		return;
+	}
+	_destroy_thread(scope->threads, thread);
+}
 
 static void *start_routine_wrapper(void *_ctx) {
 	thread_passing_object *context = _ctx;
@@ -53,12 +61,12 @@ static void *start_routine_wrapper(void *_ctx) {
 
 kburn_err_t thread_create(const char *debug_title, thread_function start_routine, void *context, KBCTX scope, thread_passing_object **out_thread) {
 	thread_passing_object *thread = MyAlloc(thread_passing_object);
-	*out_thread = thread;
 
-	if (debug_title)
+	if (debug_title) {
 		thread->debug_title = debug_title;
-	else
+	} else {
 		thread->debug_title = "<NULL>";
+	}
 
 	thread->scope = scope;
 	thread->main = start_routine;
@@ -71,6 +79,11 @@ kburn_err_t thread_create(const char *debug_title, thread_function start_routine
 	}
 
 	dispose_list_add(scope->threads, toDisposable(_destroy_thread, thread));
+
+	if (out_thread != NULL) {
+		*out_thread = thread;
+		dispose_list_add(scope->threads, toDisposable(unset_pointer, (void **)out_thread));
+	}
 
 	return KBurnNoErr;
 }

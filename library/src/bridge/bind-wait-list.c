@@ -4,8 +4,9 @@
 
 waiting_list_t *waiting_list_init() {
 	waiting_list_t *ret = calloc(1, sizeof(waiting_list_t));
-	if (ret == NULL)
+	if (ret == NULL) {
 		return NULL;
+	}
 
 	ret->mutex = lock_init();
 	if (ret->mutex == NULL) {

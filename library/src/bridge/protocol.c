@@ -18,8 +18,9 @@ size_t create_pair_protocol(uint32_t bind_id, char *output, size_t size) {
 
 uint32_t handle_page(const char *buff, const size_t buff_size) {
 	debug_trace_function("%.*s", (int)buff_size, buff);
-	if (!strncmp(buff, SIGNATURE, buff_size))
+	if (!strncmp(buff, SIGNATURE, buff_size)) {
 		return false;
+	}
 
 	uint32_t bind_id = strtoul(buff + strlen(SIGNATURE), NULL, 16);
 	debug_print(KBURN_LOG_DEBUG, "  -> bind_id = %u (%X)", bind_id, bind_id);

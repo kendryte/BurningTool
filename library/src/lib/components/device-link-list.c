@@ -9,12 +9,14 @@ port_link_list *port_link_list_init() {
 
 	port_link_list *ret = calloc(1, sizeof(port_link_list));
 	DeferFree(ret);
-	if (ret == NULL)
+	if (ret == NULL) {
 		return NULL;
+	}
 
 	ret->exclusion = lock_init();
-	if (ret == NULL)
+	if (ret == NULL) {
 		return NULL;
+	}
 
 	DeferAbort;
 	return ret;
@@ -56,24 +58,29 @@ void add_to_device_list(kburnDeviceNode *target) {
 
 	dispose_list_add(target->disposable_list, toDisposable(delete_from_device_list, target));
 
-	if (_should_insert_waitting_list(target))
+	if (_should_insert_waitting_list(target)) {
 		_recreate_waitting_list(target->_scope);
+	}
 }
 
 static void do_delete(KBCTX scope, port_link_element *target) {
 	debug_trace_function("\t0x%p [size=%d]", (void *)target, scope->openDeviceList->size);
 
-	if (target->prev)
+	if (target->prev) {
 		target->prev->next = target->next;
+	}
 
-	if (target->next)
+	if (target->next) {
 		target->next->prev = target->prev;
+	}
 
-	if (target == scope->openDeviceList->head)
+	if (target == scope->openDeviceList->head) {
 		scope->openDeviceList->head = scope->openDeviceList->head->next;
+	}
 
-	if (target == scope->openDeviceList->tail)
+	if (target == scope->openDeviceList->tail) {
 		scope->openDeviceList->tail = scope->openDeviceList->tail->prev;
+	}
 
 	m_assert(scope->openDeviceList->size > 0, "delete port from empty list");
 	scope->openDeviceList->size--;
@@ -105,10 +112,12 @@ static inline port_link_element *find_serial_device(KBCTX scope, const char *pat
 
 	autolock(scope->openDeviceList->exclusion);
 	for (curs = scope->openDeviceList->head; curs != NULL; curs = curs->next) {
-		if (!curs->node->serial->init)
+		if (!curs->node->serial->init) {
 			continue;
-		if (strcmp(curs->node->serial->deviceInfo.path, path) == 0)
+		}
+		if (strcmp(curs->node->serial->deviceInfo.path, path) == 0) {
 			break;
+		}
 	}
 	return curs;
 }
@@ -119,8 +128,9 @@ static inline port_link_element *find_usb_device_by_vidpidpath(KBCTX scope, uint
 	autolock(scope->openDeviceList->exclusion);
 	for (curs = scope->openDeviceList->head; curs != NULL; curs = curs->next) {
 		if (curs->node->usb->deviceInfo.idVendor == vid && curs->node->usb->deviceInfo.idProduct == pid &&
-			strncmp((char *)path, (char *)curs->node->usb->deviceInfo.path, MAX_USB_PATH_LENGTH) == 0)
+			strncmp((char *)path, (char *)curs->node->usb->deviceInfo.path, MAX_USB_PATH_LENGTH) == 0) {
 			break;
+		}
 	}
 	return curs;
 }
@@ -139,8 +149,9 @@ static kburnDeviceNode *has_bind_id_used(KBCTX scope, uint32_t id) {
 	port_link_element *curs = NULL;
 
 	for (curs = scope->openDeviceList->head; curs != NULL; curs = curs->next) {
-		if (curs->node->bind_id == id)
+		if (curs->node->bind_id == id) {
 			return curs->node;
+		}
 	}
 	return NULL;
 }

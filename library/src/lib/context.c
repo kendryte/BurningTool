@@ -1,4 +1,4 @@
-
+#include "context.h"
 #include "../bridge/bind-wait-list.h"
 #include "../serial/private-types.h"
 #include "../usb/private-types.h"
@@ -12,14 +12,15 @@ static uint32_t dbg_index = 0;
 
 void kburnGlobalDestroy() {
 	debug_trace_function();
-	if (lib_global_scope == NULL)
+	if (lib_global_scope == NULL) {
 		return;
+	}
 	dispose_all(lib_global_scope);
 	disposable_list_deinit(lib_global_scope);
+	lib_global_scope = NULL;
 }
 
 kburn_err_t kburnCreate(KBCTX *ppCtx) {
-	debug_trace_function("11");
 	debug_trace_function();
 
 	DeferEnabled;
@@ -56,6 +57,7 @@ kburn_err_t kburnCreate(KBCTX *ppCtx) {
 
 	memcpy(*ppCtx,
 		   &(kburnContext){
+			   .signature = CONTEXT_MEMORY_SIGNATURE,
 			   .serial = serial,
 			   .usb = usb,
 			   .openDeviceList = odlist,
@@ -82,8 +84,9 @@ kburn_err_t kburnCreate(KBCTX *ppCtx) {
 
 void kburnDestroy(KBCTX scope) {
 	debug_trace_function("(%p)", (void *)scope);
-	if (lib_global_scope == NULL)
+	if (lib_global_scope == NULL) {
 		return;
+	}
 	dispose(bindToList(lib_global_scope, toDisposable(dispose_all_and_deinit, scope->threads)));
 	dispose(bindToList(lib_global_scope, toDisposable(dispose_all_and_deinit, scope->disposables)));
 }

@@ -26,8 +26,9 @@ uint8_t write_byte(void *_ctx, uint8_t byte, bool end) {
 		}
 		node->isp->send_buffer_length = 0;
 	}
-	if (end)
+	if (end) {
 		serial_low_flush_all(node);
+	}
 
 	return 1;
 }
@@ -66,8 +67,9 @@ slip_error_t _serial_isp_slip_send_request(kburnSerialDeviceNode *node, isp_requ
 
 	slip_error_t ret = slip_send_message(&node->isp->slip, (void *)command, serial_isp_packet_size(command));
 
-	if (ret != SLIP_NO_ERROR)
+	if (ret != SLIP_NO_ERROR) {
 		slip_error(node, ret);
+	}
 
 	return ret;
 }
@@ -150,8 +152,9 @@ isp_response_t *serial_isp_command_send_low_retry(kburnSerialDeviceNode *node, i
 		}
 
 		r = serial_isp_command_send_low(node, command);
-		if (r)
+		if (r) {
 			return r;
+		}
 
 		debug_print(KBURN_LOG_ERROR, "failed retry: %d/%d", curr + 1, tries);
 		bool isWiredState = error_compare(node, KBURN_ERROR_KIND_COMMON, KBurnProtocolOpMismatch);

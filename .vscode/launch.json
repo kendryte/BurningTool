@@ -28,6 +28,7 @@
 			"type": "cppdbg",
 			"request": "launch",
 			"program": "${command:cmake.launchTargetPath}",
+			// "program": "${workspaceFolder}/build-${env:HOSTNAME}${env:COMPUTERNAME}/dist/bin/test.exe",
 			"args": [],
 			"stopAtEntry": false,
 			"cwd": "${workspaceFolder}/build-${env:HOSTNAME}${env:COMPUTERNAME}",

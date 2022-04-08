@@ -77,8 +77,9 @@ bool serial_low_read_data(kburnSerialDeviceNode *node, uint8_t **buffer, size_t 
 		*buffer_size = ava + 32;
 		*buffer = realloc(*buffer, *buffer_size);
 	}
-	if (ava == 0)
+	if (ava == 0) {
 		return true;
+	}
 
 	err = ser_read(node->m_dev_handle, *buffer, *buffer_size, read);
 	if (err != 0) {
@@ -118,8 +119,9 @@ bool serial_low_drain_input(kburnSerialDeviceNode *node, size_t *drop_bytes) {
 
 		if (ava > 0) {
 			ser_read(node->m_dev_handle, buff, PRINT_BUFF_MAX, &recv);
-			if (drop_bytes)
+			if (drop_bytes) {
 				*drop_bytes += recv;
+			}
 			print_buffer(KBURN_LOG_WARN, "drop:", buff, recv);
 		} else {
 			return true;

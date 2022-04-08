@@ -1,6 +1,6 @@
 build-*
 vcpkg_installed
-.vscode/compile_command.json
+.vscode/compile_commands.json
 sysimage*
 .vscode/*.db*
 .vscode/*.DB*

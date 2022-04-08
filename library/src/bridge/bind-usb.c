@@ -22,6 +22,7 @@ kburn_err_t usb_device_serial_bind(kburnDeviceNode *node) {
 
 		if (node->serial->isUsbBound) {
 			debug_print(KBURN_LOG_INFO, " * bind success @ usb");
+			clear_error(node);
 			return KBurnNoErr;
 		}
 	}

@@ -11,13 +11,15 @@
 #include <libusb.h>
 
 kburn_err_t kburnOpenUsb(KBCTX scope, uint16_t vid, uint16_t pid, const uint8_t *path) {
-	if (!scope->usb->libusb)
+	if (!scope->usb->libusb) {
 		usb_subsystem_init(scope);
+	}
 
 	libusb_device *dev = get_usb_device(scope->usb->libusb, vid, pid, path);
 
-	if (dev == NULL)
+	if (dev == NULL) {
 		return make_error_code(KBURN_ERROR_KIND_COMMON, KBurnUsbDeviceNotFound);
+	}
 
 	IfErrorReturn(open_single_usb_port(scope, dev, false, NULL));
 
@@ -25,8 +27,9 @@ kburn_err_t kburnOpenUsb(KBCTX scope, uint16_t vid, uint16_t pid, const uint8_t 
 }
 
 kburn_err_t kburnPollUsb(KBCTX scope) {
-	if (!scope->usb->subsystem_inited)
+	if (!scope->usb->subsystem_inited) {
 		usb_subsystem_init(scope);
+	}
 
 	return init_list_all_usb_devices(scope);
 }
@@ -50,7 +53,7 @@ void kburnSetUsbFilter(KBCTX scope, int vid, int pid) {
 
 kburnUsbDeviceList kburnGetUsbList(KBCTX scope) {
 	if (scope->list2 == NULL) {
-		scope->list2 = array_create(struct kburnUsbDeviceInfoSlice, 10);
+		scope->list2 = array_create(kburnUsbDeviceInfoSlice, 10);
 		if (scope->list2 == NULL) {
 			return (kburnUsbDeviceList){.size = 0, .list = NULL};
 		}

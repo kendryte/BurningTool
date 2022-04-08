@@ -26,8 +26,9 @@ DEFINE_REGISTER_SWAPPER(kburnOnSerialConnect, scope->serial->on_verify, on_devic
 DEFINE_REGISTER_SWAPPER(kburnOnSerialConfirm, scope->serial->on_handle, on_device_handle)
 
 PUBLIC kburn_err_t kburnPollSerial(KBCTX scope) {
-	if (!scope->serial->subsystem_inited)
+	if (!scope->serial->subsystem_inited) {
 		serial_subsystem_init(scope);
+	}
 
 	return init_list_all_serial_devices(scope);
 }

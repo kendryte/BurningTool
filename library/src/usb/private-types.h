@@ -12,6 +12,8 @@
 // #define BOMS_RESET 0xFF
 // #define BOMS_GET_MAX_LUN 0xFE
 
+typedef struct kburnUsbDeviceInfoSlice kburnUsbDeviceInfoSlice;
+
 enum UsbEventMode {
 	USB_EVENT_UNKNOWN = 0,
 	USB_EVENT_POLLING,

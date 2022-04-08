@@ -30,14 +30,16 @@ static void on_event(void *ctx, ser_dev_evt_t evt, const ser_dev_t *dev) {
 }
 
 static void first_init_list(void *UNUSED(ctx), KBCTX scope, const bool *const quit) {
-	if (!quit)
+	if (!quit) {
 		init_list_all_serial_devices(scope);
+	}
 }
 
 void serial_monitor_destroy(KBCTX scope) {
 	debug_trace_function();
-	if (!scope->serial->monitor_prepared)
+	if (!scope->serial->monitor_prepared) {
 		return;
+	}
 	if (scope->serial->monitor_instance) {
 		ser_dev_monitor_stop(scope->serial->monitor_instance);
 		scope->serial->monitor_instance = NULL;
@@ -48,8 +50,9 @@ void serial_monitor_destroy(KBCTX scope) {
 
 kburn_err_t serial_monitor_prepare(KBCTX scope) {
 	debug_trace_function();
-	if (scope->serial->monitor_prepared)
+	if (scope->serial->monitor_prepared) {
 		return KBurnNoErr;
+	}
 	scope->serial->monitor_prepared = true;
 
 	if (scope->serial->monitor_instance) {
@@ -72,8 +75,9 @@ void serial_monitor_pause(KBCTX scope) {
 
 kburn_err_t serial_monitor_resume(KBCTX scope) {
 	debug_trace_function("[instance=%p]", (void *)scope->serial->monitor_instance);
-	if (scope->serial->monitor_instance == NULL)
+	if (scope->serial->monitor_instance == NULL) {
 		scope->serial->monitor_instance = ser_dev_monitor_init(on_event, scope);
+	}
 
 	if (scope->serial->monitor_instance == NULL) {
 		debug_print(KBURN_LOG_ERROR, "ser_dev_monitor_init fail");

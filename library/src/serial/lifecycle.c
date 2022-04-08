@@ -19,16 +19,18 @@ static bool confirm_port_is_ready(kburnSerialDeviceNode *node) {
 }
 
 static inline void free_handle(void *handle) {
-	if (handle)
+	if (handle) {
 		free(handle);
+	}
 }
 
 DECALRE_DISPOSE(destroy_serial_port, kburnDeviceNode) {
 	kburnSerialDeviceNode *serial = context->serial;
 	debug_trace_function("%p[%s]", (void *)serial, OPTSTR(serial->deviceInfo.path, "*invalid*"));
 
-	if (!serial->init)
+	if (!serial->init) {
 		return;
+	}
 
 	lock(serial->mutex);
 
@@ -39,11 +41,13 @@ DECALRE_DISPOSE(destroy_serial_port, kburnDeviceNode) {
 		serial->binding = NULL;
 	}
 
-	if (serial->isOpen)
+	if (serial->isOpen) {
 		serial_low_close(serial);
+	}
 
-	if (serial->m_dev_handle != NULL)
+	if (serial->m_dev_handle != NULL) {
 		ser_destroy(serial->m_dev_handle);
+	}
 
 	serial->init = false;
 

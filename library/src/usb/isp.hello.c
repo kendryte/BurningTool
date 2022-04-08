@@ -55,8 +55,9 @@ static kburn_err_t usb_device_serial_put_str4(kburnDeviceNode *node, const uint8
 	/* 批量传输的三个阶段，命令阶段，数据阶段，状态阶段 */
 	/* 命令阶段 */
 	r = usb_lowlevel_command_send(node->usb->handle, node->usb->deviceInfo.endpoint_out, request, LIBUSB_ENDPOINT_OUT, 0, expected_tag);
-	if (r != KBurnNoErr)
+	if (r != KBurnNoErr) {
 		return r;
+	}
 
 	return usb_lowlevel_status_read(node->usb->handle, node->usb->deviceInfo.endpoint_in, expected_tag);
 }
@@ -71,8 +72,9 @@ kburn_err_t usb_device_serial_print(kburnDeviceNode *node, const uint8_t *buff, 
 		} else {
 			e = usb_device_serial_put_str4(node, buff + i);
 		}
-		if (e != KBurnNoErr)
+		if (e != KBurnNoErr) {
 			return e;
+		}
 	}
 	return KBurnNoErr;
 }

@@ -47,8 +47,9 @@ kburn_err_t usb_get_field(kburnDeviceNode *node, uint8_t type, uint8_t *output) 
 	int try = 3, r = 0;
 	while (try-- > 0) {
 		r = libusb_get_string_descriptor_ascii(node->usb->handle, type, output, 256);
-		if (r != LIBUSB_ERROR_BUSY)
+		if (r != LIBUSB_ERROR_BUSY) {
 			break;
+		}
 
 		debug_print_libusb_error("  %d> libusb_get_string_descriptor_ascii()", r, try);
 		do_sleep(1000);

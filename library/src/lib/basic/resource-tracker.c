@@ -44,8 +44,9 @@ void *_track_resource(resource_tracker_t *tracker, void *resource, cleanup_funct
 	tracker->element[i].resource = resource;
 	tracker->element[i].force = always;
 	tracker->element[i].__debug = dbg;
-	if (always)
+	if (always) {
 		tracker->hasAlways = true;
+	}
 
 	return resource;
 }

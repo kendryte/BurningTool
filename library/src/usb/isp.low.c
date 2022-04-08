@@ -58,8 +58,9 @@ static int retry_libusb_bulk_transfer(libusb_device_handle *dev_handle, unsigned
 	for (int retry = 0; retry < RETRY_MAX; retry++) {
 		// 传输长度必须正好是31个字节
 		r = libusb_bulk_transfer(dev_handle, endpoint, data, length, actual_length, timeout);
-		if (r == LIBUSB_SUCCESS)
+		if (r == LIBUSB_SUCCESS) {
 			return LIBUSB_SUCCESS;
+		}
 
 		if (r == LIBUSB_ERROR_PIPE) {
 			libusb_clear_halt(dev_handle, endpoint);
@@ -101,8 +102,9 @@ kburn_err_t usb_lowlevel_command_send(libusb_device_handle *handle, uint8_t endp
 
 	int written_size = 0;
 	int r = retry_libusb_bulk_transfer(handle, endpoint_out, &cbw, sizeof(usbIspRequestPacket), &written_size, 1000);
-	if (r < LIBUSB_SUCCESS)
+	if (r < LIBUSB_SUCCESS) {
 		return make_error_code(KBURN_ERROR_KIND_USB, r);
+	}
 
 	debug_print(KBURN_LOG_DEBUG, "      %d bytes sent", written_size);
 
@@ -127,10 +129,11 @@ static kburn_err_t csw_status_parse(const void *buff, uint32_t expected_operatio
 	if (csw->is_success) {
 		debug_print(KBURN_LOG_TRACE, "mass storage status: %d", csw->is_success);
 		// 状态值为1说明有错误出现，应该使用GetSense获取错误原因。状态值大于等于2说明设备没有识别CWB命令是啥
-		if (csw->is_success == 1)
+		if (csw->is_success == 1) {
 			return make_error_code(KBURN_ERROR_KIND_COMMON, KBurnUsbErrorSense);
-		else
+		} else {
 			return make_error_code(KBURN_ERROR_KIND_COMMON, KBurnProtocolOpMismatch);
+		}
 	} else {
 		debug_print(KBURN_LOG_ERROR, "mass storage status: %d", csw->is_success);
 	}
@@ -145,8 +148,9 @@ kburn_err_t usb_lowlevel_status_read(libusb_device_handle *handle, uint8_t endpo
 
 	int readed_size = 0;
 	int r = retry_libusb_bulk_transfer(handle, endpoint_in, &csw, sizeof(usbIspResponsePacket), &readed_size, 1000);
-	if (r < LIBUSB_SUCCESS)
+	if (r < LIBUSB_SUCCESS) {
 		return make_error_code(KBURN_ERROR_KIND_USB, r);
+	}
 
 	print_buffer(KBURN_LOG_TRACE, "csw", (void *)&csw, sizeof(usbIspResponsePacket));
 
@@ -156,10 +160,11 @@ kburn_err_t usb_lowlevel_status_read(libusb_device_handle *handle, uint8_t endpo
 	}
 
 	kburn_err_t ret = csw_status_parse(&csw, expected_operation_index);
-	if (ret == make_error_code(KBURN_ERROR_KIND_COMMON, KBurnUsbReadIndexMismatch))
+	if (ret == make_error_code(KBURN_ERROR_KIND_COMMON, KBurnUsbReadIndexMismatch)) {
 		return usb_lowlevel_status_read(handle, endpoint_in, expected_operation_index);
-	else
+	} else {
 		return ret;
+	}
 }
 
 kburn_err_t usb_lowlevel_transfer(kburnUsbDeviceNode *node, enum InOut direction, void *buffer, int size) {

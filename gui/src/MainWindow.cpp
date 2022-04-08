@@ -19,8 +19,9 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
 	ui->mainTabView->setCurrentIndex(0);
 
 	kburn_err_t err = kburnCreate(&context);
-	if (err != KBurnNoErr)
+	if (err != KBurnNoErr) {
 		fatalAlert(err);
+	}
 
 	library = new BurnLibrary(context);
 	QObject::connect(library, &BurnLibrary::onDebugLog, this->ui->textLog, &LoggerWindow::append);

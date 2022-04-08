@@ -40,8 +40,9 @@ disposable _toDisposable(dispose_function callback, void *userData, const char *
 #endif
 disposable_list_t *disposable_list_init(const char *comment) {
 	disposable_list_t *ret = calloc(1, sizeof(disposable_list_t));
-	if (ret == NULL)
+	if (ret == NULL) {
 		return NULL;
+	}
 	ret->mutex = lock_init();
 	ret->comment = comment;
 	return ret;
@@ -59,8 +60,9 @@ disposable dispose_list_add(disposable_list_t *r, disposable e) {
 	m_assert_ptr(e.callback, "dispose: missing callback (or NULL)");
 	m_assert(!r->disposed, "dispose: list is disposed");
 
-	if ((void *)r == (void *)e.object)
+	if ((void *)r == (void *)e.object) {
 		m_assert(r->size == 0, "free self must at first element");
+	}
 
 	lock(r->mutex);
 
@@ -73,11 +75,13 @@ disposable dispose_list_add(disposable_list_t *r, disposable e) {
 	ele->parent = r;
 	e.list = r;
 
-	if (!r->head)
+	if (!r->head) {
 		r->head = ele;
+	}
 
-	if (r->tail)
+	if (r->tail) {
 		r->tail->next = ele;
+	}
 
 	ele->prev = r->tail;
 
@@ -99,17 +103,21 @@ static void debug_list_content(const disposable_list_t *r) {
 }
 
 static void do_delete(disposable_list_t *r, disposable_list_element_t *target) {
-	if (target->prev)
+	if (target->prev) {
 		target->prev->next = target->next;
+	}
 
-	if (target->next)
+	if (target->next) {
 		target->next->prev = target->prev;
+	}
 
-	if (target == r->head)
+	if (target == r->head) {
 		r->head = target->next;
+	}
 
-	if (target == r->tail)
+	if (target == r->tail) {
 		r->tail = target->prev;
+	}
 
 	r->size--;
 
@@ -117,16 +125,18 @@ static void do_delete(disposable_list_t *r, disposable_list_element_t *target) {
 }
 
 void dispose_list_cancel(disposable_list_t *r, disposable e) {
-	if (r == NULL)
+	if (r == NULL) {
 		r = e.list;
+	}
 
 	m_assert_ptr(r, "dispose: no list information");
 	m_assert_ptr(r->mutex, "dispose: not init");
 
 	debug_trace_function("<%s>[%d], %s%s", NULLSTR(r->comment), r->size, DEBUG_OBJ_TITLE(e._dbg), DEBUG_OBJ_PATH(e._dbg));
 
-	if (!r->disposed)
+	if (!r->disposed) {
 		lock(r->mutex);
+	}
 
 	bool found = false;
 	int index = 0;
@@ -146,8 +156,9 @@ void dispose_list_cancel(disposable_list_t *r, disposable e) {
 		m_abort("dispose not found object");
 	}
 
-	if (!r->disposed)
+	if (!r->disposed) {
 		unlock(r->mutex);
+	}
 }
 
 void dispose_all(disposable_list_t *r) {
@@ -164,8 +175,9 @@ void dispose_all(disposable_list_t *r) {
 	bool selfLast = false;
 
 	while (r->tail) {
-		if (selfDisposing && r->size == 1)
+		if (selfDisposing && r->size == 1) {
 			selfLast = true;
+		}
 
 		disposable_list_element_t *current = r->tail;
 		current->callback(r, current->object);
@@ -193,8 +205,9 @@ void dispose(disposable target) {
 
 	m_assert(!(target.callback == free_pointer && target.object == r), "can not dispose self");
 
-	if (r->size == 0)
+	if (r->size == 0) {
 		return;
+	}
 
 	disposable_list_element_t *current = r->tail;
 
@@ -212,6 +225,8 @@ DECALRE_DISPOSE(free_and_unset_pointer, void *) {
 	free(*context);
 	*context = NULL;
 }
+DECALRE_DISPOSE_END()
+DECALRE_DISPOSE(unset_pointer, void *) { *context = NULL; }
 DECALRE_DISPOSE_END()
 DECALRE_DISPOSE(dispose_child, void) { dispose_all(context); }
 DECALRE_DISPOSE_END()

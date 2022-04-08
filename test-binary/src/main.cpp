@@ -62,13 +62,15 @@ void handle_usb(void *ctx, kburnDeviceNode *dev) {
 
 	cout << "  * error status: " << dev->error->code << ", " << test_null(dev->error->errorMessage) << endl;
 
-	if (dev->error->code != KBurnNoErr)
+	if (dev->error->code != KBurnNoErr) {
 		return;
+	}
 
 	kburnDeviceMemorySizeInfo size_info;
 	uint8_t test_block[512];
-	for (size_t i = 0; i < 512; i++)
+	for (size_t i = 0; i < 512; i++) {
 		test_block[i] = rand();
+	}
 	uint32_t testAddress = 50;
 
 	cout << "test read memory size:" << endl;
@@ -90,10 +92,11 @@ void handle_usb(void *ctx, kburnDeviceNode *dev) {
 	memset(out_test, 0, 512);
 	r = kburnUsbIspReadChunk(dev, size_info, testAddress, 512, out_test);
 	perror(r);
-	if (memcmp(out_test, test_block, 0) == 0)
+	if (memcmp(out_test, test_block, 0) == 0) {
 		cout << "    - data same" << endl;
-	else
+	} else {
 		cout << "    - data wrong" << endl;
+	}
 }
 
 void disconnect(void *ctx, const kburnDeviceNode *dev) {
@@ -151,8 +154,9 @@ int main(int argc, char **argv) {
 	for (size_t i = 0; i < list2.size; i++) {
 		cout << "[" << i << "]";
 		cout << " " << hex << (int)list2.list[i].idVendor << ":" << (int)list2.list[i].idProduct << dec << ":";
-		for (int j = 0; j < MAX_USB_PATH_LENGTH; j++)
+		for (int j = 0; j < MAX_USB_PATH_LENGTH; j++) {
 			cout << " " << (int)list2.list[i].path[j];
+		}
 		cout << endl;
 	}
 

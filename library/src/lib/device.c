@@ -6,8 +6,9 @@
 DEFINE_REGISTER_SWAPPER(kburnOnDeviceDisconnect, scope->on_disconnect, on_device_remove)
 
 DECALRE_DISPOSE(destroy_device, kburnDeviceNode) {
-	if (context->destroy_in_progress)
+	if (context->destroy_in_progress) {
 		return;
+	}
 	context->destroy_in_progress = true;
 
 	if (context->disconnect_should_call && context->_scope->on_disconnect.handler) {

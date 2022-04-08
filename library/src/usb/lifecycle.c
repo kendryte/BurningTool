@@ -42,13 +42,15 @@ static int get_endpoint(libusb_device *dev, uint8_t *out_endpoint_in, uint8_t *o
 				if (endpoint->bEndpointAddress & LIBUSB_ENDPOINT_IN) {
 					*out_endpoint_in = endpoint->bEndpointAddress;
 					debug_print(KBURN_LOG_INFO, " * endpoint_in = 0x%02X", *out_endpoint_in);
-					if (*out_endpoint_out)
+					if (*out_endpoint_out) {
 						goto _quit;
+					}
 				} else {
 					*out_endpoint_out = endpoint->bEndpointAddress;
 					debug_print(KBURN_LOG_INFO, " * endpoint_out = 0x%02X", *out_endpoint_out);
-					if (*out_endpoint_in)
+					if (*out_endpoint_in) {
 						goto _quit;
+					}
 				}
 			}
 		}
@@ -135,7 +137,6 @@ kburn_err_t open_single_usb_port(KBCTX scope, struct libusb_device *dev, bool us
 		debug_print(KBURN_LOG_DEBUG, "libusb kernel driver switch ok");
 	} else if (r == LIBUSB_ERROR_NOT_SUPPORTED) {
 		set_node_error_with_log(r, "open_single_usb_port: system not support detach kernel driver");
-		return make_error_code(KBURN_ERROR_KIND_USB, r);
 	}
 
 	libusb_clear_halt(node->usb->handle, 0);
@@ -175,8 +176,9 @@ kburn_err_t open_single_usb_port(KBCTX scope, struct libusb_device *dev, bool us
 
 	node->usb->init = true;
 	node->disconnect_should_call = true;
-	if (out_node)
+	if (out_node) {
 		*out_node = node;
+	}
 
 	DeferAbort;
 

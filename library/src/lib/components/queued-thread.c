@@ -28,8 +28,9 @@ void event_queue_thread_main(void *_ctx, KBCTX scope, const bool *const quit) {
 	event_queue_thread *context = _ctx;
 	while (!*quit) {
 		lock(context->mutex);
-		while (queue_size(context->queue) == 0 && !*quit)
+		while (queue_size(context->queue) == 0 && !*quit) {
 			pthread_cond_wait(&context->cond, raw_lock(context->mutex));
+		}
 
 		void *data = queue_shift(context->queue);
 		if (data == NULL) {
@@ -44,8 +45,9 @@ void event_queue_thread_main(void *_ctx, KBCTX scope, const bool *const quit) {
 }
 
 void event_thread_deinit(KBCTX scope, event_queue_thread **queue_thread) {
-	if ((*queue_thread)->thread)
+	if ((*queue_thread)->thread) {
 		thread_destroy(scope, (*queue_thread)->thread);
+	}
 	event_thread_queue_deinit(scope->disposables, queue_thread);
 	*queue_thread = NULL;
 }

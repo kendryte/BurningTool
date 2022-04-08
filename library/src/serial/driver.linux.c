@@ -21,14 +21,16 @@ kburnSerialDeviceInfo driver_get_devinfo(const char *path) {
 	snprintf(ret.path, MAX_SERIAL_PATH_SIZE, "%s", path);
 
 	struct udev *u = udev_new();
-	if (u == NULL)
+	if (u == NULL) {
 		return ret;
+	}
 	DeferCall(m_udev_unref, u);
 
 	/* create libudev enumerate */
 	struct udev_enumerate *query = udev_enumerate_new(u);
-	if (query == NULL)
+	if (query == NULL) {
 		return ret;
+	}
 
 	DeferCall(m_udev_enumerate_unref, query);
 
@@ -40,8 +42,9 @@ kburnSerialDeviceInfo driver_get_devinfo(const char *path) {
 	udev_list_entry_foreach(itr, list) {
 		struct udev_device *dev = udev_device_new_from_syspath(u, udev_list_entry_get_name(itr));
 
-		if (dev == NULL)
+		if (dev == NULL) {
 			continue;
+		}
 
 		const char *node = udev_device_get_devnode(dev);
 
@@ -61,8 +64,9 @@ kburnSerialDeviceInfo driver_get_devinfo(const char *path) {
 				get_number_prop(ret.usbIdProduct, "ID_REVISION", 16);
 
 				pstr = udev_device_get_property_value(dev, "ID_USB_DRIVER");
-				if (pstr)
+				if (pstr) {
 					snprintf(ret.usbDriver, MAX_DRIVER_NAME_SIZE, "%s", pstr);
+				}
 			} else {
 				ret.isUSB = false;
 			}

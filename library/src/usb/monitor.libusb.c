@@ -1,5 +1,6 @@
 #include "monitor.h"
 #include "context.h"
+#include "descriptor.h"
 #include "private-types.h"
 #include "canaan-burn/canaan-burn.h"
 #include <stdlib.h>
@@ -9,13 +10,26 @@
 
 static int on_libusb_hotplug_event(struct libusb_context *UNUSED(ctx), struct libusb_device *dev, libusb_hotplug_event event, void *user_data) {
 	KBCTX scope = user_data;
+	kburnUsbDeviceInfoSlice devInfo;
 
 	if (LIBUSB_HOTPLUG_EVENT_DEVICE_ARRIVED == event) {
 		debug_print(KBURN_LOG_DEBUG, "libusb event: " COLOR_FMT("ARRIVED"), COLOR_ARG(GREEN));
-		push_libusb_event(scope, event, dev);
+
+		int ret = usb_get_vid_pid_path(dev, &devInfo.idVendor, &devInfo.idProduct, devInfo.path);
+		if (ret < LIBUSB_SUCCESS) {
+			return 0;
+		}
+
+		push_libusb_event(scope, event, &devInfo);
 	} else if (LIBUSB_HOTPLUG_EVENT_DEVICE_LEFT == event) {
 		debug_print(KBURN_LOG_DEBUG, "libusb event: " COLOR_FMT("LEFT"), COLOR_ARG(YELLOW));
-		push_libusb_event(scope, event, dev);
+
+		int ret = usb_get_vid_pid_path(dev, &devInfo.idVendor, &devInfo.idProduct, devInfo.path);
+		if (ret < LIBUSB_SUCCESS) {
+			return 0;
+		}
+
+		push_libusb_event(scope, event, &devInfo);
 	} else {
 		debug_print(KBURN_LOG_WARN, "Unhandled event %d\n", event);
 	}

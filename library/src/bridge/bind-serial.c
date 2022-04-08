@@ -28,8 +28,9 @@ static uint32_t handle_one_device(kburnSerialDeviceNode *dev) {
 
 	ser_available(dev->m_dev_handle, &in_buffer_size);
 
-	if (in_buffer_size == 0)
+	if (in_buffer_size == 0) {
 		return false;
+	}
 
 	size_t tbuff_start = b->packet_last;
 	b->packet_last = 0;
@@ -46,8 +47,9 @@ static uint32_t handle_one_device(kburnSerialDeviceNode *dev) {
 	debug_print(KBURN_LOG_DEBUG, "\t" FMT_SIZET " in serial buffer", in_buffer_size);
 
 	for (size_t i = 0; i < tbuff_size; i++) {
-		if (tbuff[i] != '\xff')
+		if (tbuff[i] != '\xff') {
 			continue;
+		}
 
 		if (i + 6 > tbuff_size) {
 			push_buffer(b->packet, &b->packet_last, tbuff + i, tbuff_size - i);
@@ -87,8 +89,9 @@ static uint32_t handle_one_device(kburnSerialDeviceNode *dev) {
 
 		uint32_t bind_id = handle_page(b->buffer + found_start, found_end - found_start);
 
-		if (bind_id > 0)
+		if (bind_id > 0) {
 			return bind_id;
+		}
 
 		if ((uint32_t)found_end + 1 > b->buff_i) {
 			b->buff_i = 0;
@@ -109,11 +112,13 @@ void pair_serial_ports_thread(void *UNUSED(ctx), KBCTX scope, const bool *const 
 		for (kburnDeviceNode **ptr = scope->waittingDevice->list; *ptr != NULL; ptr++) {
 			kburnDeviceNode *serial_node = *ptr;
 			kburnSerialDeviceNode *dev = serial_node->serial;
-			if (!dev->init) // TODO: need lock with deinit
+			if (!dev->init) { // TODO: need lock with deinit
 				continue;
+			}
 
-			if (dev->binding == NULL)
+			if (dev->binding == NULL) {
 				dev->binding = calloc(1, sizeof(binding_state));
+			}
 
 			uint32_t found_bind = handle_one_device(dev);
 			if (found_bind > 0) {
@@ -137,10 +142,11 @@ void pair_serial_ports_thread(void *UNUSED(ctx), KBCTX scope, const bool *const 
 
 		unlock(scope->waittingDevice->mutex);
 
-		if (item_waitting_pair > 0)
+		if (item_waitting_pair > 0) {
 			delay = 100;
-		else if (delay < 1000)
+		} else if (delay < 1000) {
 			delay += 10;
+		}
 
 		do_sleep(delay);
 	}

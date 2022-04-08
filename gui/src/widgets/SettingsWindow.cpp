@@ -18,8 +18,9 @@ SettingsWindow::~SettingsWindow() { delete ui; }
 #include <qfiledialog.h>
 void SettingsWindow::on_btnSelectImage_clicked() {
 	auto str = QFileDialog::getOpenFileName(this, tr("打开系统镜像"), tr(""));
-	if (str.isEmpty())
+	if (str.isEmpty()) {
 		return;
+	}
 	ui->inputSysImage->setText(str);
 
 	loadSysImage();
@@ -28,8 +29,9 @@ void SettingsWindow::on_btnSelectImage_clicked() {
 void SettingsWindow::loadSysImage() {
 	QString fPath = ui->inputSysImage->text();
 
-	if (fd.fileName() == fPath)
+	if (fd.fileName() == fPath) {
 		return;
+	}
 
 	fd.setFileName(fPath);
 

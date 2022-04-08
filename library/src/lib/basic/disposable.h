@@ -63,6 +63,7 @@ void dispose(disposable target);
 
 DECALRE_DISPOSE_HEADER(free_pointer, void);
 DECALRE_DISPOSE_HEADER(free_and_unset_pointer, void *);
+DECALRE_DISPOSE_HEADER(unset_pointer, void *);
 DECALRE_DISPOSE_HEADER(dispose_child, void);
 DECALRE_DISPOSE_HEADER(dispose_all_and_deinit, disposable_list_t);
 

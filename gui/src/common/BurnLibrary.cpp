@@ -49,8 +49,9 @@ void BurnLibrary::start() {
 #pragma GCC diagnostic pop
 
 	auto err = kburnStartWaitingDevices(context);
-	if (err != KBurnNoErr)
+	if (err != KBurnNoErr) {
 		fatalAlert(err);
+	}
 
 	reloadList();
 }
@@ -120,8 +121,9 @@ void BurnLibrary::handleDeviceRemove(const kburnDeviceNode *dev) {
 	}
 }
 void BurnLibrary::handleHandleSerial(kburnDeviceNode *dev) {
-	if (!dev)
+	if (!dev) {
 		return;
+	}
 
 	qDebug() << "new device handle" << QChar::LineFeed;
 

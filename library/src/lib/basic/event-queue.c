@@ -28,8 +28,9 @@ void *queue_shift(queue_info *queue) {
 	}
 	queue_struct *old = queue->first;
 
-	if (queue->last == queue->first)
+	if (queue->last == queue->first) {
 		queue->last = NULL;
+	}
 	queue->first = old->next;
 
 	queue->length--;
@@ -42,13 +43,15 @@ void *queue_shift(queue_info *queue) {
 size_t queue_size(queue_info *queue) { return queue->length; }
 
 void queue_destroy(queue_info *queue, pointer_handler element_handle) {
-	if (queue == NULL)
+	if (queue == NULL) {
 		return;
+	}
 
 	void *ele;
 	while ((ele = queue_shift(queue)) != NULL) {
-		if (element_handle != NULL)
+		if (element_handle != NULL) {
 			element_handle(ele);
+		}
 	}
 
 	free(queue);

@@ -27,8 +27,9 @@ const char *relative_path(const char *file_path) { return &file_path[strlen(PROJ
 int basename_to_ext_length(const char *name) {
 	name = cbasename(name);
 	char *found = strrchr(name, '.');
-	if (found == NULL)
+	if (found == NULL) {
 		return strlen(name);
+	}
 
 	return found - name;
 }
@@ -45,8 +46,9 @@ size_t _debug_format_prefix(char *output, size_t output_size, const char *file, 
 
 	size += _debug_format_path(output + size, output_size - size, file, line);
 
-	if (size < PREFIX_SIZE)
+	if (size < PREFIX_SIZE) {
 		size += m_snprintf(output + size, output_size - size, "%*s", PREFIX_SIZE - (int)size, "");
+	}
 
 	output[size] = ']';
 	output[size + 1] = ' ';
@@ -59,8 +61,9 @@ size_t _debug_format_prefix(char *output, size_t output_size, const char *file, 
 
 size_t _debug_format_bundle_title(char *output, size_t output_size, debug_bundle e) {
 	size_t size = 0;
-	if (e.func)
+	if (e.func) {
 		size += m_snprintf(output, output_size, "%s::", e.func);
+	}
 
 	size += m_snprintf(output + size, output_size - size, "%s", OPTSTR(e.title, "<anonymouse>"));
 

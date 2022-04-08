@@ -10,8 +10,9 @@ char *sprintf_alloc(const char *fmt, ...) {
 
 	size_t size = m_vsnprintf(NULL, 0, fmt, args);
 	char *ret = calloc(sizeof(char), size + 2);
-	if (ret == NULL)
+	if (ret == NULL) {
 		return ret;
+	}
 	m_vsnprintf(ret, size + 2, fmt, args);
 
 	va_end(args);
@@ -23,8 +24,9 @@ char *vsprintf_alloc(const char *fmt, va_list args) {
 	va_copy(argsc, args);
 	size_t size = m_vsnprintf(NULL, 0, fmt, argsc);
 	char *ret = calloc(sizeof(char), size + 100);
-	if (ret == NULL)
+	if (ret == NULL) {
 		return ret;
+	}
 
 	m_vsnprintf(ret, size + 100, fmt, args);
 

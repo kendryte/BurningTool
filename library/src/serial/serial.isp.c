@@ -31,6 +31,7 @@ static uint32_t checksum(const isp_request_t *packet) {
 bool serial_isp_verify_checksum(isp_request_t *packet) { return checksum(packet) == packet->checksum; }
 
 void serial_isp_calculate_checksum(isp_request_t *packet) {
-	if (packet->checksum == 0)
+	if (packet->checksum == 0) {
 		packet->checksum = checksum(packet);
+	}
 }

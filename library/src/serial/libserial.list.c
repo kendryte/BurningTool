@@ -49,7 +49,7 @@ ssize_t list_serial_ports(KBCTX UNUSED(scope), struct kburnSerialDeviceInfoSlice
 			continue;
 		}
 
-		if (i > max_size) {
+		if (i >= max_size) {
 			i++;
 			continue;
 		}

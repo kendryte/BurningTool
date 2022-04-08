@@ -18,7 +18,7 @@
 	"cmake.clearOutputBeforeBuild": true,
 	"cmake.sourceDirectory": "${workspaceFolder}",
 	"cmake.buildDirectory": "${workspaceFolder}/build-${env:HOSTNAME}${env:COMPUTERNAME}",
-	"cmake.copyCompileCommands": "${workspaceFolder}/.vscode/compile_command.json",
+	"cmake.copyCompileCommands": "${workspaceFolder}/.vscode/compile_commands.json",
 	"cmake.exportCompileCommandsFile": true,
 	"cmake.skipConfigureIfCachePresent": false,
 	"cmake.cmakeCommunicationMode": "fileApi",

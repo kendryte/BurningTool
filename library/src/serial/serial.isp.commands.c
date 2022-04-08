@@ -20,8 +20,9 @@ static bool greeting(kburnSerialDeviceNode *node, bool auto_switch) {
 	if (!serial_isp_command_send_low_retry(node, hello_pkt, 3)) {
 		debug_print(KBURN_LOG_ERROR, "greeting: FAILED");
 
-		if (!auto_switch)
+		if (!auto_switch) {
 			return false;
+		}
 
 		if (error_compare(node, KBURN_ERROR_KIND_SERIAL, SER_ETIMEDOUT)) {
 			uint32_t want_speed;
@@ -31,8 +32,9 @@ static bool greeting(kburnSerialDeviceNode *node, bool auto_switch) {
 			} else if (node->baudRate == baudrateHighValue) {
 				debug_print(KBURN_LOG_ERROR, "  - error is timeout, retry low speed.");
 				want_speed = KBURN_K510_BAUDRATE_DEFAULT;
-			} else
+			} else {
 				return false;
+			}
 
 			if (!hackdev_serial_low_switch_baudrate(node, want_speed)) {
 				debug_print(KBURN_LOG_ERROR, "  - can not switch baudrate");
@@ -140,16 +142,18 @@ bool kburnSerialIspMemoryWrite(kburnSerialDeviceNode *node, const kburn_mem_addr
 	const uint32_t pages = (data_size + BOARD_MEMORY_PAGE_SIZE - 1) / BOARD_MEMORY_PAGE_SIZE;
 	debug_trace_function("base=0x%X, size=" FMT_SIZET ", pages=%d", address, data_size, pages);
 
-	if (cb)
+	if (cb) {
 		cb(ctx, get_node(node), 0, data_size);
+	}
 
 	for (uint32_t page = 0; page < pages; page++) {
 		uint32_t offset = page * BOARD_MEMORY_PAGE_SIZE;
 		packet->address = address + offset;
-		if (offset + BOARD_MEMORY_PAGE_SIZE > data_size)
+		if (offset + BOARD_MEMORY_PAGE_SIZE > data_size) {
 			packet->data_len = data_size % BOARD_MEMORY_PAGE_SIZE;
-		else
+		} else {
 			packet->data_len = BOARD_MEMORY_PAGE_SIZE;
+		}
 
 		debug_print(KBURN_LOG_TRACE, "[mem write]: page=%u [0x%X], size=%u", page, packet->address, packet->data_len);
 
@@ -160,8 +164,9 @@ bool kburnSerialIspMemoryWrite(kburnSerialDeviceNode *node, const kburn_mem_addr
 			return false;
 		}
 
-		if (cb)
+		if (cb) {
 			cb(ctx, get_node(node), page * BOARD_MEMORY_PAGE_SIZE + packet->data_len, data_size);
+		}
 	}
 
 	return true;
