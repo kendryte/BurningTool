@@ -55,18 +55,19 @@ kburn_err_t kburnCreate(KBCTX *ppCtx) {
 	struct port_link_list *odlist = port_link_list_init();
 	dispose_list_add(dis, toDisposable(port_link_list_deinit, odlist));
 
-	memcpy(*ppCtx,
-		   &(kburnContext){
-			   .signature = CONTEXT_MEMORY_SIGNATURE,
-			   .serial = serial,
-			   .usb = usb,
-			   .openDeviceList = odlist,
-			   .waittingDevice = wlist,
-			   .disposables = dis,
-			   .threads = threads,
-			   .monitor_inited = false,
-		   },
-		   sizeof(kburnContext));
+	memcpy(
+		*ppCtx,
+		&(kburnContext){
+			.signature = CONTEXT_MEMORY_SIGNATURE,
+			.serial = serial,
+			.usb = usb,
+			.openDeviceList = odlist,
+			.waittingDevice = wlist,
+			.disposables = dis,
+			.threads = threads,
+			.monitor_inited = false,
+		},
+		sizeof(kburnContext));
 
 	if (!lib_global_scope) {
 		atexit(kburnGlobalDestroy);

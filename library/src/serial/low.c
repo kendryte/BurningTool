@@ -43,7 +43,9 @@ bool serial_low_open(kburnSerialDeviceNode *node) {
 	return open(node, get_current_serial_options(node->deviceInfo.path));
 }
 
-void serial_low_flush_all(kburnSerialDeviceNode *node) { ser_flush(node->m_dev_handle, SER_QUEUE_ALL); }
+void serial_low_flush_all(kburnSerialDeviceNode *node) {
+	ser_flush(node->m_dev_handle, SER_QUEUE_ALL);
+}
 
 bool serial_low_switch_baudrate(kburnSerialDeviceNode *node, uint32_t speed) {
 	serial_low_close(node);

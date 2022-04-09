@@ -13,10 +13,14 @@ extern kburnDebugColors g_debug_colors;
 size_t debug_format_color(const char *prefix, const char *postfix, const char *fmt, ...) __attribute__((format(printf, 3, 4)));
 
 #define COLOR_FMT(const_str) "%s" const_str "%s"
-static inline const char *COLOR_START(const char *prefix, const char *UNUSED(postfix)) { return prefix; }
-static inline const char *COLOR_END(const char *UNUSED(prefix), const char *postfix) { return postfix; }
+static inline const char *COLOR_START(const char *prefix, const char *UNUSED(postfix)) {
+	return prefix;
+}
+static inline const char *COLOR_END(const char *UNUSED(prefix), const char *postfix) {
+	return postfix;
+}
 
-#define COLOR_ARG(COLOR, ...)                                                                                                                        \
-	COLOR_START(COLOR)                                                                                                                               \
-	__VA_OPT__(, )                                                                                                                                   \
+#define COLOR_ARG(COLOR, ...) \
+	COLOR_START(COLOR)        \
+	__VA_OPT__(, )            \
 	__VA_ARGS__, COLOR_END(COLOR)

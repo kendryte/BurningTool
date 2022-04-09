@@ -10,7 +10,9 @@
 
 using namespace std;
 
-const char *test_null(const char *str) { return str ? str : "NULL"; }
+const char *test_null(const char *str) {
+	return str ? str : "NULL";
+}
 
 bool verify(void *ctx, const kburnDeviceNode *dev) {
 	cout << "ask connect: " << dev->serial->deviceInfo.path << ", isUSB=" << dev->serial->deviceInfo.isUSB << endl;

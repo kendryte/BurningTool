@@ -4,7 +4,9 @@
 
 using namespace std;
 
-const char *test_null(const char *str) { return str ? str : "NULL"; }
+const char *test_null(const char *str) {
+	return str ? str : "NULL";
+}
 
 bool verify(const kburnDeviceNode *dev, void *ctx) {
 	cout << "ask connect: " << dev->path << ", isUSB=" << dev->deviceInfo.isUSB << endl;

@@ -130,7 +130,8 @@ target_link_libraries(canaan_burn PRIVATE sercomm)
 
 # ############################  END #######################################
 if(WIN32)
-	target_link_libraries(canaan_burn PRIVATE ws2_32)
+	set(WIN32LIBS ws2_32 Setupapi)
+	target_link_libraries(canaan_burn PRIVATE "${WIN32LIBS}")
 endif()
 
 include("${CMAKE_CURRENT_LIST_DIR}/3rdparty/slip/CMakeLists.txt")

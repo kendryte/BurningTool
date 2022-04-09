@@ -40,7 +40,9 @@ void *queue_shift(queue_info *queue) {
 	return ret;
 }
 
-size_t queue_size(queue_info *queue) { return queue->length; }
+size_t queue_size(queue_info *queue) {
+	return queue->length;
+}
 
 void queue_destroy(queue_info *queue, pointer_handler element_handle) {
 	if (queue == NULL) {

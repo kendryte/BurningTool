@@ -17,8 +17,9 @@ static inline void do_cleanup(const resource_tracker_element element) {
 
 void resource_tracker_done(resource_tracker_t *tracker) {
 	if (!tracker->successed) {
-		debug_print_dbg(KBURN_LOG_WARN, tracker->__debug, "function return without confirm, release all resource: %s(%d)",
-						DEBUG_OBJ_TITLE(tracker->__debug), tracker->size);
+		debug_print_dbg(
+			KBURN_LOG_WARN, tracker->__debug, "function return without confirm, release all resource: %s(%d)", DEBUG_OBJ_TITLE(tracker->__debug),
+			tracker->size);
 		for (int i = tracker->size - 1; i >= 0; i--) {
 			debug_print_dbg(KBURN_LOG_WARN, tracker->element[i].__debug, " * %s", DEBUG_OBJ_TITLE(tracker->element[i].__debug));
 			do_cleanup(tracker->element[i]);
@@ -34,7 +35,9 @@ void resource_tracker_done(resource_tracker_t *tracker) {
 
 	memset(tracker, 0, sizeof(resource_tracker_t));
 }
-void keep_resource(resource_tracker_t *tracker) { tracker->successed = true; }
+void keep_resource(resource_tracker_t *tracker) {
+	tracker->successed = true;
+}
 void *_track_resource(resource_tracker_t *tracker, void *resource, cleanup_function clean, bool always, resource_tracker_debug dbg) {
 	m_assert_ptr(resource, "can not track null ptr");
 	uint8_t i = tracker->size++;

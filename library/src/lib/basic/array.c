@@ -90,5 +90,7 @@ bool array_fit(dynamic_array_t *array, uint32_t new_size) {
 		return true;
 	}
 }
-DECALRE_DISPOSE(array_destroy, dynamic_array_t) { array_delete(context); }
+DECALRE_DISPOSE(array_destroy, dynamic_array_t) {
+	array_delete(context);
+}
 DECALRE_DISPOSE_END()

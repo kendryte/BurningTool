@@ -22,7 +22,9 @@ const char *cbasename(const char *p) {
 #define PREFIX_SIZE 42
 #endif
 
-const char *relative_path(const char *file_path) { return &file_path[strlen(PROJECT_ROOT) + 1]; }
+const char *relative_path(const char *file_path) {
+	return &file_path[strlen(PROJECT_ROOT) + 1];
+}
 
 int basename_to_ext_length(const char *name) {
 	name = cbasename(name);
@@ -34,7 +36,9 @@ int basename_to_ext_length(const char *name) {
 	return found - name;
 }
 
-size_t debug_empty_prefix(char *output, size_t output_size) { return m_snprintf(output, output_size, "%*s", PREFIX_SIZE, ""); }
+size_t debug_empty_prefix(char *output, size_t output_size) {
+	return m_snprintf(output, output_size, "%*s", PREFIX_SIZE, "");
+}
 
 size_t _debug_format_path(char *output, size_t output_size, const char *file, const int line) {
 	return m_snprintf(output, output_size, FILE_LINE_FORMAT, FILE_LINE_VALUE(file, line));

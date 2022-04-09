@@ -75,4 +75,6 @@ kburnUsbDeviceList kburnGetUsbList(KBCTX scope) {
 	return (kburnUsbDeviceList){.size = array->length, .list = array->body};
 }
 
-void kburnFreeUsbList(KBCTX scope) { array_destroy(scope->disposables, scope->list2); }
+void kburnFreeUsbList(KBCTX scope) {
+	array_destroy(scope->disposables, scope->list2);
+}

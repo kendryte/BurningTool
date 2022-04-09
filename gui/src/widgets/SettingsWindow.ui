@@ -10,9 +10,6 @@
     <height>544</height>
    </rect>
   </property>
-  <property name="windowTitle">
-   <string>Form</string>
-  </property>
   <layout class="QVBoxLayout" name="verticalLayout">
    <item>
     <widget class="QGroupBox" name="groupBox_5">
@@ -117,18 +114,107 @@
        </widget>
       </item>
       <item>
-       <widget class="QSpinBox" name="inputStopBits">
+       <widget class="QDoubleSpinBox" name="inputStopBits">
         <property name="sizePolicy">
          <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
           <horstretch>0</horstretch>
           <verstretch>0</verstretch>
          </sizepolicy>
         </property>
-        <property name="minimum">
+        <property name="correctionMode">
+         <enum>QAbstractSpinBox::CorrectToNearestValue</enum>
+        </property>
+        <property name="decimals">
          <number>1</number>
         </property>
+        <property name="minimum">
+         <double>1.000000000000000</double>
+        </property>
         <property name="maximum">
-         <number>3</number>
+         <double>2.000000000000000</double>
+        </property>
+        <property name="singleStep">
+         <double>0.500000000000000</double>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QLabel" name="label_2">
+        <property name="sizePolicy">
+         <sizepolicy hsizetype="Fixed" vsizetype="Preferred">
+          <horstretch>0</horstretch>
+          <verstretch>0</verstretch>
+         </sizepolicy>
+        </property>
+        <property name="minimumSize">
+         <size>
+          <width>50</width>
+          <height>0</height>
+         </size>
+        </property>
+        <property name="text">
+         <string>校验</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QComboBox" name="inputParity">
+        <item>
+         <property name="text">
+          <string>None</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>Even</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>Odd</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>Mark</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>Space</string>
+         </property>
+        </item>
+       </widget>
+      </item>
+      <item>
+       <widget class="QLabel" name="label_9">
+        <property name="sizePolicy">
+         <sizepolicy hsizetype="Fixed" vsizetype="Preferred">
+          <horstretch>0</horstretch>
+          <verstretch>0</verstretch>
+         </sizepolicy>
+        </property>
+        <property name="minimumSize">
+         <size>
+          <width>50</width>
+          <height>0</height>
+         </size>
+        </property>
+        <property name="text">
+         <string>数据位</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QSpinBox" name="inputByteSize">
+        <property name="minimum">
+         <number>5</number>
+        </property>
+        <property name="maximum">
+         <number>8</number>
+        </property>
+        <property name="value">
+         <number>8</number>
         </property>
        </widget>
       </item>
@@ -211,52 +297,16 @@
     </widget>
    </item>
    <item>
-    <widget class="QGroupBox" name="l_logs">
-     <property name="title">
-      <string>日志记录</string>
+    <widget class="QDialogButtonBox" name="actionBar">
+     <property name="orientation">
+      <enum>Qt::Horizontal</enum>
      </property>
-     <layout class="QGridLayout" name="_2">
-      <item row="0" column="3">
-       <widget class="QLineEdit" name="inputLogFilePath"/>
-      </item>
-      <item row="0" column="1">
-       <widget class="QComboBox" name="inputLogLevel"/>
-      </item>
-      <item row="0" column="4">
-       <widget class="QToolButton" name="btnOpenLog">
-        <property name="text">
-         <string>选择文件</string>
-        </property>
-       </widget>
-      </item>
-      <item row="0" column="0">
-       <widget class="QLabel" name="label_9">
-        <property name="text">
-         <string>TextLabel</string>
-        </property>
-       </widget>
-      </item>
-      <item row="0" column="2">
-       <widget class="QCheckBox" name="inputLogFileEnable">
-        <property name="text">
-         <string>CheckBox</string>
-        </property>
-       </widget>
-      </item>
-      <item row="0" column="5">
-       <spacer name="horizontalSpacer_8">
-        <property name="orientation">
-         <enum>Qt::Horizontal</enum>
-        </property>
-        <property name="sizeHint" stdset="0">
-         <size>
-          <width>40</width>
-          <height>20</height>
-         </size>
-        </property>
-       </spacer>
-      </item>
-     </layout>
+     <property name="standardButtons">
+      <set>QDialogButtonBox::Discard|QDialogButtonBox::RestoreDefaults|QDialogButtonBox::Save</set>
+     </property>
+     <property name="centerButtons">
+      <bool>false</bool>
+     </property>
     </widget>
    </item>
    <item>
@@ -277,23 +327,106 @@
  <resources/>
  <connections>
   <connection>
-   <sender>inputSysImage</sender>
-   <signal>editingFinished()</signal>
+   <sender>actionBar</sender>
+   <signal>rejected()</signal>
    <receiver>SettingsWindow</receiver>
-   <slot>loadSysImage()</slot>
+   <slot>reloadSettings()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>527</x>
-     <y>48</y>
+     <x>283</x>
+     <y>203</y>
     </hint>
     <hint type="destinationlabel">
-     <x>542</x>
-     <y>6</y>
+     <x>261</x>
+     <y>249</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>actionBar</sender>
+   <signal>accepted()</signal>
+   <receiver>SettingsWindow</receiver>
+   <slot>acceptSave()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>358</x>
+     <y>205</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>401</x>
+     <y>253</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>inputBaudrateHigh</sender>
+   <signal>currentIndexChanged(int)</signal>
+   <receiver>SettingsWindow</receiver>
+   <slot>inputChanged()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>219</x>
+     <y>115</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>219</x>
+     <y>297</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>inputBaudrateInit</sender>
+   <signal>currentIndexChanged(int)</signal>
+   <receiver>SettingsWindow</receiver>
+   <slot>inputChanged()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>99</x>
+     <y>115</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>98</x>
+     <y>322</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>inputStopBits</sender>
+   <signal>valueChanged(double)</signal>
+   <receiver>SettingsWindow</receiver>
+   <slot>inputChanged()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>325</x>
+     <y>115</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>358</x>
+     <y>271</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>inputByteSize</sender>
+   <signal>valueChanged(int)</signal>
+   <receiver>SettingsWindow</receiver>
+   <slot>inputChanged()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>522</x>
+     <y>115</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>358</x>
+     <y>271</y>
     </hint>
    </hints>
   </connection>
  </connections>
  <slots>
   <slot>loadSysImage()</slot>
+  <slot>acceptSave()</slot>
+  <slot>reloadSettings()</slot>
+  <slot>inputChanged()</slot>
  </slots>
 </ui>

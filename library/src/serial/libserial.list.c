@@ -68,6 +68,9 @@ ssize_t list_serial_ports(KBCTX UNUSED(scope), struct kburnSerialDeviceInfoSlice
 		strcpy(list[i].usbDriver, e.usbDriver);
 		list[i].deviceMajor = e.deviceMajor;
 		list[i].deviceMinor = e.deviceMinor;
+#elif WIN32
+		strcpy(list[i].title, e.title);
+		strcpy(list[i].hwid, e.hwid);
 #endif
 
 		i++;

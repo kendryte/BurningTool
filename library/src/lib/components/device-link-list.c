@@ -128,7 +128,7 @@ static inline port_link_element *find_usb_device_by_vidpidpath(KBCTX scope, uint
 	autolock(scope->openDeviceList->exclusion);
 	for (curs = scope->openDeviceList->head; curs != NULL; curs = curs->next) {
 		if (curs->node->usb->deviceInfo.idVendor == vid && curs->node->usb->deviceInfo.idProduct == pid &&
-			strncmp((char *)path, (char *)curs->node->usb->deviceInfo.path, MAX_USB_PATH_LENGTH) == 0) {
+		    strncmp((char *)path, (char *)curs->node->usb->deviceInfo.path, MAX_USB_PATH_LENGTH) == 0) {
 			break;
 		}
 	}
@@ -169,4 +169,6 @@ void alloc_new_bind_id(kburnDeviceNode *node) {
 	node->bind_id = id;
 }
 
-kburnDeviceNode *get_device_by_bind_id(KBCTX scope, uint32_t id) { return has_bind_id_used(scope, id); }
+kburnDeviceNode *get_device_by_bind_id(KBCTX scope, uint32_t id) {
+	return has_bind_id_used(scope, id);
+}

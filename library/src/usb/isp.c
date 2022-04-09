@@ -85,8 +85,8 @@ static kburn_err_t check_input(kburnDeviceNode *node, kburn_stor_block_t nblock,
 	return KBurnNoErr;
 }
 
-static kburn_err_t read_normalized(kburnDeviceNode *node, kburnUsbIspCommandTaget device, kburn_stor_address_t start_addr, uint32_t block_count,
-								   void *buffer, uint32_t length) {
+static kburn_err_t read_normalized(
+	kburnDeviceNode *node, kburnUsbIspCommandTaget device, kburn_stor_address_t start_addr, uint32_t block_count, void *buffer, uint32_t length) {
 	usbIspCommandPacket request = {
 		.command = USB_ISP_COMMAND_READ_BURN,
 		.target = convertTarget(device),
@@ -105,8 +105,8 @@ static kburn_err_t read_normalized(kburnDeviceNode *node, kburnUsbIspCommandTage
 	return KBurnNoErr;
 }
 
-static kburn_err_t write_normalized(kburnDeviceNode *node, kburnUsbIspCommandTaget device, kburn_stor_address_t start_addr, uint32_t block_count,
-									void *buffer, uint32_t length) {
+static kburn_err_t write_normalized(
+	kburnDeviceNode *node, kburnUsbIspCommandTaget device, kburn_stor_address_t start_addr, uint32_t block_count, void *buffer, uint32_t length) {
 	usbIspCommandPacket request = {
 		.command = USB_ISP_COMMAND_WRITE_BURN,
 		.target = convertTarget(device),
@@ -125,8 +125,8 @@ static kburn_err_t write_normalized(kburnDeviceNode *node, kburnUsbIspCommandTag
 	return KBurnNoErr;
 }
 
-kburn_err_t kburnUsbIspWriteChunk(kburnDeviceNode *node, const kburnDeviceMemorySizeInfo dev_info, kburn_stor_block_t start_block, void *buffer,
-								  uint32_t length) {
+kburn_err_t kburnUsbIspWriteChunk(
+	kburnDeviceNode *node, const kburnDeviceMemorySizeInfo dev_info, kburn_stor_block_t start_block, void *buffer, uint32_t length) {
 	debug_trace_function();
 	IfErrorReturn(check_input(node, start_block, length, dev_info));
 
@@ -136,8 +136,8 @@ kburn_err_t kburnUsbIspWriteChunk(kburnDeviceNode *node, const kburnDeviceMemory
 	return write_normalized(node, dev_info.device, start_addr, block_count, buffer, length);
 }
 
-kburn_err_t kburnUsbIspReadChunk(kburnDeviceNode *node, const kburnDeviceMemorySizeInfo dev_info, kburn_stor_block_t start_block, uint32_t length,
-								 void *buffer) {
+kburn_err_t
+kburnUsbIspReadChunk(kburnDeviceNode *node, const kburnDeviceMemorySizeInfo dev_info, kburn_stor_block_t start_block, uint32_t length, void *buffer) {
 	debug_trace_function();
 	IfErrorReturn(check_input(node, start_block, length, dev_info));
 

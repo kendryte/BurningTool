@@ -1,6 +1,6 @@
 #pragma once
 
-#include "common/BurnLibrary.h"
+#include <canaan-burn/canaan-burn.h>
 #include <QMainWindow>
 
 QT_BEGIN_NAMESPACE
@@ -14,28 +14,19 @@ class MainWindow : public QMainWindow {
 	KBCTX context;
 
   protected:
-	void showEvent(QShowEvent *ev);
-	void resizeEvent(QResizeEvent *ev) {
-		QMainWindow::resizeEvent(ev);
-		handleResize();
-	};
+    void showEvent(QShowEvent *ev);
 
   public:
-	MainWindow(QWidget *parent = nullptr);
-	~MainWindow();
-
-  signals:
-	void startBurn(const QString &sysImg);
+    MainWindow(QWidget *parent = nullptr);
+    ~MainWindow();
 
   private slots:
-	void handleResize();
-	void on_btnOpenWebsite_triggered();
-	void on_btnStartBurn_clicked();
-	void handleDeviceStateChange(kburnDeviceNode *dev);
-	void handleSerialPortList(const QStringList &list);
-	void on_btnToggleLogWindow_clicked(bool checked);
+    void on_btnOpenWebsite_triggered();
+    void on_btnSaveLog_triggered();
+    void updateSettingStatus();
 
   private:
-	Ui::MainWindow *ui;
-	BurnLibrary *library;
+    void closeEvent(QCloseEvent *ev);
+    Ui::MainWindow *ui;
+    class BurnLibrary *library;
 };

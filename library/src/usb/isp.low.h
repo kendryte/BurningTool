@@ -5,7 +5,8 @@
 #include "canaan-burn/exported/usb.isp.h"
 #include <libusb.h>
 
-typedef enum usbIspCommand {
+typedef enum usbIspCommand
+{
 	USB_ISP_COMMAND_HELLO = 0x0000,
 	USB_ISP_COMMAND_SENSE = 0x0300,
 	USB_ISP_COMMAND_WRITE_BURN = 0xE000,
@@ -16,7 +17,8 @@ typedef enum usbIspCommand {
 } __attribute__((__packed__)) usbIspCommand;
 _Static_assert(sizeof(usbIspCommand) == 2, "enum must 16bit");
 
-typedef enum usbIspCommandTaget {
+typedef enum usbIspCommandTaget
+{
 	USB_ISP_COMMAND_TARGET_EMMC = KBURN_USB_ISP_EMMC,
 	USB_ISP_COMMAND_TARGET_SDCARD = KBURN_USB_ISP_SDCARD,
 	USB_ISP_COMMAND_TARGET_NAND = KBURN_USB_ISP_NAND,
@@ -56,13 +58,14 @@ typedef struct usbIspCommandPacket {
 // char (*__)[sizeof(usbIspCommandPacket)] = 1; // test
 _Static_assert(sizeof(usbIspCommandPacket) == 9, "cwd packet must 9bytes");
 
-enum InOut {
+enum InOut
+{
 	USB_READ,
 	USB_WRITE,
 };
 
-kburn_err_t usb_lowlevel_command_send(libusb_device_handle *handle, uint8_t endpoint, const usbIspCommandPacket cdb, uint8_t direction,
-									  int data_length, uint32_t operation_index);
+kburn_err_t usb_lowlevel_command_send(
+	libusb_device_handle *handle, uint8_t endpoint, const usbIspCommandPacket cdb, uint8_t direction, int data_length, uint32_t operation_index);
 kburn_err_t usb_lowlevel_status_read(libusb_device_handle *handle, uint8_t endpoint, uint32_t expected_operation_index);
 kburn_err_t usb_lowlevel_error_read(libusb_device_handle *handle, uint8_t endpoint_in, uint8_t endpoint_out);
 kburn_err_t usb_lowlevel_transfer(kburnUsbDeviceNode *node, enum InOut direction, void *buffer, int size);

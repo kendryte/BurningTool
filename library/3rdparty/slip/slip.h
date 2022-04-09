@@ -34,9 +34,19 @@ THE SOFTWARE.
 #define SLIP_ESCAPED_BYTE_END 0xDC
 #define SLIP_ESCAPED_BYTE_ESC 0xDD
 
-typedef enum slip_state { SLIP_STATE_NORMAL = 0x00, SLIP_STATE_ESCAPED } slip_state_t;
+typedef enum slip_state
+{
+	SLIP_STATE_NORMAL = 0x00,
+	SLIP_STATE_ESCAPED
+} slip_state_t;
 
-typedef enum slip_error { SLIP_NO_ERROR = 0x00, SLIP_ERROR_BUFFER_OVERFLOW, SLIP_ERROR_UNKNOWN_ESCAPED_BYTE, SLIP_ERROR_CRC_MISMATCH } slip_error_t;
+typedef enum slip_error
+{
+	SLIP_NO_ERROR = 0x00,
+	SLIP_ERROR_BUFFER_OVERFLOW,
+	SLIP_ERROR_UNKNOWN_ESCAPED_BYTE,
+	SLIP_ERROR_CRC_MISMATCH
+} slip_error_t;
 
 typedef struct slip_descriptor {
 	uint8_t *buf;

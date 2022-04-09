@@ -5,9 +5,16 @@
 
 DEFINE_START
 
-enum KBurnSerialConfigByteSize { KBurnSerialConfigByteSize_8, KBurnSerialConfigByteSize_7, KBurnSerialConfigByteSize_6, KBurnSerialConfigByteSize_5 };
+enum KBurnSerialConfigByteSize
+{
+	KBurnSerialConfigByteSize_8,
+	KBurnSerialConfigByteSize_7,
+	KBurnSerialConfigByteSize_6,
+	KBurnSerialConfigByteSize_5
+};
 
-enum KBurnSerialConfigParity {
+enum KBurnSerialConfigParity
+{
 	KBurnSerialConfigParityNone,
 	KBurnSerialConfigParityOdd,
 	KBurnSerialConfigParityEven,
@@ -15,10 +22,17 @@ enum KBurnSerialConfigParity {
 	KBurnSerialConfigParitySpace
 };
 
-enum KBurnSerialConfigStopBits { KBurnSerialConfigStopBitsOne, KBurnSerialConfigStopBitsOneHalf, KBurnSerialConfigStopBitsTwo };
+enum KBurnSerialConfigStopBits
+{
+	KBurnSerialConfigStopBitsOne,
+	KBurnSerialConfigStopBitsOneHalf,
+	KBurnSerialConfigStopBitsTwo
+};
 
 #define MAX_SERIAL_PATH_SIZE 256
 #define MAX_DRIVER_NAME_SIZE 32
+#define MAX_TITTLE_SIZE 256
+#define MAX_WIN32_PATH_SIZE 256
 
 struct kburnSerialDeviceInfoSlice {
 	PCONST bool isUSB;
@@ -33,6 +47,10 @@ struct kburnSerialDeviceInfoSlice {
 	PCONST char usbDriver[MAX_DRIVER_NAME_SIZE];
 	PCONST uint32_t deviceMajor;
 	PCONST uint32_t deviceMinor;
+#endif
+#ifdef WIN32
+	PCONST char title[MAX_TITTLE_SIZE];
+	PCONST char hwid[MAX_TITTLE_SIZE];
 #endif
 };
 
@@ -49,6 +67,10 @@ typedef struct kburnSerialDeviceInfo {
 	PCONST char usbDriver[MAX_DRIVER_NAME_SIZE];
 	PCONST uint32_t deviceMajor;
 	PCONST uint32_t deviceMinor;
+#endif
+#ifdef WIN32
+	PCONST char title[MAX_TITTLE_SIZE];
+	PCONST char hwid[MAX_TITTLE_SIZE];
 #endif
 
 } kburnSerialDeviceInfo;

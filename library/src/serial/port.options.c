@@ -21,7 +21,9 @@ ser_opts_t get_current_serial_options(const char *path) {
 	return _opts;
 }
 
-void kburnSetSerialBaudrate(uint32_t baudrate) { opts.baudrate = baudrate; }
+void kburnSetSerialBaudrate(uint32_t baudrate) {
+	opts.baudrate = baudrate;
+}
 void kburnSetSerialByteSize(enum KBurnSerialConfigByteSize byteSize) {
 	switch (byteSize) {
 	case KBurnSerialConfigByteSize_8:
@@ -77,5 +79,9 @@ void kburnSetSerialStopBits(enum KBurnSerialConfigStopBits stopBits) {
 		m_abort("stopBits is invalid");
 	}
 }
-void kburnSetSerialReadTimeout(int32_t readTimeout) { opts.timeouts.rd = readTimeout; }
-void kburnSetSerialWriteTimeout(int32_t writeTimeout) { opts.timeouts.wr = writeTimeout; }
+void kburnSetSerialReadTimeout(int32_t readTimeout) {
+	opts.timeouts.rd = readTimeout;
+}
+void kburnSetSerialWriteTimeout(int32_t writeTimeout) {
+	opts.timeouts.wr = writeTimeout;
+}

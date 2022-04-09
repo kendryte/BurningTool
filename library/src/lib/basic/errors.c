@@ -25,7 +25,7 @@ kburnErrorDesc kburnSplitErrorCode(kburn_err_t code) {
 kburn_err_t make_error_code(enum kburnErrorKind kind, int32_t code) {
 	error_convert c = {
 		.split = {.kind = kind >> 32, .code = code}
-	   };
+    };
 
 	return c.combine;
 }

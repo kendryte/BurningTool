@@ -37,4 +37,6 @@ typedef struct kburnContext {
 
 typedef kburnContext *KBCTX;
 
-static inline bool validateContext(KBCTX ptr) { return memcmp(ptr->signature, CONTEXT_MEMORY_SIGNATURE, sizeof(CONTEXT_MEMORY_SIGNATURE)) == 0; }
+static inline bool validateContext(KBCTX ptr) {
+	return memcmp(ptr->signature, CONTEXT_MEMORY_SIGNATURE, sizeof(CONTEXT_MEMORY_SIGNATURE)) == 0;
+}

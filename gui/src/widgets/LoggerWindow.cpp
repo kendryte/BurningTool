@@ -1,12 +1,18 @@
 #include "LoggerWindow.h"
 #include <QAction>
 #include <QContextMenuEvent>
+#include <QDir>
 #include <QMenu>
 #include <QScrollBar>
 
-LoggerWindow::LoggerWindow(QWidget *parent) : QTextEdit(parent) { autoScroll = false; }
+LoggerWindow::LoggerWindow(QWidget *parent) : QTextEdit(parent) {
+	autoScroll = false;
+	logfile.setFileName(QDir::currentPath() + "burning_tool.log");
+	logfile.open(QIODeviceBase::Unbuffered | QIODeviceBase::Truncate | QIODeviceBase::WriteOnly);
+}
 
-LoggerWindow::~LoggerWindow() {}
+LoggerWindow::~LoggerWindow() {
+}
 
 void LoggerWindow::scrollToBottom() {
 	if (autoScroll) {
@@ -15,7 +21,9 @@ void LoggerWindow::scrollToBottom() {
 }
 
 void LoggerWindow::append(const QString &line) {
-	QTextEdit::append("<div style=\"white-space:pre;\">" + line + "</div>");
+	QString newLine = QString::fromLatin1("<div style=\"white-space:pre;\">") + line + "</div>";
+	QTextEdit::append(newLine);
+
 	scrollToBottom();
 }
 

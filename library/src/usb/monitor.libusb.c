@@ -37,17 +37,22 @@ static int on_libusb_hotplug_event(struct libusb_context *UNUSED(ctx), struct li
 	return 0;
 }
 
-kburn_err_t usb_monitor_callback_prepare(KBCTX UNUSED(scope)) { return KBurnNoErr; }
-void usb_monitor_callback_destroy(KBCTX UNUSED(scope)) {}
-void usb_monitor_callback_pause(KBCTX scope) { libusb_hotplug_deregister_callback(scope->usb->libusb, scope->usb->event_handle); }
+kburn_err_t usb_monitor_callback_prepare(KBCTX UNUSED(scope)) {
+	return KBurnNoErr;
+}
+void usb_monitor_callback_destroy(KBCTX UNUSED(scope)) {
+}
+void usb_monitor_callback_pause(KBCTX scope) {
+	libusb_hotplug_deregister_callback(scope->usb->libusb, scope->usb->event_handle);
+}
 kburn_err_t usb_monitor_callback_resume(KBCTX scope) {
 	debug_print(KBURN_LOG_INFO, "\tlibusb_hotplug_register_callback: [%04x:%04x]", scope->usb->filter.vid, scope->usb->filter.pid);
 
-	IfUsbErrorLogReturn(
-		libusb_hotplug_register_callback(scope->usb->libusb, LIBUSB_HOTPLUG_EVENT_DEVICE_ARRIVED | LIBUSB_HOTPLUG_EVENT_DEVICE_LEFT, 0,
-										 scope->usb->filter.vid == KBURN_VIDPID_FILTER_ANY ? LIBUSB_HOTPLUG_MATCH_ANY : scope->usb->filter.vid,
-										 scope->usb->filter.pid == KBURN_VIDPID_FILTER_ANY ? LIBUSB_HOTPLUG_MATCH_ANY : scope->usb->filter.pid,
-										 LIBUSB_HOTPLUG_MATCH_ANY, on_libusb_hotplug_event, scope, &scope->usb->event_handle));
+	IfUsbErrorLogReturn(libusb_hotplug_register_callback(
+		scope->usb->libusb, LIBUSB_HOTPLUG_EVENT_DEVICE_ARRIVED | LIBUSB_HOTPLUG_EVENT_DEVICE_LEFT, 0,
+		scope->usb->filter.vid == KBURN_VIDPID_FILTER_ANY ? LIBUSB_HOTPLUG_MATCH_ANY : scope->usb->filter.vid,
+		scope->usb->filter.pid == KBURN_VIDPID_FILTER_ANY ? LIBUSB_HOTPLUG_MATCH_ANY : scope->usb->filter.pid, LIBUSB_HOTPLUG_MATCH_ANY,
+		on_libusb_hotplug_event, scope, &scope->usb->event_handle));
 
 	return KBurnNoErr;
 }

@@ -9,7 +9,6 @@
 #include "canaan-burn/canaan-burn.h"
 #include <windows.h>
 #include <dbt.h>
-#include <Setupapi.h>
 #include <usbiodef.h>
 #include "debug/print.h"
 
@@ -171,8 +170,9 @@ static HWND create_event_window(KBCTX scope) {
 	debug_print(KBURN_LOG_DEBUG, "WIN32 RegisterClassEx OK");
 
 	// Step 2: Creating the Window
-	HWND hwnd = CreateWindowEx(WS_EX_NOACTIVATE | WS_EX_TOOLWINDOW | WS_EX_STATICEDGE, windowClass, "usb event handle window", WS_VISIBLE,
-							   CW_USEDEFAULT, CW_USEDEFAULT, 200, 200, NULL, NULL, NULL, scope);
+	HWND hwnd = CreateWindowEx(
+		WS_EX_NOACTIVATE | WS_EX_TOOLWINDOW | WS_EX_STATICEDGE, windowClass, "usb event handle window", WS_VISIBLE, CW_USEDEFAULT, CW_USEDEFAULT, 200,
+		200, NULL, NULL, NULL, scope);
 
 	if (hwnd == NULL) {
 		debug_print_win32("WIN32 CreateWindowEx Failed!");
@@ -206,12 +206,7 @@ static void usb_monitor_polling_thread(void *UNUSED(context), KBCTX scope, const
 	}
 	debug_print(KBURN_LOG_DEBUG, "WIN32 RegisterDeviceNotification OK");
 
-	// #ifndef NDEBUG
-	// 	if (!ShowWindow(hwnd, SW_SHOWNORMAL))
-	// #else
-	if (!ShowWindow(hwnd, SW_HIDE))
-	// #endif
-	{
+	if (!ShowWindow(hwnd, SW_HIDE)) {
 		debug_print_win32("WIN32 ShowWindow Failed!");
 	}
 
@@ -240,13 +235,11 @@ static void usb_monitor_polling_thread(void *UNUSED(context), KBCTX scope, const
 }
 
 static DECALRE_DISPOSE(quit_windows_thread, struct polling_context) {
-	// context->window;
 	DWORD threadId = GetWindowThreadProcessId(context->window, NULL);
 	debug_print(KBURN_LOG_INFO, "window thread id: %lu", threadId);
 	if (!PostThreadMessage(threadId, WM_QUIT, 0, 0)) {
 		debug_print_win32("WIN32 PostThreadMessage Failed!");
 	}
-	//		PostMessageA(, WM_QUIT, 0, 0);
 }
 DECALRE_DISPOSE_END()
 
@@ -279,7 +272,9 @@ void usb_monitor_polling_destroy(KBCTX scope) {
 	scope->usb->polling_context = NULL;
 }
 
-void usb_monitor_polling_pause(KBCTX scope) { scope->usb->polling_context->notify = false; }
+void usb_monitor_polling_pause(KBCTX scope) {
+	scope->usb->polling_context->notify = false;
+}
 
 kburn_err_t usb_monitor_polling_resume(KBCTX scope) {
 	scope->usb->polling_context->notify = true;

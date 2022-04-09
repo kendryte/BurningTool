@@ -18,7 +18,9 @@ static inline bool match_device(int vid, int pid, const struct libusb_device_des
 	return true;
 }
 
-void free_got_usb_device(libusb_device *dev) { libusb_unref_device(dev); }
+void free_got_usb_device(libusb_device *dev) {
+	libusb_unref_device(dev);
+}
 
 libusb_device *get_usb_device(struct libusb_context *libusb, uint16_t vid, uint16_t pid, const uint8_t *in_path) {
 	debug_trace_function("%d, %d, %.8s", vid, pid, in_path);

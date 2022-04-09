@@ -1,5 +1,5 @@
 #include "BurnLibrary.h"
-#include "BuringProcess.h"
+#include "BurningProcess.h"
 #include <canaan-burn/canaan-burn.h>
 #include <iostream>
 #include <QDebug>
@@ -16,14 +16,15 @@ BurnLibrary::~BurnLibrary() {
 	kburnOnDeviceDisconnect(context, previousOnDeviceRemove.handler, previousOnDeviceRemove.context);
 }
 
-BurnLibrary::BurnLibrary(KBCTX context) : context(context) {}
+BurnLibrary::BurnLibrary(KBCTX context) : context(context) {
+}
 
 void BurnLibrary::start() {
 	previousColors = kburnSetColors((kburnDebugColors){
-		.red = {	.prefix = "<span style=\"color: red\">", .postfix = "</span>"},
-		.green = {  .prefix = "<span style=\"color: lime\">", .postfix = "</span>"},
+		.red = {.prefix = "<span style=\"color: red\">",    .postfix = "</span>"},
+		.green = {.prefix = "<span style=\"color: lime\">",   .postfix = "</span>"},
 		.yellow = {.prefix = "<span style=\"color: yellow\">", .postfix = "</span>"},
-		.grey = {	 .prefix = "<span style=\"color: grey\">", .postfix = "</span>"},
+		.grey = {.prefix = "<span style=\"color: grey\">",   .postfix = "</span>"},
 	});
 
 #pragma GCC diagnostic push
@@ -96,11 +97,14 @@ void BurnLibrary::reloadList() {
 	knownSerialPorts.clear();
 	for (auto i = 0; i < list.size; i++) {
 		QString r;
-		QTextStream(&r) << list.list[i].path << " - [" << list.list[i].usbIdVendor << ":" << list.list[i].usbIdProduct << "] "
-#if !WIN32
-						<< list.list[i].usbDriver
+		r += QString::fromLatin1(list.list[i].path) + " - [" + QString::number(list.list[i].usbIdVendor, 16).leftJustified(4, '0') + ":" +
+		     QString::number(list.list[i].usbIdProduct, 16).leftJustified(4, '0') + "] ";
+#if WIN32
+		r += QString::fromUtf8(list.list[i].title) + " (" + QString::fromUtf8(list.list[i].hwid) + ")";
+#elif __linux__
+		r += QString::fromLatin1(list.list[i].usbDriver);
 #endif
-			;
+
 		knownSerialPorts.append(r);
 	}
 
@@ -143,7 +147,9 @@ void BurnLibrary::handleHandleSerial(kburnDeviceNode *dev) {
 		emit onHandleSerial(dev);
 	}
 }
-void BurnLibrary::handleHandleUsb(kburnDeviceNode *dev) { emit onHandleUsb(dev); }
+void BurnLibrary::handleHandleUsb(kburnDeviceNode *dev) {
+	emit onHandleUsb(dev);
+}
 
 void BurnLibrary::__handle_progress(void *self, const kburnDeviceNode *dev, size_t current, size_t length) {
 	reinterpret_cast<BurnLibrary *>(self)->handleProgressChange(dev, current, length);

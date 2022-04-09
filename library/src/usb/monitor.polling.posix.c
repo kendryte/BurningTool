@@ -11,6 +11,10 @@ kburn_err_t usb_monitor_polling_prepare(KBCTX UNUSED(scope)) {
 	TODO;
 	return KBurnNoErr;
 }
-void usb_monitor_polling_destroy(KBCTX UNUSED(scope)) {}
-void usb_monitor_polling_pause(KBCTX UNUSED(scope)) {}
-kburn_err_t usb_monitor_polling_resume(KBCTX UNUSED(scope)) { return KBurnNoErr; }
+void usb_monitor_polling_destroy(KBCTX UNUSED(scope)) {
+}
+void usb_monitor_polling_pause(KBCTX UNUSED(scope)) {
+}
+kburn_err_t usb_monitor_polling_resume(KBCTX UNUSED(scope)) {
+	return KBurnNoErr;
+}

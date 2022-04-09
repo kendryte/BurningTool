@@ -16,11 +16,13 @@ kburn_err_t kburnOpenSerial(KBCTX scope, const char *path) {
 
 uint32_t baudrateHighValue = 460800;
 
-void kburnSetHighSpeedValue(uint32_t baudrate) {
+void kburnSetSerialHighSpeedBaudrate(uint32_t baudrate) {
 	debug_trace_function("%d", baudrate);
 	baudrateHighValue = baudrate;
 }
-uint32_t kburnGetHighSpeedValue() { return baudrateHighValue; }
+uint32_t kburnGetSerialHighSpeedBaudrate() {
+	return baudrateHighValue;
+}
 
 DEFINE_REGISTER_SWAPPER(kburnOnSerialConnect, scope->serial->on_verify, on_device_connect)
 DEFINE_REGISTER_SWAPPER(kburnOnSerialConfirm, scope->serial->on_handle, on_device_handle)
@@ -57,4 +59,6 @@ kburnSerialDeviceList kburnGetSerialList(KBCTX scope) {
 	return (kburnSerialDeviceList){.size = array->length, .list = array->body};
 }
 
-void kburnFreeSerialList(KBCTX scope) { array_destroy(scope->disposables, scope->list1); }
+void kburnFreeSerialList(KBCTX scope) {
+	array_destroy(scope->disposables, scope->list1);
+}

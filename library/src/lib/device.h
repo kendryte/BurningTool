@@ -6,16 +6,22 @@
 
 DECALRE_DISPOSE_HEADER(destroy_device, kburnDeviceNode);
 
-__attribute__((always_inline)) static inline kburnDeviceNode *__p(kburnDeviceNode *v) { return v; }
-__attribute__((always_inline)) static inline kburnDeviceNode *__s(kburnSerialDeviceNode *v) { return v->parent; }
-__attribute__((always_inline)) static inline kburnDeviceNode *__u(kburnUsbDeviceNode *v) { return v->parent; }
+__attribute__((always_inline)) static inline kburnDeviceNode *__p(kburnDeviceNode *v) {
+	return v;
+}
+__attribute__((always_inline)) static inline kburnDeviceNode *__s(kburnSerialDeviceNode *v) {
+	return v->parent;
+}
+__attribute__((always_inline)) static inline kburnDeviceNode *__u(kburnUsbDeviceNode *v) {
+	return v->parent;
+}
 #define get_node(node) _Generic((node), kburnDeviceNode * : __p, kburnSerialDeviceNode * : __s, kburnUsbDeviceNode * : __u)(node)
 
 #define serial_isp_command_error(node, err) _serial_isp_command_error(get_node(node), err)
 #define copy_last_serial_io_error(node, errno) _copy_last_serial_io_error(get_node(node), errno)
 #define copy_last_libusb_error(node, errno) _copy_last_libusb_error(get_node(node), errno)
 #define set_error(node, kind, code, errstr, ...) _set_error(get_node(node), kind, code, errstr __VA_OPT__(, ) __VA_ARGS__)
-#define set_kb_error(node, err, errstr, ...)                                                                                                         \
+#define set_kb_error(node, err, errstr, ...) \
 	set_error(node, kburnSplitErrorCode(err).kind, kburnSplitErrorCode(err).code, errstr __VA_OPT__(, ) __VA_ARGS__)
 #define set_syserr(node) set_error(node, KBURN_ERROR_KIND_SYSCALL, errno, strerror(errno))
 #define clear_error(node) _clear_error(get_node(node))

@@ -54,9 +54,13 @@ static bool greeting(kburnSerialDeviceNode *node, bool auto_switch) {
 	return true;
 }
 
-bool kburnSerialIspGreeting(kburnSerialDeviceNode *node) { return greeting(node, true); }
+bool kburnSerialIspGreeting(kburnSerialDeviceNode *node) {
+	return greeting(node, true);
+}
 
-bool kburnSerialIspSetBaudrateHigh(kburnSerialDeviceNode *node) { return kburnSerialIspSetBaudrate(node, baudrateHighValue); }
+bool kburnSerialIspSetBaudrateHigh(kburnSerialDeviceNode *node) {
+	return kburnSerialIspSetBaudrate(node, baudrateHighValue);
+}
 
 bool kburnSerialIspSetBaudrate(kburnSerialDeviceNode *node, uint32_t want_br) {
 	debug_trace_function("baudrate=%d", want_br);
@@ -134,8 +138,8 @@ bool kburnSerialIspBootMemory(kburnSerialDeviceNode *node, kburn_mem_address_t a
 	return true;
 }
 
-bool kburnSerialIspMemoryWrite(kburnSerialDeviceNode *node, const kburn_mem_address_t address, const char *data, const size_t data_size,
-							   const on_write_progress cb, void *ctx) {
+bool kburnSerialIspMemoryWrite(
+	kburnSerialDeviceNode *node, const kburn_mem_address_t address, const char *data, const size_t data_size, const on_write_progress cb, void *ctx) {
 	make_serial_isp_packet(packet, BOARD_MEMORY_PAGE_SIZE);
 	packet->op = ISP_MEMORY_WRITE;
 
@@ -172,8 +176,8 @@ bool kburnSerialIspMemoryWrite(kburnSerialDeviceNode *node, const kburn_mem_addr
 	return true;
 }
 
-bool kburnSerialIspRunProgram(kburnSerialDeviceNode *node, const void *programBuffer, size_t programBufferSize, on_write_progress page_callback,
-							  void *ctx) {
+bool kburnSerialIspRunProgram(
+	kburnSerialDeviceNode *node, const void *programBuffer, size_t programBufferSize, on_write_progress page_callback, void *ctx) {
 	debug_trace_function("node[%s]", node->deviceInfo.path);
 
 	if (!greeting(node, false)) {

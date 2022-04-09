@@ -14,7 +14,9 @@ on_debug_log_t g_on_debug = {
 	.context = NULL,
 };
 
-void debug_callback_call(kburnLogType type, const char *message) { CALL_HANDLE_SYNC(g_on_debug, type, message); }
+void debug_callback_call(kburnLogType type, const char *message) {
+	CALL_HANDLE_SYNC(g_on_debug, type, message);
+}
 
 on_debug_log_t kburnSetLogCallback(on_debug_log callback, void *call_context) {
 	debug_callback_call(KBURN_LOG_INFO, "logger switched");

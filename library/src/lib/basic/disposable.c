@@ -96,8 +96,9 @@ static void debug_list_content(const disposable_list_t *r) {
 	debug_trace_function();
 	int index = 0;
 	for (disposable_list_element_t *curs = r->head; curs != NULL; curs = curs->next) {
-		debug_print_dbg(KBURN_LOG_TRACE, curs->__debug, COLOR_FMT(" [%02d] %s {%p}"),
-						COLOR_ARG(GREY, index, DEBUG_OBJ_TITLE(curs->__debug), (void *)curs->object));
+		debug_print_dbg(
+			KBURN_LOG_TRACE, curs->__debug, COLOR_FMT(" [%02d] %s {%p}"),
+			COLOR_ARG(GREY, index, DEBUG_OBJ_TITLE(curs->__debug), (void *)curs->object));
 		index++;
 	}
 }
@@ -142,8 +143,9 @@ void dispose_list_cancel(disposable_list_t *r, disposable e) {
 	int index = 0;
 	for (disposable_list_element_t *curs = r->head; curs != NULL; curs = curs->next) {
 		if (curs->callback == e.callback && curs->object == e.object) {
-			debug_print_dbg(KBURN_LOG_TRACE, curs->__debug, " [%02d] " COLOR_FMT("<%s>[%d]") ": %s", index,
-							COLOR_ARG(GREY, NULLSTR(r->comment), r->size), DEBUG_OBJ_TITLE(curs->__debug));
+			debug_print_dbg(
+				KBURN_LOG_TRACE, curs->__debug, " [%02d] " COLOR_FMT("<%s>[%d]") ": %s", index, COLOR_ARG(GREY, NULLSTR(r->comment), r->size),
+				DEBUG_OBJ_TITLE(curs->__debug));
 			do_delete(r, curs);
 			found = true;
 			break;
@@ -215,20 +217,26 @@ void dispose(disposable target) {
 	current->callback(r, current->object);
 
 	// debug_print("  * dispose callback return, size=%d", target->size);
-	m_assert(plength - 1 == r->size, "not call to dispose_list_delete(): %s at %s", DEBUG_OBJ_TITLE(current->__debug),
-			 DEBUG_OBJ_PATH(current->__debug));
+	m_assert(
+		plength - 1 == r->size, "not call to dispose_list_delete(): %s at %s", DEBUG_OBJ_TITLE(current->__debug), DEBUG_OBJ_PATH(current->__debug));
 }
 
-DECALRE_DISPOSE(free_pointer, void) { free(context); }
+DECALRE_DISPOSE(free_pointer, void) {
+	free(context);
+}
 DECALRE_DISPOSE_END()
 DECALRE_DISPOSE(free_and_unset_pointer, void *) {
 	free(*context);
 	*context = NULL;
 }
 DECALRE_DISPOSE_END()
-DECALRE_DISPOSE(unset_pointer, void *) { *context = NULL; }
+DECALRE_DISPOSE(unset_pointer, void *) {
+	*context = NULL;
+}
 DECALRE_DISPOSE_END()
-DECALRE_DISPOSE(dispose_child, void) { dispose_all(context); }
+DECALRE_DISPOSE(dispose_child, void) {
+	dispose_all(context);
+}
 DECALRE_DISPOSE_END()
 DECALRE_DISPOSE(dispose_all_and_deinit, disposable_list_t) {
 	dispose_all(context);

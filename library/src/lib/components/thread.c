@@ -15,7 +15,9 @@ typedef struct thread_passing_object {
 	const char *debug_title;
 } thread_passing_object;
 
-void thread_tell_quit(thread_passing_object *thread) { thread->quit = true; }
+void thread_tell_quit(thread_passing_object *thread) {
+	thread->quit = true;
+}
 
 static DECALRE_DISPOSE(_destroy_thread, thread_passing_object) {
 	debug_print(KBURN_LOG_DEBUG, COLOR_FMT("[thread]") " wait quit: %s", COLOR_ARG(YELLOW), context->debug_title);

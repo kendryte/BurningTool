@@ -34,8 +34,8 @@ typedef struct usbIspResponsePacket // CSW
 // char (*__)[sizeof(usbIspResponsePacket)] = 1;
 _Static_assert(sizeof(usbIspResponsePacket) == 13, "cbw packet must 13bytes");
 
-static inline usbIspRequestPacket create_request(uint32_t operation_tag, uint32_t transfer_data_length, uint8_t flags,
-												 const usbIspCommandPacket body) {
+static inline usbIspRequestPacket
+create_request(uint32_t operation_tag, uint32_t transfer_data_length, uint8_t flags, const usbIspCommandPacket body) {
 	usbIspRequestPacket r = {
 		.signature = "USBC",
 		.operation_tag = operation_tag,
@@ -52,8 +52,8 @@ static inline usbIspRequestPacket create_request(uint32_t operation_tag, uint32_
 	return r;
 }
 
-static int retry_libusb_bulk_transfer(libusb_device_handle *dev_handle, unsigned char endpoint, void *data, int length, int *actual_length,
-									  unsigned int timeout) {
+static int retry_libusb_bulk_transfer(
+	libusb_device_handle *dev_handle, unsigned char endpoint, void *data, int length, int *actual_length, unsigned int timeout) {
 	int r = LIBUSB_ERROR_OTHER;
 	for (int retry = 0; retry < RETRY_MAX; retry++) {
 		// 传输长度必须正好是31个字节
@@ -89,8 +89,8 @@ param6 : int data_length                       数据长度（字节）
 param6 : operation_index                       命令id（随机数）
 Return: 返回负数说明函数执行失败，返回0为成功
 *************************************************************/
-kburn_err_t usb_lowlevel_command_send(libusb_device_handle *handle, uint8_t endpoint_out, const usbIspCommandPacket cdb, uint8_t direction,
-									  int data_length, uint32_t operation_index) {
+kburn_err_t usb_lowlevel_command_send(
+	libusb_device_handle *handle, uint8_t endpoint_out, const usbIspCommandPacket cdb, uint8_t direction, int data_length, uint32_t operation_index) {
 	debug_trace_function("%d", operation_index);
 
 	m_assert_ptr(handle, "handle pointer is null!");
@@ -111,7 +111,9 @@ kburn_err_t usb_lowlevel_command_send(libusb_device_handle *handle, uint8_t endp
 	return KBurnNoErr;
 }
 
-static bool is_packet_type_csw(const void *buff) { return memcmp(buff, "USBS", 4) == 0; }
+static bool is_packet_type_csw(const void *buff) {
+	return memcmp(buff, "USBS", 4) == 0;
+}
 
 static kburn_err_t csw_status_parse(const void *buff, uint32_t expected_operation_index) {
 	if (!is_packet_type_csw(buff)) {
@@ -155,8 +157,8 @@ kburn_err_t usb_lowlevel_status_read(libusb_device_handle *handle, uint8_t endpo
 	print_buffer(KBURN_LOG_TRACE, "csw", (void *)&csw, sizeof(usbIspResponsePacket));
 
 	if (readed_size != sizeof(usbIspResponsePacket)) {
-		debug_print(KBURN_LOG_ERROR, "usb_lowlevel_status_read: received %d bytes (expected " FMT_SIZET ")", readed_size,
-					sizeof(usbIspResponsePacket));
+		debug_print(
+			KBURN_LOG_ERROR, "usb_lowlevel_status_read: received %d bytes (expected " FMT_SIZET ")", readed_size, sizeof(usbIspResponsePacket));
 	}
 
 	kburn_err_t ret = csw_status_parse(&csw, expected_operation_index);
@@ -188,8 +190,9 @@ kburn_err_t usb_lowlevel_transfer(kburnUsbDeviceNode *node, enum InOut direction
 		}
 
 		kburn_err_t r = make_error_code(KBURN_ERROR_KIND_COMMON, KBurnUsbSizeMismatch);
-		_set_error(node->parent, KBURN_ERROR_KIND_COMMON, KBurnUsbSizeMismatch, "actual read/write size(%d) is not equal to expected (%d)",
-				   actual_size, size);
+		_set_error(
+			node->parent, KBURN_ERROR_KIND_COMMON, KBurnUsbSizeMismatch, "actual read/write size(%d) is not equal to expected (%d)", actual_size,
+			size);
 		return r;
 	}
 	return KBurnNoErr;

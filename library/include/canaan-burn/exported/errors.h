@@ -7,7 +7,8 @@ DEFINE_START
 
 typedef int64_t kburn_err_t;
 
-enum KBurnCommonError {
+enum KBurnCommonError
+{
 	KBurnNoErr = 0,
 	KBurnWiredError,
 	KBurnNoMemory,
@@ -32,7 +33,8 @@ enum KBurnCommonError {
 
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wpedantic"
-enum kburnErrorKind {
+enum kburnErrorKind
+{
 	KBURN_ERROR_KIND_COMMON = 0ULL,
 	KBURN_ERROR_KIND_SERIAL = 1ULL << 32,
 	KBURN_ERROR_KIND_SLIP = 1ULL << 33,

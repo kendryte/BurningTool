@@ -33,8 +33,8 @@ static void _pump_libusb_event(struct passing_data *recv) {
 
 		libusb_device *dev = get_usb_device(scope->usb->libusb, defInfo.idVendor, defInfo.idProduct, defInfo.path);
 		if (!dev) {
-			debug_print(KBURN_LOG_ERROR, "failed get device: [%04x: %04x] %s", defInfo.idVendor, defInfo.idProduct,
-						usb_debug_path_string(defInfo.path));
+			debug_print(
+				KBURN_LOG_ERROR, "failed get device: [%04x: %04x] %s", defInfo.idVendor, defInfo.idProduct, usb_debug_path_string(defInfo.path));
 			return;
 		}
 		kburn_err_t r = open_single_usb_port(scope, dev, true, NULL);

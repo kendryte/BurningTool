@@ -1,11 +1,13 @@
 #pragma once
 
+#include <QFile>
 #include <QTextEdit>
 
 class LoggerWindow : public QTextEdit {
 	Q_OBJECT
 
 	bool autoScroll;
+	QFile logfile;
 
   public slots:
 	void append(const QString &text);

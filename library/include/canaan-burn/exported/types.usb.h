@@ -20,7 +20,7 @@ typedef struct kburnUsbDeviceInfo {
 	PCONST uint8_t path[MAX_USB_PATH_LENGTH];
 	PCONST struct libusb_device_descriptor *descriptor;
 
-	PCONST uint8_t endpoint_in;	 /* 端点 in */
+	PCONST uint8_t endpoint_in;  /* 端点 in */
 	PCONST uint8_t endpoint_out; /* 端点 out */
 
 	// #ifdef __linux__

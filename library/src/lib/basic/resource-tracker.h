@@ -35,34 +35,34 @@ void keep_resource(resource_tracker_t *tracker);
 void *_track_resource(resource_tracker_t *tracker, void *resource, cleanup_function clean, bool always, resource_tracker_debug dbg);
 void *_track_dispose(resource_tracker_t *tracker, disposable d, resource_tracker_debug dbg);
 
-#define resource_tracker_t_init                                                                                                                      \
-	(resource_tracker_t){                                                                                                                            \
-		.successed = false,                                                                                                                          \
-		.hasAlways = false,                                                                                                                          \
-		.size = false,                                                                                                                               \
-		.__debug = DEBUG_SAVE("ResourceTracker"),                                                                                                    \
+#define resource_tracker_t_init                   \
+	(resource_tracker_t){                         \
+		.successed = false,                       \
+		.hasAlways = false,                       \
+		.size = false,                            \
+		.__debug = DEBUG_SAVE("ResourceTracker"), \
 	};
 
 #define DeferEnabled resource_tracker_t __attribute__((cleanup(resource_tracker_done))) _resource_tracker = resource_tracker_t_init
 
-#define DeferCall(cleaner, pointer)                                                                                                                  \
-	__extension__({                                                                                                                                  \
-		if (0)                                                                                                                                       \
-			cleaner(pointer);                                                                                                                        \
-		_track_resource(&_resource_tracker, (void *)pointer, (cleanup_function)cleaner, false, DEBUG_SAVE(#cleaner "(" #pointer ")"));               \
+#define DeferCall(cleaner, pointer)                                                                                                    \
+	__extension__({                                                                                                                    \
+		if (0)                                                                                                                         \
+			cleaner(pointer);                                                                                                          \
+		_track_resource(&_resource_tracker, (void *)pointer, (cleanup_function)cleaner, false, DEBUG_SAVE(#cleaner "(" #pointer ")")); \
 	})
-#define DeferCallAlways(cleaner, pointer)                                                                                                            \
-	__extension__({                                                                                                                                  \
-		if (0)                                                                                                                                       \
-			cleaner(pointer);                                                                                                                        \
-		_track_resource(&_resource_tracker, (void *)pointer, (cleanup_function)cleaner, true, DEBUG_SAVE(#cleaner "(" #pointer ")"));                \
+#define DeferCallAlways(cleaner, pointer)                                                                                             \
+	__extension__({                                                                                                                   \
+		if (0)                                                                                                                        \
+			cleaner(pointer);                                                                                                         \
+		_track_resource(&_resource_tracker, (void *)pointer, (cleanup_function)cleaner, true, DEBUG_SAVE(#cleaner "(" #pointer ")")); \
 	})
 #define DeferFree(pointer) DeferCall(free, pointer)
 #define DeferFreeAlways(pointer) DeferCallAlways(free, pointer)
-#define DeferDispose(list, obj, destruct)                                                                                                            \
-	__extension__({                                                                                                                                  \
-		disposable d = toDisposable(destruct, obj);                                                                                                  \
-		_track_dispose(&_resource_tracker, dispose_list_add(list, d), DEBUG_SAVE(#destruct "(" #obj ")"));                                           \
+#define DeferDispose(list, obj, destruct)                                                                  \
+	__extension__({                                                                                        \
+		disposable d = toDisposable(destruct, obj);                                                        \
+		_track_dispose(&_resource_tracker, dispose_list_add(list, d), DEBUG_SAVE(#destruct "(" #obj ")")); \
 	})
 
 #define DeferAbort keep_resource(&_resource_tracker)

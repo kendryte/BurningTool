@@ -31,7 +31,7 @@ static inline debug_bundle __DEBUG_SAVE(const char *title, const char *file, int
 
 size_t _debug_format_bundle_title(char *output, size_t output_size, debug_bundle e);
 
-#define debug_print_prefix(output, output_size, file_name, file_line)                                                                                \
+#define debug_print_prefix(output, output_size, file_name, file_line) \
 	debug_output_move(_debug_format_prefix(output, output_size, file_name, file_line))
 
 #define DEBUG_OBJ_TITLE(dbg) (_debug_format_bundle_title(dbg.buff1, 512, dbg), dbg.buff1)
@@ -42,7 +42,9 @@ size_t _debug_format_bundle_title(char *output, size_t output_size, debug_bundle
 
 #else
 #define struct_debug_bundle const char *
-static inline const char *DEBUG_SAVE(const char *title) { return title; }
+static inline const char *DEBUG_SAVE(const char *title) {
+	return title;
+}
 
 #define debug_print_prefix(output, output_size, file_name, file_line)
 #define DEBUG_OBJ_TITLE(dbg) (const char *)dbg

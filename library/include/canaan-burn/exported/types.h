@@ -32,7 +32,8 @@ typedef struct kburnDeviceNode {
 	PCONST uint32_t bind_id;
 } kburnDeviceNode;
 
-typedef enum kburnLogType {
+typedef enum kburnLogType
+{
 	KBURN_LOG_BUFFER,
 	KBURN_LOG_TRACE,
 	KBURN_LOG_DEBUG,
@@ -42,11 +43,11 @@ typedef enum kburnLogType {
 } kburnLogType;
 
 #define CONCAT(a, b) a##b
-#define declare_callback(ret, name, ...)                                                                                                             \
-	typedef ret (*name)(void *ctx, __VA_ARGS__);                                                                                                     \
-	typedef struct CONCAT(name, _callback_bundle) {                                                                                                  \
-		name handler;                                                                                                                                \
-		void *context;                                                                                                                               \
+#define declare_callback(ret, name, ...)            \
+	typedef ret (*name)(void *ctx, __VA_ARGS__);    \
+	typedef struct CONCAT(name, _callback_bundle) { \
+		name handler;                               \
+		void *context;                              \
 	} CONCAT(name, _t)
 
 declare_callback(bool, on_device_connect, const kburnDeviceNode *dev);

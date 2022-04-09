@@ -25,15 +25,23 @@ void debug_printf(const char *fmt, ...) {
 	va_end(va);
 }
 
-void debug_vprintf(const char *fmt, va_list va) { debug_output_move(m_vsnprintf(debug_output, debug_buffer_remain, fmt, va)); }
+void debug_vprintf(const char *fmt, va_list va) {
+	debug_output_move(m_vsnprintf(debug_output, debug_buffer_remain, fmt, va));
+}
 
-void debug_puts(const char *message) { debug_output_move(m_snprintf(debug_output, debug_buffer_remain, "%s", message)); }
+void debug_puts(const char *message) {
+	debug_output_move(m_snprintf(debug_output, debug_buffer_remain, "%s", message));
+}
 
 pthread_spinlock_t lock = 0;
 
-__attribute__((constructor)) void lock_constructor() { m_assert(pthread_spin_init(&lock, PTHREAD_PROCESS_PRIVATE) == 0, "lock destroy fail"); }
+__attribute__((constructor)) void lock_constructor() {
+	m_assert(pthread_spin_init(&lock, PTHREAD_PROCESS_PRIVATE) == 0, "lock destroy fail");
+}
 
-__attribute__((destructor)) void lock_destructor() { m_assert(pthread_spin_destroy(&lock) == 0, "lock destroy fail"); }
+__attribute__((destructor)) void lock_destructor() {
+	m_assert(pthread_spin_destroy(&lock) == 0, "lock destroy fail");
+}
 
 void _kb__debug_enter() {
 	pthread_spin_lock(&lock);
