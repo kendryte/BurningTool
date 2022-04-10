@@ -136,7 +136,7 @@ kburn_err_t open_single_usb_port(KBCTX scope, struct libusb_device *dev, bool us
 		}
 		debug_print(KBURN_LOG_DEBUG, "libusb kernel driver switch ok");
 	} else if (r == LIBUSB_ERROR_NOT_SUPPORTED) {
-		set_node_error_with_log(r, "open_single_usb_port: system not support detach kernel driver");
+		debug_print_libusb_result("open_single_usb_port: system not support detach kernel driver", r);
 	}
 
 	libusb_clear_halt(node->usb->handle, 0);
@@ -165,7 +165,7 @@ kburn_err_t open_single_usb_port(KBCTX scope, struct libusb_device *dev, bool us
 	IfUsbErrorSetReturn(get_endpoint(dev, &node->usb->deviceInfo.endpoint_in, &node->usb->deviceInfo.endpoint_out));
 
 	IfErrorReturn(usb_device_hello(node));
-	debug_print(KBURN_LOG_DEBUG, "hello success.");
+	debug_print(KBURN_LOG_DEBUG, COLOR_FMT("hello success."), GREEN);
 
 	add_to_device_list(node);
 

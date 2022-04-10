@@ -31,6 +31,10 @@ int main(int argc, char *argv[]) {
 	return r;
 }
 
+QString tr(const char *s, const char *c, int n) {
+	return a->tr(s, c, n);
+}
+
 void fatalAlert(kburn_err_t err) {
 	if (err != KBurnNoErr) {
 		auto e = kburnSplitErrorCode(err);

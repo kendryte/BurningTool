@@ -7,15 +7,18 @@
 #include <QRunnable>
 #include <QString>
 
-enum BurnStage {
+enum BurnStage
+{
 	Starting,
 	Serial,
 	Usb,
 };
 
-class FlashTask : public QRunnable {
+class FlashTask : public QObject, public QRunnable {
+	Q_OBJECT
+
   private:
-    FlashTask();
+	FlashTask();
 
 	const QString systemImage;
 	const QString comPort;
@@ -24,24 +27,33 @@ class FlashTask : public QRunnable {
 	EventStack inputs;
 	QPromise<void> output;
 
-	KBurnException *result;
+	KBurnException *result = NULL;
 
   public:
-    ~FlashTask();
-    FlashTask(KBCTX scope, const QString &comPort, const QString &systemImage) : scope(scope), comPort(comPort), systemImage(systemImage), inputs(2) {
-        this->setAutoDelete(false);
-    };
-    void run();
+	~FlashTask();
+	FlashTask(KBCTX scope, const QString &comPort, const QString &systemImage) : scope(scope), comPort(comPort), systemImage(systemImage), inputs(2) {
+		this->setAutoDelete(false);
+	};
+	void run();
 
 	auto future() { return output.future(); }
 	void cancel();
 
 	const KBurnException *getResult() { return result; }
 
+	void nextStage(const QString &title, size_t bytes = 0);
+
   signals:
-    void onProgress(uint64_t current, uint64_t total, enum BurnStage usb_stage);
+	void onDeviceChange(const kburnDeviceNode *node);
+	void progressTextChanged(const QString &title);
 
   public slots:
-    void onSerialConnected(kburnDeviceNode *node) { inputs.set(0, node); };
-    void onUsbConnected(kburnDeviceNode *node) { inputs.set(1, node); };
+	void onSerialConnected(kburnDeviceNode *node) {
+		inputs.set(0, node);
+		emit onDeviceChange(node);
+	};
+	void onUsbConnected(kburnDeviceNode *node) {
+		inputs.set(1, node);
+		emit onDeviceChange(node);
+	};
 };

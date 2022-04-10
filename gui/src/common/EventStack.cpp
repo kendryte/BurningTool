@@ -19,7 +19,8 @@ void *EventStack::pick(unsigned int index) {
 		mutex.lock();
 		auto ret = list.at(index);
 		if (!ret) {
-			cond.wait(&mutex);
+			QDeadlineTimer deadline(10 * 1000);
+			cond.wait(&mutex, deadline);
 		}
 		mutex.unlock();
 

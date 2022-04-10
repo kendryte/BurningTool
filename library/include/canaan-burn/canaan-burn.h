@@ -30,7 +30,7 @@ DEFINE_START
  * 	return 0;
  * }
  */
-kburn_err_t kburnCreate(struct kburnContext **ppCtx);
+PUBLIC kburn_err_t kburnCreate(struct kburnContext **ppCtx);
 
 /**
  * 程序结束时，应调用此函数回收资源

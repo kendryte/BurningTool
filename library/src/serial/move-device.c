@@ -4,6 +4,7 @@
 #include "private-types.h"
 
 void copy_serial_device(kburnDeviceNode *src, kburnDeviceNode *dst) {
+	debug_trace_function();
 	dst->serial->parent = dst;
 	dst->serial->isUsbBound = true;
 	dst->serial->deviceInfo = src->serial->deviceInfo;

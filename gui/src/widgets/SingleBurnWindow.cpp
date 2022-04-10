@@ -4,6 +4,8 @@
 
 SingleBurnWindow::SingleBurnWindow(QWidget *parent) : QWidget(parent), ui(new Ui::SingleBurnWindow) {
 	ui->setupUi(this);
+
+	resetProgressState();
 }
 
 SingleBurnWindow::~SingleBurnWindow() {
@@ -29,9 +31,12 @@ void SingleBurnWindow::on_btnStartBurn_clicked() {
 		return;
 	}
 
+	connect(work, &FlashTask::onDeviceChange, this, &SingleBurnWindow::handleDeviceStateChange);
+	connect(work, &FlashTask::progressTextChanged, this, &SingleBurnWindow::setProgressText);
+
 	resetProgressState();
 
-	reinterpret_cast<QWidget *>(parent())->setEnabled(false);
+	setEnabled(false);
 
 	future = new QFutureWatcher<void>();
 
@@ -40,18 +45,19 @@ void SingleBurnWindow::on_btnStartBurn_clicked() {
 	connect(future, &QFutureWatcher<void>::canceled, this, [=]() {
 		auto r = work->getResult();
 		auto e = kburnSplitErrorCode(r->errorCode);
-		ui->textPortInfo->setText(tr("错误: ") + QString::number(e.kind >> 32) + " - (" + QString::number(e.code, 16) + "), " + r->errorMessage);
+		ui->textStatus->setText(tr("错误: ") + QString::number(e.kind >> 32) + " - (" + QString::number(e.code, 16) + "), " + r->errorMessage);
+		ui->textStatus->setStyleSheet("QLabel { color : red; }");
 
 		resumeState();
 	});
 	connect(future, &QFutureWatcher<void>::progressRangeChanged, ui->progressBar, &QProgressBar::setRange);
 	connect(future, &QFutureWatcher<void>::progressValueChanged, ui->progressBar, &QProgressBar::setValue);
-	connect(future, &QFutureWatcher<void>::progressTextChanged, this, &SingleBurnWindow::setProgressText);
 
 	future->setFuture(work->future());
 }
 
 void SingleBurnWindow::setProgressText(const QString &progressText) {
+	ui->textStatus->setText(progressText);
 	if (progressText.isEmpty()) {
 		ui->progressBar->setFormat("%p%");
 	} else {
@@ -60,8 +66,10 @@ void SingleBurnWindow::setProgressText(const QString &progressText) {
 }
 
 void SingleBurnWindow::resetProgressState() {
-	ui->textPortInfo->setText("");
 	setProgressText("");
+	ui->textStatus->setStyleSheet("QLabel {}");
+	ui->textStatus->setText(tr("就绪"));
+	ui->textPortInfo->setText("");
 	ui->progressBar->setRange(0, 100);
 	ui->progressBar->setValue(0);
 }
@@ -71,7 +79,12 @@ void SingleBurnWindow::resumeState() {
 	future = NULL;
 	delete work;
 	work = NULL;
-	reinterpret_cast<QWidget *>(parent())->setEnabled(true);
+	setEnabled(true);
+}
+
+void SingleBurnWindow::setEnabled(bool enabled) {
+	ui->btnStartBurn->setEnabled(enabled);
+	ui->inputComPortList->setEnabled(enabled);
 }
 
 void SingleBurnWindow::handleSerialPortList(const QMap<QString, QString> &list) {
@@ -102,7 +115,7 @@ void SingleBurnWindow::handleSerialPortList(const QMap<QString, QString> &list) 
 	}
 }
 
-void SingleBurnWindow::handleDeviceStateChange(kburnDeviceNode *dev) {
+void SingleBurnWindow::handleDeviceStateChange(const kburnDeviceNode *dev) {
 	QString val;
 	val += tr("Serial Device: ");
 	if (dev->serial->init || dev->serial->isUsbBound) {

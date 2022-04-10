@@ -114,7 +114,7 @@ bool kburnSerialIspBootMemory(kburnSerialDeviceNode *node, kburn_mem_address_t a
 			debug_print(KBURN_LOG_ERROR, "kburnSerialIspBootMemory: failed send");
 			return false;
 		}
-		do_sleep(50);
+		do_sleep(100);
 	}
 
 	debug_print(KBURN_LOG_INFO, "kburnSerialIspBootMemory: command sent (5 times), now switch to usb protocol!\n\n");

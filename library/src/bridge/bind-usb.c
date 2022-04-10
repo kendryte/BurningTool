@@ -11,14 +11,13 @@ kburn_err_t usb_device_serial_bind(kburnDeviceNode *node) {
 	char output[512];
 	size_t buff_len = create_pair_protocol(node->bind_id, output, 512);
 
-	for (int i = 5; i > 0; i--) {
-		kburn_err_t r = usb_device_serial_print(node, (uint8_t *)output, buff_len);
-		if (r != KBurnNoErr) {
-			set_kb_error(node, r, "failed send serial print command");
-			return r;
+	for (int i = 10; i > 0; i--) {
+		if (!usb_device_serial_print(node, (uint8_t *)output, buff_len)) {
+			return node->error->code;
 		}
 
-		do_sleep(500);
+		do_sleep(1000);
+		debug_print(KBURN_LOG_TRACE, "wait usb: %d", i);
 
 		if (node->serial->isUsbBound) {
 			debug_print(KBURN_LOG_INFO, " * bind success @ usb");

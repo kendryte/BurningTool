@@ -6,12 +6,11 @@
 
 class KBurnException : public QException {
   public:
-    KBurnException() : QException(), errorCode(KBurnNoErr), errorMessage("") {}
+	KBurnException() : QException(), errorCode(KBurnNoErr), errorMessage("") {}
 
-    KBurnException(const KBurnException &other) : QException(), errorCode(other.errorCode), errorMessage(other.errorMessage + "") {}
+	KBurnException(const KBurnException &other) : QException(), errorCode(other.errorCode), errorMessage(other.errorMessage + "") {}
 
-	KBurnException(kburn_err_t errorCode, const char *errorMessage)
-		: QException(), errorCode(errorCode), errorMessage(QString::fromUtf8(errorMessage)) {
+	KBurnException(kburn_err_t errorCode, const QString &message) : QException(), errorCode(errorCode), errorMessage(message) {
 		Q_ASSERT(errorCode != KBurnNoErr);
 	}
 

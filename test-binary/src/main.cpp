@@ -76,8 +76,7 @@ void handle_usb(void *ctx, kburnDeviceNode *dev) {
 	uint32_t testAddress = 50;
 
 	cout << "test read memory size:" << endl;
-	r = kburnUsbIspGetMemorySize(dev, KBURN_USB_ISP_EMMC, &size_info);
-	if (r != KBurnNoErr) {
+	if (!kburnUsbIspGetMemorySize(dev, KBURN_USB_ISP_EMMC, &size_info)) {
 		cout << "  * error status: " << dev->error->code << ", " << test_null(dev->error->errorMessage) << endl;
 	} else {
 		cout << "  * block_size: " << size_info.block_size << endl;

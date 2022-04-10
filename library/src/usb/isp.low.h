@@ -64,8 +64,8 @@ enum InOut
 	USB_WRITE,
 };
 
-kburn_err_t usb_lowlevel_command_send(
-	libusb_device_handle *handle, uint8_t endpoint, const usbIspCommandPacket cdb, uint8_t direction, int data_length, uint32_t operation_index);
-kburn_err_t usb_lowlevel_status_read(libusb_device_handle *handle, uint8_t endpoint, uint32_t expected_operation_index);
-kburn_err_t usb_lowlevel_error_read(libusb_device_handle *handle, uint8_t endpoint_in, uint8_t endpoint_out);
-kburn_err_t usb_lowlevel_transfer(kburnUsbDeviceNode *node, enum InOut direction, void *buffer, int size);
+bool usb_lowlevel_command_send(
+	kburnUsbDeviceNode *node, uint8_t endpoint, const usbIspCommandPacket cdb, uint8_t direction, int data_length, uint32_t operation_index);
+bool usb_lowlevel_status_read(kburnUsbDeviceNode *node, uint8_t endpoint, uint32_t expected_operation_index);
+bool usb_lowlevel_error_read(kburnUsbDeviceNode *node, uint8_t endpoint_in, uint8_t endpoint_out);
+bool usb_lowlevel_transfer(kburnUsbDeviceNode *node, enum InOut direction, void *buffer, int size);

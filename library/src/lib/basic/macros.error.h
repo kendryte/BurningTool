@@ -26,3 +26,8 @@ static inline int64_t __kburn_err_t_unchange(int64_t t) {
 	})
 
 #define kburn_not_error(e) (e == KBurnNoErr)
+
+#define ifNotReturnFalse(action) \
+	if (!action) {               \
+		return false;            \
+	}
