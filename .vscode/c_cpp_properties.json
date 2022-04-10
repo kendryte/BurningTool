@@ -9,7 +9,7 @@
 			"cStandard": "gnu17",
 			"cppStandard": "gnu++20",
 			"configurationProvider": "ms-vscode.cmake-tools",
-			"compileCommands": ".vscode/compile_command.json",
+			"compileCommands": ".vscode/compile_commands.json",
 			"browse": {
 				"path": [
 					"${workspaceFolder}/gui",

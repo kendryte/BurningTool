@@ -30,5 +30,6 @@ PUBLIC bool kburnSerialIspBootMemory(kburnSerialDeviceNode *node, kburn_mem_addr
 PUBLIC bool kburnSerialIspRunProgram(
 	kburnSerialDeviceNode *node, const void *programBuffer, size_t programBufferSize, on_write_progress page_callback, void *ctx);
 PUBLIC bool kburnSerialIspSwitchUsbMode(kburnSerialDeviceNode *node, on_write_progress page_callback, void *ctx);
+PUBLIC size_t kburnGetUsbIspProgramSize();
 
 DEFINE_END

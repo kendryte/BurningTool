@@ -20,6 +20,7 @@ typedef void *kb_mutex_t;
 #endif
 
 typedef struct kburnDeviceNode {
+	PCONST uint64_t guid;
 	PCONST kburnDeviceError *const error;
 	PCONST void *chipInfo;
 	PCONST struct disposable_list *disposable_list;

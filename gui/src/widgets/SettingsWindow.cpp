@@ -13,10 +13,10 @@
 #define SETTING_PARITY "parity"
 
 static const QMap<uint8_t, enum KBurnSerialConfigByteSize> bsMap = {
-	{5, KBurnSerialConfigByteSize_8},
-	{6, KBurnSerialConfigByteSize_7},
-	{7, KBurnSerialConfigByteSize_6},
-	{8, KBurnSerialConfigByteSize_5},
+	{8, KBurnSerialConfigByteSize_8},
+	{7, KBurnSerialConfigByteSize_7},
+	{6, KBurnSerialConfigByteSize_6},
+	{5, KBurnSerialConfigByteSize_5},
 };
 
 static const QMap<QString, enum KBurnSerialConfigParity> parMap = {
@@ -161,12 +161,12 @@ void SettingsWindow::reloadSettings() {
 	{
 		auto v = settings.value(SETTING_BAUD_HIGH, 460800).toUInt();
 		ui->inputBaudrateHigh->setCurrentText(QString::number(v));
-		kburnSetSerialBaudrate(v);
+		kburnSetSerialHighSpeedBaudrate(v);
 	}
 	{
 		auto v = settings.value(SETTING_BAUD_INIT, 115200).toUInt();
 		ui->inputBaudrateInit->setCurrentText(QString::number(v));
-		kburnSetSerialHighSpeedBaudrate(v);
+		kburnSetSerialBaudrate(v);
 	}
 
 	{

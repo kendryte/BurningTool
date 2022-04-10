@@ -40,5 +40,7 @@
 	},
 	"files.associations": {
 		"*.ts": "xml",
-	}
+	},
+	"editor.formatOnSave": true,
+	"editor.formatOnSaveMode": "file",
 }

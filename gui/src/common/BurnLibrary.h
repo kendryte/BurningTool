@@ -1,6 +1,7 @@
 #pragma once
 
 #include "main.h"
+#include <QMap>
 #include <QObject>
 #include <QString>
 
@@ -8,6 +9,8 @@ class BurnLibrary : public QObject {
 	Q_OBJECT
 
 	KBCTX context;
+
+	QString imagePath;
 
 	on_device_connect_t previousOnConnectUsb;
 	on_device_connect_t previousOnConnectSerial;
@@ -19,8 +22,9 @@ class BurnLibrary : public QObject {
 
 	kburnSerialDeviceList list = {0, NULL};
 
-	QStringList knownSerialPorts;
-	QList<kburnDeviceNode *> nodes;
+	QMap<QString, QString> knownSerialPorts;
+
+	QMap<QString, class FlashTask *> runningFlash;
 
   public:
 	BurnLibrary(KBCTX context);
@@ -30,7 +34,8 @@ class BurnLibrary : public QObject {
 	void start();
 
   public slots:
-	void startBurn(const QString &serialPath);
+	class FlashTask *startBurn(const QString &serialPath);
+	void setSystemImagePath(const QString &imagePath) { this->imagePath = imagePath; }
 
   private:
 	bool handleConnectSerial(const kburnDeviceNode *dev);
@@ -39,18 +44,8 @@ class BurnLibrary : public QObject {
 	void handleHandleSerial(kburnDeviceNode *dev);
 	void handleHandleUsb(kburnDeviceNode *dev);
 	void handleDebugLog(kburnLogType type, const char *message);
-	static void __handle_progress(void *ctx, const kburnDeviceNode *dev, size_t current, size_t length);
-
-	void handleProgressChange(const kburnDeviceNode *dev, size_t current, size_t length);
 
   signals:
-	bool onConnectSerial(const kburnDeviceNode *dev);
-	bool onConnectUsb(const kburnDeviceNode *dev);
-	void onDeviceRemove(const kburnDeviceNode *dev);
-	void onHandleSerial(kburnDeviceNode *dev);
-	void onHandleUsb(kburnDeviceNode *dev);
 	void onDebugLog(QString message);
-	void onSerialPortList(const QStringList &onSerialPortList);
-
-	void onProgressChange(const kburnDeviceNode *dev, size_t current, size_t length);
+	void onSerialPortList(const QMap<QString, QString> &portList);
 };

@@ -204,3 +204,7 @@ bool kburnSerialIspRunProgram(
 bool kburnSerialIspSwitchUsbMode(kburnSerialDeviceNode *node, on_write_progress page_callback, void *ctx) {
 	return kburnSerialIspRunProgram(node, usb_isp_buffer, usb_isp_buffer_size, page_callback, ctx);
 }
+
+size_t kburnGetUsbIspProgramSize() {
+	return usb_isp_buffer_size;
+}

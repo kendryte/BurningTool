@@ -22,7 +22,13 @@ int main(int argc, char *argv[]) {
 	MainWindow w;
 	w.show();
 
-	return a->exec();
+	auto r = a->exec();
+
+	qDebug("Application main() return.");
+
+	QApplication::exit(r);
+
+	return r;
 }
 
 void fatalAlert(kburn_err_t err) {

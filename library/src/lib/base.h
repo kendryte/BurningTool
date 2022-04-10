@@ -58,3 +58,10 @@
 #else
 #define FMT_SIZET "%zu"
 #endif
+
+static inline uint64_t guid() {
+	int rand(void);
+	static uint64_t guid = 0;
+	guid += rand() % 9;
+	return guid;
+}

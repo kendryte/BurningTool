@@ -12,21 +12,22 @@ QT_END_NAMESPACE
 class MainWindow : public QMainWindow {
 	Q_OBJECT
 	KBCTX context;
+	bool closing = false;
 
   protected:
-    void showEvent(QShowEvent *ev);
+	void showEvent(QShowEvent *ev);
 
   public:
-    MainWindow(QWidget *parent = nullptr);
-    ~MainWindow();
+	MainWindow(QWidget *parent = nullptr);
+	~MainWindow();
 
   private slots:
-    void on_btnOpenWebsite_triggered();
-    void on_btnSaveLog_triggered();
-    void updateSettingStatus();
+	void on_btnOpenWebsite_triggered();
+	void on_btnSaveLog_triggered();
+	void updateSettingStatus();
 
   private:
-    void closeEvent(QCloseEvent *ev);
-    Ui::MainWindow *ui;
-    class BurnLibrary *library;
+	void closeEvent(QCloseEvent *ev);
+	Ui::MainWindow *ui;
+	class BurnLibrary *library;
 };

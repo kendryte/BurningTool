@@ -61,6 +61,7 @@ kburn_err_t create_empty_device_instance(KBCTX scope, kburnDeviceNode **output) 
 
 	memcpy(empty_device_instance, &n, sizeof(kburnDeviceNode));
 
+	empty_device_instance->guid = (uint64_t)empty_device_instance;
 	n.serial->parent = empty_device_instance;
 	n.usb->parent = empty_device_instance;
 

@@ -37,6 +37,7 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
 
 	ui->manualBurnWindow->setLibrary(library);
 	connect(ui->settingsWindow, &SettingsWindow::settingsChanged, this, &MainWindow::updateSettingStatus);
+	updateSettingStatus();
 }
 
 void MainWindow::updateSettingStatus() {
@@ -53,6 +54,8 @@ void MainWindow::updateSettingStatus() {
 			ui->mainTabView->setTabEnabled(i, false);
 		}
 	}
+
+	library->setSystemImagePath(file.fileName());
 }
 
 void MainWindow::showEvent(QShowEvent *event) {
@@ -61,9 +64,6 @@ void MainWindow::showEvent(QShowEvent *event) {
 }
 
 MainWindow::~MainWindow() {
-	QSettings settings(QSettings::Scope::UserScope, SETTINGS_CATEGORY, "ui");
-	settings.setValue("splitterSizes", ui->mainSplitter->saveState());
-
 	delete ui;
 }
 
@@ -72,9 +72,20 @@ void MainWindow::on_btnOpenWebsite_triggered() {
 }
 
 void MainWindow::closeEvent(QCloseEvent *ev) {
-	ui->mainTabView->setDisabled(true);
+	if (closing) {
+		QApplication::exit(0);
+		return;
+	}
+
+	closing = true;
+	setDisabled(true);
+
+	QSettings settings(QSettings::Scope::UserScope, SETTINGS_CATEGORY, "ui");
+	settings.setValue("splitterSizes", ui->mainSplitter->saveState());
+
 	delete library;
 	kburnGlobalDestroy();
+
 	ev->accept();
 }
 

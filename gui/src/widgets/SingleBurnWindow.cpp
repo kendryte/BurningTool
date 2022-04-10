@@ -7,21 +7,74 @@ SingleBurnWindow::SingleBurnWindow(QWidget *parent) : QWidget(parent), ui(new Ui
 }
 
 SingleBurnWindow::~SingleBurnWindow() {
+	if (work) {
+		work->cancel();
+		future->waitForFinished();
+	}
 	delete ui;
 }
 
 void SingleBurnWindow::setLibrary(class BurnLibrary *library) {
 	QObject::connect(library, &BurnLibrary::onSerialPortList, this, &SingleBurnWindow::handleSerialPortList);
-	QObject::connect(library, &BurnLibrary::onHandleSerial, this, &SingleBurnWindow::handleDeviceStateChange);
-	QObject::connect(library, &BurnLibrary::onHandleUsb, this, &SingleBurnWindow::handleDeviceStateChange);
-
 	QObject::connect(this, &SingleBurnWindow::startBurn, library, &BurnLibrary::startBurn);
 }
 void SingleBurnWindow::on_btnStartBurn_clicked() {
-	emit startBurn(ui->inputComPortList->currentText());
+	if (work) {
+		// ????
+		qErrnoWarning("Invalid state: re-run on_btnStartBurn_clicked; this is impossible\n");
+	}
+	work = emit startBurn(ui->inputComPortList->currentText());
+	if (work == NULL) {
+		ui->textPortInfo->setText(tr("发生未知错误"));
+		return;
+	}
+
+	resetProgressState();
+
+	reinterpret_cast<QWidget *>(parent())->setEnabled(false);
+
+	future = new QFutureWatcher<void>();
+
+	connect(future, &QFutureWatcher<void>::finished, this, &SingleBurnWindow::resumeState);
+	connect(future, &QFutureWatcher<void>::finished, this, &SingleBurnWindow::resetProgressState);
+	connect(future, &QFutureWatcher<void>::canceled, this, [=]() {
+		auto r = work->getResult();
+		auto e = kburnSplitErrorCode(r->errorCode);
+		ui->textPortInfo->setText(tr("错误: ") + QString::number(e.kind >> 32) + " - (" + QString::number(e.code, 16) + "), " + r->errorMessage);
+
+		resumeState();
+	});
+	connect(future, &QFutureWatcher<void>::progressRangeChanged, ui->progressBar, &QProgressBar::setRange);
+	connect(future, &QFutureWatcher<void>::progressValueChanged, ui->progressBar, &QProgressBar::setValue);
+	connect(future, &QFutureWatcher<void>::progressTextChanged, this, &SingleBurnWindow::setProgressText);
+
+	future->setFuture(work->future());
 }
 
-void SingleBurnWindow::handleSerialPortList(const QStringList &list) {
+void SingleBurnWindow::setProgressText(const QString &progressText) {
+	if (progressText.isEmpty()) {
+		ui->progressBar->setFormat("%p%");
+	} else {
+		ui->progressBar->setFormat(progressText + ": %p%");
+	}
+}
+
+void SingleBurnWindow::resetProgressState() {
+	ui->textPortInfo->setText("");
+	setProgressText("");
+	ui->progressBar->setRange(0, 100);
+	ui->progressBar->setValue(0);
+}
+
+void SingleBurnWindow::resumeState() {
+	delete future;
+	future = NULL;
+	delete work;
+	work = NULL;
+	reinterpret_cast<QWidget *>(parent())->setEnabled(true);
+}
+
+void SingleBurnWindow::handleSerialPortList(const QMap<QString, QString> &list) {
 	QString save(ui->inputComPortList->currentText());
 
 	bool custom = true;
@@ -37,11 +90,14 @@ void SingleBurnWindow::handleSerialPortList(const QStringList &list) {
 	}
 
 	ui->inputComPortList->clear();
-	ui->inputComPortList->addItems(list);
+	auto titles = list.keys();
+	for (auto title : titles) {
+		ui->inputComPortList->addItem(title, list.value(title));
+	}
 	if (custom) {
 		ui->inputComPortList->setEditText(save);
 	} else {
-		int sel = qMax(list.indexOf(save), 0);
+		int sel = qMax(titles.indexOf(save), 0);
 		ui->inputComPortList->setCurrentIndex(sel);
 	}
 }

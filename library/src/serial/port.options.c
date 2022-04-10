@@ -22,9 +22,11 @@ ser_opts_t get_current_serial_options(const char *path) {
 }
 
 void kburnSetSerialBaudrate(uint32_t baudrate) {
+	debug_trace_function("%d", baudrate);
 	opts.baudrate = baudrate;
 }
 void kburnSetSerialByteSize(enum KBurnSerialConfigByteSize byteSize) {
+	debug_trace_function("%d", byteSize);
 	switch (byteSize) {
 	case KBurnSerialConfigByteSize_8:
 		opts.bytesz = SER_BYTESZ_8;
@@ -43,6 +45,7 @@ void kburnSetSerialByteSize(enum KBurnSerialConfigByteSize byteSize) {
 	}
 }
 void kburnSetSerialParity(enum KBurnSerialConfigParity parity) {
+	debug_trace_function("%d", parity);
 	switch (parity) {
 	case KBurnSerialConfigParityNone:
 		opts.parity = SER_PAR_NONE;
@@ -65,6 +68,7 @@ void kburnSetSerialParity(enum KBurnSerialConfigParity parity) {
 	}
 }
 void kburnSetSerialStopBits(enum KBurnSerialConfigStopBits stopBits) {
+	debug_trace_function("%d", stopBits);
 	switch (stopBits) {
 	case KBurnSerialConfigStopBitsOne:
 		opts.stopbits = SER_STOPB_ONE;
@@ -80,8 +84,10 @@ void kburnSetSerialStopBits(enum KBurnSerialConfigStopBits stopBits) {
 	}
 }
 void kburnSetSerialReadTimeout(int32_t readTimeout) {
+	debug_trace_function("%d", readTimeout);
 	opts.timeouts.rd = readTimeout;
 }
 void kburnSetSerialWriteTimeout(int32_t writeTimeout) {
+	debug_trace_function("%d", writeTimeout);
 	opts.timeouts.wr = writeTimeout;
 }

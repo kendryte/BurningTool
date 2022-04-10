@@ -89,6 +89,7 @@ static isp_response_t *serial_isp_command_send_low(kburnSerialDeviceNode *node, 
 		goto exit;
 	}
 
+	int zeroCheck = 0;
 	while (!node->isp->has_response) {
 		int32_t err = ser_read_wait(node->m_dev_handle);
 		if (err != 0) {
@@ -99,6 +100,13 @@ static isp_response_t *serial_isp_command_send_low(kburnSerialDeviceNode *node, 
 		size_t recv;
 		if (!serial_low_read_data(node, &input_buffer, &input_buffer_size, &recv)) {
 			goto exit;
+		}
+		if (recv == 0) {
+			zeroCheck++;
+			if (zeroCheck > 10) {
+				debug_print(KBURN_LOG_ERROR, "port state invalid.");
+				goto exit;
+			}
 		}
 
 		for (size_t i = 0; i < recv; i++) {

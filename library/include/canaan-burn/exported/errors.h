@@ -53,3 +53,7 @@ typedef struct kburnErrorDesc {
 kburnErrorDesc kburnSplitErrorCode(kburn_err_t code);
 
 DEFINE_END
+
+#ifdef __cplusplus
+#define KBurnNoErr ((kburn_err_t)KBurnCommonError::KBurnNoErr)
+#endif
