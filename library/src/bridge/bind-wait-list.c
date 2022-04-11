@@ -24,7 +24,7 @@ DECALRE_DISPOSE(waiting_list_deinit, waiting_list_t) {
 DECALRE_DISPOSE_END()
 
 bool _should_insert_waitting_list(kburnDeviceNode *node) {
-	return node->serial->init && node->serial->isOpen && node->serial->isSwitchIsp && !node->serial->isUsbBound;
+	return !node->destroy_in_progress && node->serial->init && node->serial->isOpen && node->serial->isSwitchIsp && !node->serial->isUsbBound;
 }
 
 void _recreate_waitting_list(KBCTX scope) {

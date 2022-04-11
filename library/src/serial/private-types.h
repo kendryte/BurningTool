@@ -34,6 +34,18 @@ enum kburnIspOperation
 typedef enum kburnIspOperation kburnIspOperation;
 _Static_assert(sizeof(kburnIspOperation) == 1, "enum must 8bit");
 
+struct serial_settings {
+	uint8_t retry_times;
+	uint32_t command_baudrate;
+	uint32_t transfer_baudrate;
+	uint32_t isp_baudrate;
+	int32_t read_timeout;
+	int32_t write_timeout;
+	enum KBurnSerialConfigByteSize byte_size;
+	enum KBurnSerialConfigParity parity;
+	enum KBurnSerialConfigStopBits stop_bits;
+};
+
 typedef struct serial_subsystem_context {
 	bool subsystem_inited;
 	kbthread init_list_thread;
@@ -43,6 +55,8 @@ typedef struct serial_subsystem_context {
 	kbthread pairing_thread;
 	on_device_connect_t on_verify;
 	on_device_handle_t on_handle;
+
+	struct serial_settings settings;
 } serial_subsystem_context;
 
 #define SERIAL_CHUNK_SIZE ((size_t)1064)
@@ -78,3 +92,13 @@ typedef struct isp_response_t {
 } isp_response_t;
 
 extern uint32_t baudrateHighValue;
+
+#ifdef get_settings
+#undef get_settings
+#undef subsystem_settings
+#undef CREATE_GETTER_SETTER
+#else
+#define get_settings(node) get_scope(node)->serial->settings
+#define subsystem_settings (scope->serial->settings)
+#define CREATE_GETTER_SETTER(Field, config_field) _CREATE_GETTER_SETTER(Serial, Field, config_field)
+#endif

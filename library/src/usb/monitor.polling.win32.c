@@ -31,7 +31,7 @@ static inline bool match_device(int vid, int pid, const kburnUsbDeviceInfoSlice 
 
 static void push_event(KBCTX scope, bool add, const kburnUsbDeviceInfoSlice *devInfo) {
 	libusb_hotplug_event event = add ? LIBUSB_HOTPLUG_EVENT_DEVICE_ARRIVED : LIBUSB_HOTPLUG_EVENT_DEVICE_LEFT;
-	if (match_device(scope->usb->filter.vid, scope->usb->filter.pid, devInfo)) {
+	if (match_device(subsystem_settings.vid, subsystem_settings.pid, devInfo)) {
 		push_libusb_event(scope, event, devInfo);
 	}
 }

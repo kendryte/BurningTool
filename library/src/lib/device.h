@@ -16,6 +16,7 @@ __attribute__((always_inline)) static inline kburnDeviceNode *__u(kburnUsbDevice
 	return v->parent;
 }
 #define get_node(node) _Generic((node), kburnDeviceNode * : __p, kburnSerialDeviceNode * : __s, kburnUsbDeviceNode * : __u)(node)
+#define scopeOf(node) get_node(node)->_scope
 
 #define serial_isp_command_error(node, err) _serial_isp_command_error(get_node(node), err)
 #define copy_last_serial_io_error(node, errno) _copy_last_serial_io_error(get_node(node), errno)

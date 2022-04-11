@@ -20,6 +20,8 @@ class FlashTask : public QObject, public QRunnable {
   private:
 	FlashTask();
 
+	size_t bytesWritten = 0;
+	size_t bytesNextStage = 0;
 	const QString systemImage;
 	const QString comPort;
 	KBCTX scope;
@@ -28,6 +30,12 @@ class FlashTask : public QObject, public QRunnable {
 	QPromise<void> output;
 
 	KBurnException *result = NULL;
+
+	void setProgressValue(size_t bytes);
+	static void serial_isp_progress(void *, const kburnDeviceNode *, size_t, size_t);
+
+	bool canceled = false;
+	void testCancel();
 
   public:
 	~FlashTask();

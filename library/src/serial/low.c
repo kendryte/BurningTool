@@ -1,6 +1,6 @@
 #include "low.h"
 #include "device.h"
-#include "port.options.h"
+#include "settings.h"
 
 static bool open(kburnSerialDeviceNode *node, ser_opts_t opts) {
 	m_assert(node->m_dev_handle == NULL, "duplicate call to serial port open");
@@ -40,7 +40,7 @@ void serial_low_close(kburnSerialDeviceNode *node) {
 
 bool serial_low_open(kburnSerialDeviceNode *node) {
 	debug_trace_function("node[%s]", node->deviceInfo.path);
-	return open(node, get_current_serial_options(node->deviceInfo.path));
+	return open(node, get_current_serial_options(scopeOf(node), node->deviceInfo.path));
 }
 
 void serial_low_flush_all(kburnSerialDeviceNode *node) {
@@ -49,7 +49,7 @@ void serial_low_flush_all(kburnSerialDeviceNode *node) {
 
 bool serial_low_switch_baudrate(kburnSerialDeviceNode *node, uint32_t speed) {
 	serial_low_close(node);
-	ser_opts_t opts = get_current_serial_options(node->deviceInfo.path);
+	ser_opts_t opts = get_current_serial_options(scopeOf(node), node->deviceInfo.path);
 	opts.baudrate = speed;
 	return open(node, opts);
 }

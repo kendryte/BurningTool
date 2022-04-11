@@ -15,29 +15,30 @@ class SettingsWindow : public QWidget {
 	Q_OBJECT
 	QFile fd;
 	Ui::SettingsWindow *ui;
-	QList<uint32_t> baudrates = {9600, 115200, 230400, 460800, 576000, 921600};
 	QSettings settings;
 
   public:
-    explicit SettingsWindow(QWidget *parent = nullptr);
-    ~SettingsWindow();
+	explicit SettingsWindow(QWidget *parent = nullptr);
+	~SettingsWindow();
 
-    QString getFile() { return fd.fileName(); }
+	QString getFile() { return fd.fileName(); }
+	void showEvent(QShowEvent *event);
 
   signals:
-    void settingsChanged();
+	void settingsChanged();
+	void settingsUnsaved(bool hasUnsave);
 
   private slots:
-    bool checkSysImage();
-    void on_btnSelectImage_clicked();
-    void on_inputSysImage_editingFinished();
-    void on_actionBar_clicked(class QAbstractButton *button);
-    void acceptSave();
-    void reloadSettings();
-    void inputChanged();
+	bool checkSysImage();
+	void on_btnSelectImage_clicked();
+	void on_inputSysImage_editingFinished();
+	void on_actionBar_clicked(class QAbstractButton *button);
+	void acceptSave();
+	void reloadSettings();
+	void inputChanged();
 
   private:
-    void restoreDefaults();
+	void restoreDefaults();
 
 	void checkAndSetInt(const QString &setting, const QString &input);
 	template <typename keyT, typename valueT>

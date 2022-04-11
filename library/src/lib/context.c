@@ -9,6 +9,8 @@
 
 disposable_list_t *lib_global_scope = NULL;
 static uint32_t dbg_index = 0;
+extern struct serial_settings serial_default_settings;
+extern struct usb_settings usb_default_settings;
 
 void kburnGlobalDestroy() {
 	debug_trace_function();
@@ -47,10 +49,11 @@ kburn_err_t kburnCreate(KBCTX *ppCtx) {
 	serial_subsystem_context *serial = MyAlloc(serial_subsystem_context);
 	register_dispose_pointer(dis, serial);
 
+	serial->settings = serial_default_settings;
+
 	usb_subsystem_context *usb = MyAlloc(usb_subsystem_context);
 	register_dispose_pointer(dis, usb);
-	usb->filter.vid = DEFAULT_VID;
-	usb->filter.pid = DEFAULT_PID;
+	usb->settings = usb_default_settings;
 
 	struct port_link_list *odlist = port_link_list_init();
 	dispose_list_add(dis, toDisposable(port_link_list_deinit, odlist));

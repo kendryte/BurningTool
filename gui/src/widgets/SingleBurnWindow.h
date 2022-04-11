@@ -18,7 +18,7 @@ class SingleBurnWindow : public QWidget {
 	explicit SingleBurnWindow(QWidget *parent = nullptr);
 	~SingleBurnWindow();
 
-	void setLibrary(class BurnLibrary *lib);
+	void showEvent(QShowEvent *event);
 
   signals:
 	class FlashTask *startBurn(const QString &sysImg);

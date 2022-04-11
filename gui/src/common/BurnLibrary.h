@@ -8,7 +8,9 @@
 class BurnLibrary : public QObject {
 	Q_OBJECT
 
-	KBCTX context;
+	QWidget *const parent;
+	KBCTX ctx;
+	static class BurnLibrary *_instance;
 
 	QString imagePath;
 
@@ -21,21 +23,22 @@ class BurnLibrary : public QObject {
 	kburnDebugColors previousColors;
 
 	kburnSerialDeviceList list = {0, NULL};
-
 	QMap<QString, QString> knownSerialPorts;
-
 	QMap<QString, class FlashTask *> runningFlash;
 
+	BurnLibrary(QWidget *parent);
+
+	void fatalAlert(kburn_err_t err);
+
   public:
-	BurnLibrary(KBCTX context);
 	~BurnLibrary();
 
 	void reloadList();
 	void start();
 
-  public slots:
-	class FlashTask *startBurn(const QString &serialPath);
-	void setSystemImagePath(const QString &imagePath) { this->imagePath = imagePath; }
+	static void createInstance(QWidget *parent);
+	static KBCTX context();
+	static BurnLibrary *instance();
 
   private:
 	bool handleConnectSerial(const kburnDeviceNode *dev);
@@ -44,6 +47,10 @@ class BurnLibrary : public QObject {
 	void handleHandleSerial(kburnDeviceNode *dev);
 	void handleHandleUsb(kburnDeviceNode *dev);
 	void handleDebugLog(kburnLogType type, const char *message);
+
+  public slots:
+	class FlashTask *startBurn(const QString &serialPath);
+	void setSystemImagePath(const QString &imagePath) { this->imagePath = imagePath; }
 
   signals:
 	void onDebugLog(QString message);

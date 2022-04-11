@@ -6,10 +6,6 @@
 
 #define CHUNK_SIZE 1024 * 1024
 
-static void handle_serial_progress(void *self, const kburnDeviceNode *dev, size_t current, size_t length) {
-	reinterpret_cast<QPromise<void> *>(self)->setProgressValue(current);
-}
-
 static void run_progress(QPromise<void> &output, QFuture<kburnDeviceNode *> &input, KBCTX scope, const QString &comPort, const QString &systemImage) {
 }
 
@@ -19,10 +15,21 @@ FlashTask::~FlashTask() {
 	}
 }
 
+void FlashTask::setProgressValue(size_t value) {
+	output.setProgressValue(bytesWritten + value);
+}
+
 void FlashTask::nextStage(const QString &title, size_t bytes) {
-	output.setProgressRange(0, bytes);
-	output.setProgressValue(0);
+	bytesWritten += bytesNextStage;
+	bytesNextStage = bytes;
+	output.setProgressRange(bytesWritten, bytesWritten + bytes);
+	output.setProgressValue(bytesWritten);
 	emit progressTextChanged(title);
+}
+
+void FlashTask::serial_isp_progress(void *self, const kburnDeviceNode *dev, size_t current, size_t length) {
+	auto _this = reinterpret_cast<FlashTask *>(self);
+	_this->setProgressValue(current);
 }
 
 void FlashTask::run() {
@@ -51,18 +58,24 @@ void FlashTask::run() {
 		nextStage(::tr("写入USB ISP"), kburnGetUsbIspProgramSize());
 
 		auto node = (kburnDeviceNode *)inputs.pick(0);
+		if (node == NULL) {
+			throw KBurnException(tr("设备超时"));
+		}
 
 		if (!kburnSerialIspSetBaudrateHigh(node->serial)) {
 			throw KBurnException(node->error->code, node->error->errorMessage);
 		}
 
-		if (!kburnSerialIspSwitchUsbMode(node->serial, handle_serial_progress, &output)) {
+		if (!kburnSerialIspSwitchUsbMode(node->serial, FlashTask::serial_isp_progress, this)) {
 			throw KBurnException(node->error->code, node->error->errorMessage);
 		}
 
 		nextStage(::tr("等待USB ISP启动"));
 
 		node = (kburnDeviceNode *)inputs.pick(1);
+		if (node == NULL) {
+			throw KBurnException(tr("设备超时"));
+		}
 
 		kburnDeviceMemorySizeInfo devInfo;
 		if (!kburnUsbIspGetMemorySize(node, kburnUsbIspCommandTaget::KBURN_USB_ISP_EMMC, &devInfo)) {
@@ -75,19 +88,19 @@ void FlashTask::run() {
 		}
 		nextStage(::tr("下载中"), imageSize);
 
-		size_t chunk_size = (CHUNK_SIZE / devInfo.block_size + (CHUNK_SIZE % devInfo.block_size > 0 ? 1 : 0)) * devInfo.block_size;
-		// imageStream.rea(chunk_size)
+		size_t chunk_size = ((CHUNK_SIZE / devInfo.block_size) + (CHUNK_SIZE % devInfo.block_size > 0 ? 1 : 0)) * devInfo.block_size;
 		char readBuffer[chunk_size];
+		memset(readBuffer, 0, chunk_size);
 		size_t block = 0;
 		while (!imageStream.atEnd()) {
-			imageStream.readRawData(readBuffer, chunk_size);
+			size_t actread = imageStream.readRawData(readBuffer, chunk_size);
 
 			bool success = [&] {
 				for (int tries = 0; tries < 5; tries++) {
 					if (kburnUsbIspWriteChunk(node, devInfo, block, readBuffer, chunk_size)) {
 						return true;
 					} else {
-						qErrnoWarning("kburnUsbIspWriteChunk failed [%d/5]: %s", tries + 1, node->error->errorMessage);
+						fprintf(stderr, "\x1b[38;5;9mkburnUsbIspWriteChunk failed [%d/5]: %s\x1b[0m\n", tries + 1, node->error->errorMessage);
 					}
 				}
 				return false;
@@ -96,13 +109,13 @@ void FlashTask::run() {
 			if (!success) {
 				throw KBurnException(tr("设备写入失败，地址: ") + QString::number(block * chunk_size, 16));
 			}
+			testCancel();
 
 			block += chunk_size / devInfo.block_size;
-			qDebug() << "\x1B[38;5;9m" << block << "\x1B[0m" << QChar::LineFeed;
-			output.setProgressValue(block * chunk_size);
+			setProgressValue(block * chunk_size);
 		}
 	} catch (KBurnException e) {
-		result = new KBurnException(e);
+		result = new KBurnException(e); // copy: prevent access free-ed error message, free in ~FlashTask
 		output.setException(e);
 		return;
 	}
@@ -110,5 +123,11 @@ void FlashTask::run() {
 }
 
 void FlashTask::cancel() {
-	// TODO: impl
+	canceled = true;
+}
+
+void FlashTask::testCancel() {
+	if (canceled) {
+		throw KBurnException(tr("用户主动取消"));
+	}
 }

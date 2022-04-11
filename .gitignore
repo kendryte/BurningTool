@@ -4,3 +4,5 @@ vcpkg_installed
 sysimage*
 .vscode/*.db*
 .vscode/*.DB*
+*.img
+*.bin

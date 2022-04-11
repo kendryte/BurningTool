@@ -82,6 +82,6 @@ void _serial_isp_command_error(kburnDeviceNode *node, kburnIspErrorCode err) {
 		set_error(node, KBURN_ERROR_KIND_ISP, err, "ISP_RET_INVALID_INITIALIZATION");
 		return;
 	default:
-		m_abort("invalid isp command error");
+		set_error(node, KBURN_ERROR_KIND_ISP, err, "invalid isp command error: %d", err);
 	}
 }

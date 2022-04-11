@@ -61,7 +61,7 @@ libusb_device *get_usb_device(struct libusb_context *libusb, uint16_t vid, uint1
 }
 
 kburn_err_t init_list_all_usb_devices(KBCTX scope) {
-	debug_trace_function("%.4x:%.4x", scope->usb->filter.vid, scope->usb->filter.pid);
+	debug_trace_function("%.4x:%.4x", scope->usb->settings.vid, scope->usb->settings.pid);
 	struct libusb_device_descriptor desc;
 
 	libusb_device **list;
@@ -80,7 +80,7 @@ kburn_err_t init_list_all_usb_devices(KBCTX scope) {
 		}
 		debug_print(KBURN_LOG_DEBUG, "[init/poll] found device: [%.4x:%.4x]", desc.idVendor, desc.idProduct);
 
-		if (!match_device(scope->usb->filter.vid, scope->usb->filter.pid, &desc)) {
+		if (!match_device(subsystem_settings.vid, subsystem_settings.pid, &desc)) {
 			debug_print(KBURN_LOG_DEBUG, "[init/poll] \tnot wanted device.");
 			continue;
 		}

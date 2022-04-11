@@ -5,9 +5,6 @@
 #include "components/thread.h"
 #include <libusb.h>
 
-#define DEFAULT_VID 0x0559
-#define DEFAULT_PID 0x4001
-
 // Mass Storage Requests values. See section 3 of the Bulk-Only Mass Storage Class specifications
 // #define BOMS_RESET 0xFF
 // #define BOMS_GET_MAX_LUN 0xFE
@@ -21,11 +18,13 @@ enum UsbEventMode
 	USB_EVENT_CALLBACK,
 };
 
+struct usb_settings {
+	uint16_t vid;
+	uint16_t pid;
+};
+
 typedef struct usb_subsystem_context {
-	struct {
-		int vid;
-		int pid;
-	} filter;
+	struct usb_settings settings;
 
 	bool subsystem_inited;
 	bool detach_kernel_driver;
@@ -116,3 +115,13 @@ typedef struct usb_subsystem_context {
 			(void)0;                                              \
 		IfErrorReturn(kburn_not_error, action, set_node_k_error); \
 	})
+
+#ifdef get_settings
+#undef subsystem_settings
+#undef get_settings
+#undef CREATE_GETTER_SETTER
+#else
+#define get_settings(node) get_scope(node)->usb->settings
+#define subsystem_settings (scope->usb->settings)
+#define CREATE_GETTER_SETTER(Field, config_field) _CREATE_GETTER_SETTER(Usb, Field, config_field)
+#endif

@@ -28,11 +28,13 @@ void usb_subsystem_deinit(KBCTX scope) {
 	usb_monitor_destroy(scope);
 
 	if (scope->usb->libusb) {
+		debug_print(KBURN_LOG_INFO, "libusb_exit!");
 		libusb_exit(scope->usb->libusb);
 		scope->usb->libusb = NULL;
 	}
 
 	scope->usb->subsystem_inited = false;
+	debug_trace_function("DONE");
 }
 
 kburn_err_t usb_subsystem_init(KBCTX scope) {

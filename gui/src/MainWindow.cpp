@@ -9,6 +9,8 @@
 #include <QUrl>
 
 MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWindow) {
+	BurnLibrary::createInstance(this);
+
 	ui->setupUi(this);
 
 	ui->mainSplitter->setStretchFactor(1, 0);
@@ -24,20 +26,23 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
 
 	ui->mainTabView->setCurrentIndex(0);
 
-	ui->mainTabView->removeTab(3);
-	ui->mainTabView->removeTab(2);
-
-	kburn_err_t err = kburnCreate(&context);
-	if (err != KBurnNoErr) {
-		fatalAlert(err);
+	for (int i = 2; i < ui->mainTabView->count(); i++) {
+		ui->mainTabView->setTabVisible(i, false);
 	}
 
-	library = new BurnLibrary(context);
+	auto library = BurnLibrary::instance();
 	QObject::connect(library, &BurnLibrary::onDebugLog, this->ui->textLog, &LoggerWindow::append);
 
-	ui->manualBurnWindow->setLibrary(library);
 	connect(ui->settingsWindow, &SettingsWindow::settingsChanged, this, &MainWindow::updateSettingStatus);
+	connect(ui->settingsWindow, &SettingsWindow::settingsUnsaved, this, &MainWindow::disableOtherTabs);
+
 	updateSettingStatus();
+}
+
+void MainWindow::disableOtherTabs(bool disable) {
+	for (int i = 1; i < ui->mainTabView->count(); i++) {
+		ui->mainTabView->setTabEnabled(i, !disable);
+	}
 }
 
 void MainWindow::updateSettingStatus() {
@@ -55,16 +60,12 @@ void MainWindow::updateSettingStatus() {
 		}
 	}
 
-	library->setSystemImagePath(file.fileName());
+	BurnLibrary::instance()->setSystemImagePath(file.fileName());
 }
 
 void MainWindow::showEvent(QShowEvent *event) {
 	QMainWindow::showEvent(event);
-	library->start();
-}
-
-MainWindow::~MainWindow() {
-	delete ui;
+	BurnLibrary::instance()->start();
 }
 
 void MainWindow::on_btnOpenWebsite_triggered() {
@@ -83,7 +84,7 @@ void MainWindow::closeEvent(QCloseEvent *ev) {
 	QSettings settings(QSettings::Scope::UserScope, SETTINGS_CATEGORY, "ui");
 	settings.setValue("splitterSizes", ui->mainSplitter->saveState());
 
-	delete library;
+	delete BurnLibrary::instance();
 	kburnGlobalDestroy();
 
 	ev->accept();
@@ -91,8 +92,8 @@ void MainWindow::closeEvent(QCloseEvent *ev) {
 
 void MainWindow::on_btnSaveLog_triggered() {
 	QString selFilter("Log File (*.log)");
-	QString str =
-		QFileDialog::getSaveFileName(this, tr("日志保存路径"), QDir::currentPath() + "help.log", tr("Log File (*.log);;All files (*.*)"), &selFilter);
+	QString str = QFileDialog::getSaveFileName(
+		this, tr("日志保存路径"), QDir::currentPath() + "/help.log", tr("Log File (*.log);;All files (*.*)"), &selFilter);
 	if (str.isEmpty()) {
 		return;
 	}

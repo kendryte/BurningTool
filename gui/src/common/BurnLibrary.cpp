@@ -1,22 +1,61 @@
 #include "BurnLibrary.h"
 #include "BurningProcess.h"
+#include "main.h"
 #include <canaan-burn/canaan-burn.h>
 #include <iostream>
 #include <QDebug>
+#include <QMessageBox>
 #include <QThreadPool>
 
 BurnLibrary::~BurnLibrary() {
 	kburnSetColors(previousColors);
 
 	kburnSetLogCallback(previousOnDebugLog.handler, previousOnDebugLog.context);
-	kburnOnSerialConnect(context, previousOnConnectSerial.handler, previousOnConnectSerial.context);
-	kburnOnSerialConfirm(context, previousOnHandleSerial.handler, previousOnHandleSerial.context);
-	kburnOnUsbConnect(context, previousOnConnectUsb.handler, previousOnConnectUsb.context);
-	kburnOnUsbConfirm(context, previousOnHandleUsb.handler, previousOnHandleUsb.context);
-	kburnOnDeviceDisconnect(context, previousOnDeviceRemove.handler, previousOnDeviceRemove.context);
+	kburnOnSerialConnect(ctx, previousOnConnectSerial.handler, previousOnConnectSerial.context);
+	kburnOnSerialConfirm(ctx, previousOnHandleSerial.handler, previousOnHandleSerial.context);
+	kburnOnUsbConnect(ctx, previousOnConnectUsb.handler, previousOnConnectUsb.context);
+	kburnOnUsbConfirm(ctx, previousOnHandleUsb.handler, previousOnHandleUsb.context);
+	kburnOnDeviceDisconnect(ctx, previousOnDeviceRemove.handler, previousOnDeviceRemove.context);
 }
 
-BurnLibrary::BurnLibrary(KBCTX context) : context(context) {
+BurnLibrary::BurnLibrary(QWidget *parent) : parent(parent) {
+}
+
+BurnLibrary *BurnLibrary::_instance = NULL;
+
+BurnLibrary *BurnLibrary::instance() {
+	Q_ASSERT(BurnLibrary::_instance != NULL);
+	return BurnLibrary::_instance;
+}
+
+KBCTX BurnLibrary::context() {
+	Q_ASSERT(BurnLibrary::_instance != NULL);
+	return BurnLibrary::_instance->ctx;
+}
+
+void BurnLibrary::createInstance(QWidget *parent) {
+	Q_ASSERT(BurnLibrary::_instance == NULL);
+	auto instance = new BurnLibrary(parent);
+
+	KBCTX context;
+	kburn_err_t err = kburnCreate(&context);
+	if (err != KBurnNoErr) {
+		instance->fatalAlert(err);
+	}
+
+	instance->ctx = context;
+
+	BurnLibrary::_instance = instance;
+};
+
+void BurnLibrary::fatalAlert(kburn_err_t err) {
+	auto e = kburnSplitErrorCode(err);
+	QMessageBox msg(
+		QMessageBox::Icon::Critical, ::tr("错误"),
+		::tr("无法初始化读写功能:") + '\n' + ::tr("error kind: ") + QString::number(e.kind) + ", " + ::tr("code: ") + QString::number(e.code),
+		QMessageBox::StandardButton::Close, parent);
+	msg.exec();
+	abort();
 }
 
 void BurnLibrary::start() {
@@ -33,23 +72,23 @@ void BurnLibrary::start() {
 		[](void *self, kburnLogType level, const char *cstr) { reinterpret_cast<BurnLibrary *>(self)->handleDebugLog(level, cstr); }, this);
 
 	previousOnConnectSerial = kburnOnSerialConnect(
-		context, [](void *self, const kburnDeviceNode *dev) { return reinterpret_cast<BurnLibrary *>(self)->handleConnectSerial(dev); }, this);
+		ctx, [](void *self, const kburnDeviceNode *dev) { return reinterpret_cast<BurnLibrary *>(self)->handleConnectSerial(dev); }, this);
 
 	previousOnHandleSerial = kburnOnSerialConfirm(
-		context, [](void *self, kburnDeviceNode *dev) { reinterpret_cast<BurnLibrary *>(self)->handleHandleSerial(dev); }, this);
+		ctx, [](void *self, kburnDeviceNode *dev) { reinterpret_cast<BurnLibrary *>(self)->handleHandleSerial(dev); }, this);
 
 	previousOnConnectUsb = kburnOnUsbConnect(
-		context, [](void *self, const kburnDeviceNode *dev) { return reinterpret_cast<BurnLibrary *>(self)->handleConnectUsb(dev); }, this);
+		ctx, [](void *self, const kburnDeviceNode *dev) { return reinterpret_cast<BurnLibrary *>(self)->handleConnectUsb(dev); }, this);
 
 	previousOnHandleUsb = kburnOnUsbConfirm(
-		context, [](void *self, kburnDeviceNode *dev) { reinterpret_cast<BurnLibrary *>(self)->handleHandleUsb(dev); }, this);
+		ctx, [](void *self, kburnDeviceNode *dev) { reinterpret_cast<BurnLibrary *>(self)->handleHandleUsb(dev); }, this);
 
 	previousOnDeviceRemove = kburnOnDeviceDisconnect(
-		context, [](void *self, const kburnDeviceNode *dev) { reinterpret_cast<BurnLibrary *>(self)->handleDeviceRemove(dev); }, this);
+		ctx, [](void *self, const kburnDeviceNode *dev) { reinterpret_cast<BurnLibrary *>(self)->handleDeviceRemove(dev); }, this);
 
 #pragma GCC diagnostic pop
 
-	auto err = kburnStartWaitingDevices(context);
+	auto err = kburnStartWaitingDevices(ctx);
 	if (err != KBurnNoErr) {
 		fatalAlert(err);
 	}
@@ -64,7 +103,7 @@ void BurnLibrary::handleDebugLog(kburnLogType level, const char *cstr) {
 }
 
 void BurnLibrary::reloadList() {
-	auto n = kburnGetSerialList(context);
+	auto n = kburnGetSerialList(ctx);
 	memcpy(&list, &n, sizeof(list));
 
 	if (list.size < 0) {
@@ -76,7 +115,7 @@ void BurnLibrary::reloadList() {
 	for (auto i = 0; i < list.size; i++) {
 		QString r;
 		r += QString::fromLatin1(list.list[i].path) + " - [" + QString::number(list.list[i].usbIdVendor, 16).leftJustified(4, '0') + ":" +
-			 QString::number(list.list[i].usbIdProduct, 16).leftJustified(4, '0') + "] ";
+		     QString::number(list.list[i].usbIdProduct, 16).leftJustified(4, '0') + "] ";
 #if WIN32
 		r += QString::fromUtf8(list.list[i].title) + " (" + QString::fromUtf8(list.list[i].hwid) + ")";
 #elif __linux__
@@ -91,7 +130,7 @@ void BurnLibrary::reloadList() {
 
 FlashTask *BurnLibrary::startBurn(const QString &selectedSerial) {
 	const QString &comPortPath = knownSerialPorts.value(selectedSerial, selectedSerial);
-	FlashTask *task = new FlashTask(context, comPortPath, imagePath);
+	FlashTask *task = new FlashTask(ctx, comPortPath, imagePath);
 	runningFlash[comPortPath] = task;
 
 	QThreadPool::globalInstance()->start(task);

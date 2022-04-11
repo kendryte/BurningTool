@@ -53,6 +53,8 @@
 #include "basic/macros.endian.h"
 #pragma GCC diagnostic pop
 
+#include "basic/macros.public_interface.h"
+
 #if WIN32
 #define FMT_SIZET "%llu"
 #else

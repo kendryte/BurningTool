@@ -98,13 +98,6 @@ PUBLIC uint32_t kburnGetResourceCount();
 /** 调试：获取打开的端口数 */
 PUBLIC uint32_t kburnGetOpenPortCount();
 
-#define KBURN_VIDPID_FILTER_ANY -1
-#define KBURN_VIDPID_FILTER_DEFAULT -2
-/**
- * 设置usb监视器（和扫描）要响应的设备vid pid
- */
-PUBLIC void kburnSetUsbFilter(KBCTX scope, int32_t vid, int32_t pid);
-
 /**
  * 直接打开端口，通常不应该调用这个函数
  * @param path USB设备路径
@@ -127,8 +120,8 @@ PUBLIC kburn_err_t kburnPollUsb(KBCTX scope);
 
 DEFINE_END
 
+#include "./exported/config-api.h"
 #include "./exported/debug.h"
-#include "./exported/serial.config.h"
 #include "./exported/serial.isp.h"
 #include "./exported/usb.isp.h"
 

@@ -4,6 +4,8 @@
 
 #define MAX_USB_PATH_LENGTH 9 // 当前usb最大7级，首个字符是bus number，多一个0用于字符串比较
 
+#define KBURN_VIDPID_FILTER_ANY -1 // NO USE
+
 struct kburnUsbDeviceInfoSlice {
 	PCONST uint16_t idVendor;
 	PCONST uint16_t idProduct;

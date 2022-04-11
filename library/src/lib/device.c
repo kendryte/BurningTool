@@ -11,6 +11,8 @@ DECALRE_DISPOSE(destroy_device, kburnDeviceNode) {
 	}
 	context->destroy_in_progress = true;
 
+	recreate_waitting_list(context->_scope);
+
 	if (context->disconnect_should_call && context->_scope->on_disconnect.handler) {
 		debug_print(KBURN_LOG_DEBUG, "\tscope::on_disconnect()");
 		context->_scope->on_disconnect.handler(context->_scope->on_disconnect.context, context);

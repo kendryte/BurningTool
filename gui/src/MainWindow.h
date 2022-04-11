@@ -19,15 +19,14 @@ class MainWindow : public QMainWindow {
 
   public:
 	MainWindow(QWidget *parent = nullptr);
-	~MainWindow();
 
   private slots:
 	void on_btnOpenWebsite_triggered();
 	void on_btnSaveLog_triggered();
 	void updateSettingStatus();
+	void disableOtherTabs(bool disable);
 
   private:
 	void closeEvent(QCloseEvent *ev);
 	Ui::MainWindow *ui;
-	class BurnLibrary *library;
 };

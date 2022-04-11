@@ -147,6 +147,10 @@ exit:
 isp_response_t *serial_isp_command_send_low_retry(kburnSerialDeviceNode *node, isp_request_t *command, int tries) {
 	isp_response_t *r;
 
+	if (tries == 0) {
+		tries = node->parent->_scope->serial->settings.retry_times;
+	}
+
 	autolock(node->mutex);
 	for (int curr = 1; curr < tries; curr++) {
 		if (node->isSwitchIsp || node->isUsbBound) {

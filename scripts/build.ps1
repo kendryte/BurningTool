@@ -27,6 +27,9 @@ function Invoke-CMake {
 }
 
 function Build-CMakeArguments {
+	if (-Not( [bool]($settings.PSobject.Properties.name -match "cmake.configureSettings"))) {
+		return;
+	}
 	$v = $settings."cmake.configureSettings"
 	foreach ($key in $v.psobject.properties.name) {
 		"-D${key}=$($v.$key)"

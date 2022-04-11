@@ -1,4 +1,5 @@
 #include "SettingsWindow.h"
+#include "../common/BurnLibrary.h"
 #include "ui_SettingsWindow.h"
 #include <canaan-burn/canaan-burn.h>
 #include <QDir>
@@ -11,6 +12,12 @@
 #define SETTING_BYTE_SIZE "byte-size"
 #define SETTING_STOP_BITS "stop-bits"
 #define SETTING_PARITY "parity"
+#define SETTING_SERIAL_READ_TIMEOUT "serial-read-timeout"
+#define SETTING_SERIAL_WRITE_TIMEOUT "serial-write-timeout"
+#define SETTING_SERIAL_RETRY "serial-write-retry"
+
+static const QList<uint32_t> baudrates = {9600,    115200,  230400,  460800,  576000,  921600,  1000000,
+                                          1152000, 1500000, 2000000, 2500000, 3000000, 3500000, 4000000};
 
 static const QMap<uint8_t, enum KBurnSerialConfigByteSize> bsMap = {
 	{8, KBurnSerialConfigByteSize_8},
@@ -20,10 +27,10 @@ static const QMap<uint8_t, enum KBurnSerialConfigByteSize> bsMap = {
 };
 
 static const QMap<QString, enum KBurnSerialConfigParity> parMap = {
-    {"None",  KBurnSerialConfigParityNone },
+	{"None",  KBurnSerialConfigParityNone },
     {"Odd",   KBurnSerialConfigParityOdd  },
     {"Even",  KBurnSerialConfigParityEven },
-    {"Mark",  KBurnSerialConfigParityMark },
+	{"Mark",  KBurnSerialConfigParityMark },
     {"Space", KBurnSerialConfigParitySpace},
 };
 
@@ -36,12 +43,15 @@ static const QMap<float, enum KBurnSerialConfigStopBits> sbMap = {
 SettingsWindow::SettingsWindow(QWidget *parent)
 	: QWidget(parent), ui(new Ui::SettingsWindow), settings(QSettings::Scope::UserScope, SETTINGS_CATEGORY, "burning") {
 	ui->setupUi(this);
-
-	reloadSettings();
 }
 
 SettingsWindow::~SettingsWindow() {
 	delete ui;
+}
+
+void SettingsWindow::showEvent(QShowEvent *event) {
+	QWidget::showEvent(event);
+	reloadSettings();
 }
 
 void SettingsWindow::on_btnSelectImage_clicked() {
@@ -90,12 +100,17 @@ void SettingsWindow::on_inputSysImage_editingFinished() {
 void SettingsWindow::on_actionBar_clicked(QAbstractButton *button) {
 	if (button == (QAbstractButton *)ui->actionBar->button(QDialogButtonBox::RestoreDefaults)) {
 		restoreDefaults();
+	} else if (button == (QAbstractButton *)ui->actionBar->button(QDialogButtonBox::Save)) {
+		acceptSave();
+	} else if (button == (QAbstractButton *)ui->actionBar->button(QDialogButtonBox::Discard)) {
+		reloadSettings();
 	}
 }
 
 void SettingsWindow::inputChanged() {
 	ui->actionBar->button(QDialogButtonBox::Save)->setEnabled(true);
 	ui->actionBar->button(QDialogButtonBox::Discard)->setEnabled(true);
+	emit settingsUnsaved(true);
 }
 
 void SettingsWindow::checkAndSetInt(const QString &setting, const QString &input) {
@@ -142,6 +157,8 @@ void SettingsWindow::restoreDefaults() {
 }
 
 void SettingsWindow::reloadSettings() {
+	auto context = BurnLibrary::context();
+
 	QDir appDir(QCoreApplication::applicationDirPath());
 	if (settings.contains(SETTING_SYSTEM_IMAGE_PATH)) {
 		QString saved = settings.value(SETTING_SYSTEM_IMAGE_PATH).toString();
@@ -159,20 +176,20 @@ void SettingsWindow::reloadSettings() {
 		ui->inputBaudrateInit->addItem(QString::number(v), v);
 	}
 	{
-		auto v = settings.value(SETTING_BAUD_HIGH, 460800).toUInt();
+		auto v = settings.value(SETTING_BAUD_HIGH, 921600).toUInt();
 		ui->inputBaudrateHigh->setCurrentText(QString::number(v));
-		kburnSetSerialHighSpeedBaudrate(v);
+		kburnSetSerialBaudrate(context, v);
 	}
 	{
 		auto v = settings.value(SETTING_BAUD_INIT, 115200).toUInt();
 		ui->inputBaudrateInit->setCurrentText(QString::number(v));
-		kburnSetSerialBaudrate(v);
+		kburnSetSerialFastbootBaudrate(context, v);
 	}
 
 	{
 		auto v = settings.value(SETTING_BYTE_SIZE, 8).toUInt();
 		ui->inputByteSize->setValue(v);
-		kburnSetSerialByteSize(bsMap.value(v));
+		kburnSetSerialByteSize(context, bsMap.value(v));
 	}
 
 	{
@@ -183,20 +200,38 @@ void SettingsWindow::reloadSettings() {
 
 		auto v = settings.value(SETTING_PARITY, "None").toString();
 		ui->inputParity->setCurrentText(v);
-		kburnSetSerialParity(parMap.value(v));
+		kburnSetSerialParity(context, parMap.value(v));
 	}
 
 	{
-		auto v = settings.value(SETTING_STOP_BITS, 1).toFloat();
+		auto v = settings.value(SETTING_STOP_BITS, 2).toFloat();
 		ui->inputStopBits->setValue(v);
-		kburnSetSerialStopBits(sbMap.value(v));
+		kburnSetSerialStopBits(context, sbMap.value(v));
 	}
 
-	// kburnSetSerialReadTimeout
-	// kburnSetSerialWriteTimeout
+	{
+		auto v = settings.value(SETTING_SERIAL_READ_TIMEOUT, 1000).toUInt();
+		ui->inputSerialReadTimeout->setValue(v);
+		kburnSetSerialReadTimeout(context, v);
+	}
+
+	{
+		auto v = settings.value(SETTING_SERIAL_WRITE_TIMEOUT, 1000).toUInt();
+		ui->inputSerialWriteTimeout->setValue(v);
+		kburnSetSerialWriteTimeout(context, v);
+	}
+
+
+	{
+		auto v = settings.value(SETTING_SERIAL_RETRY, 6).toUInt();
+		ui->inputSerialRetry->setValue(v);
+		kburnSetSerialFailRetry(context, v);
+	}
+
 
 	ui->actionBar->button(QDialogButtonBox::Save)->setEnabled(false);
 	ui->actionBar->button(QDialogButtonBox::Discard)->setEnabled(false);
 
 	emit settingsChanged();
+	emit settingsUnsaved(false);
 }

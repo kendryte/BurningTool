@@ -25,6 +25,9 @@ endif()
 message("CMAKE_MAKE_PROGRAM=${CMAKE_MAKE_PROGRAM}")
 message("CMAKE_GENERATOR=${CMAKE_GENERATOR}")
 
+set(DISABLE_TERM_HYPERLINK yes CACHE BOOL "disable terminal escape for files" FORCE)
+set(OpenGL_GL_PREFERENCE GLVND CACHE STRING "" FORCE)
+
 set(VCPKG_ROOT
 	"${CMAKE_CURRENT_LIST_DIR}/vcpkg"
 	CACHE PATH "vcpkg install root" FORCE)

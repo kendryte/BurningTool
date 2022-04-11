@@ -10,6 +10,8 @@
 #define RETRY_MAX 5
 #define REQUEST_SENSE_LENGTH 0x12
 
+static const int usb_timeout = 10000;
+
 typedef struct usbIspRequestPacket // cbw
 {
 	uint8_t signature[4];
@@ -100,7 +102,7 @@ bool usb_lowlevel_command_send(
 	print_buffer(KBURN_LOG_TRACE, "cbw", (void *)&cbw, sizeof(usbIspRequestPacket));
 
 	int written_size = 0;
-	if (!retry_libusb_bulk_transfer(node, endpoint_out, &cbw, sizeof(usbIspRequestPacket), &written_size, 1000)) {
+	if (!retry_libusb_bulk_transfer(node, endpoint_out, &cbw, sizeof(usbIspRequestPacket), &written_size, usb_timeout)) {
 		return false;
 	}
 
@@ -149,7 +151,7 @@ bool usb_lowlevel_status_read(kburnUsbDeviceNode *node, uint8_t endpoint_in, uin
 	memset(&csw, 0, sizeof(usbIspResponsePacket));
 
 	int readed_size = 0;
-	ifNotReturnFalse(retry_libusb_bulk_transfer(node, endpoint_in, &csw, sizeof(usbIspResponsePacket), &readed_size, 1000));
+	ifNotReturnFalse(retry_libusb_bulk_transfer(node, endpoint_in, &csw, sizeof(usbIspResponsePacket), &readed_size, usb_timeout));
 
 	print_buffer(KBURN_LOG_TRACE, "csw", (void *)&csw, sizeof(usbIspResponsePacket));
 
@@ -177,7 +179,7 @@ bool usb_lowlevel_transfer(kburnUsbDeviceNode *node, enum InOut direction, void 
 
 	int actual_size;
 	uint8_t target = direction == USB_WRITE ? node->deviceInfo.endpoint_out : node->deviceInfo.endpoint_in;
-	if (!retry_libusb_bulk_transfer(node, target, buffer, size, &actual_size, 1000))
+	if (!retry_libusb_bulk_transfer(node, target, buffer, size, &actual_size, usb_timeout))
 		return false;
 
 	if (direction == USB_READ) {
@@ -221,7 +223,7 @@ bool usb_lowlevel_error_read(kburnUsbDeviceNode *node, uint8_t endpoint_in, uint
 		return false;
 	}
 
-	ifNotReturnFalse(retry_libusb_bulk_transfer(node, endpoint_in, (unsigned char *)&sense, REQUEST_SENSE_LENGTH, &size, 1000));
+	ifNotReturnFalse(retry_libusb_bulk_transfer(node, endpoint_in, (unsigned char *)&sense, REQUEST_SENSE_LENGTH, &size, usb_timeout));
 
 	print_buffer(KBURN_LOG_TRACE, "sense", sense, REQUEST_SENSE_LENGTH);
 

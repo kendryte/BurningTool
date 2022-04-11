@@ -88,14 +88,16 @@ static bool check_input(kburnDeviceNode *node, kburn_stor_block_t nblock, int32_
 }
 
 static bool read_normalized(
-	kburnDeviceNode *node, kburnUsbIspCommandTaget device, kburn_stor_address_t start_addr, uint32_t block_count, void *buffer, uint32_t length) {
+	kburnDeviceNode *node, kburnUsbIspCommandTaget device, kburn_stor_block_t start_block, uint32_t block_count, void *buffer, uint32_t length) {
 	usbIspCommandPacket request = {
 		.command = USB_ISP_COMMAND_READ_BURN,
 		.target = convertTarget(device),
-		.burn.address = htobe32(start_addr),
+		.burn.address = htobe32(start_block),
 		.burn.block_count = htobe16(block_count),
 	};
 	uint32_t expected_tag = rand();
+
+	debug_print(KBURN_LOG_TRACE, COLOR_FMT("[READ ]") " block: 0x%06u, block count: %u, length: %u", RED, start_block, block_count, length);
 
 	ifNotReturnFalse(usb_lowlevel_command_send(node->usb, node->usb->deviceInfo.endpoint_out, request, LIBUSB_ENDPOINT_IN, length, expected_tag));
 
@@ -107,14 +109,16 @@ static bool read_normalized(
 }
 
 static bool write_normalized(
-	kburnDeviceNode *node, kburnUsbIspCommandTaget device, kburn_stor_address_t start_addr, uint32_t block_count, void *buffer, uint32_t length) {
+	kburnDeviceNode *node, kburnUsbIspCommandTaget device, kburn_stor_block_t start_block, uint32_t block_count, void *buffer, uint32_t length) {
 	usbIspCommandPacket request = {
 		.command = USB_ISP_COMMAND_WRITE_BURN,
 		.target = convertTarget(device),
-		.burn.address = htobe32(start_addr),
+		.burn.address = htobe32(start_block),
 		.burn.block_count = htobe16(block_count),
 	};
 	uint32_t expected_tag = rand();
+
+	debug_print(KBURN_LOG_TRACE, COLOR_FMT("[WRITE]") " block: 0x%06u, block count: %u, length: %u", RED, start_block, block_count, length);
 
 	ifNotReturnFalse(usb_lowlevel_command_send(node->usb, node->usb->deviceInfo.endpoint_out, request, LIBUSB_ENDPOINT_OUT, length, expected_tag));
 
@@ -131,9 +135,9 @@ bool kburnUsbIspWriteChunk(
 	ifNotReturnFalse(check_input(node, start_block, length, dev_info));
 
 	uint32_t block_count = length / dev_info.block_size;
-	uint32_t start_addr = (start_block * dev_info.block_size) + dev_info.base_address;
+	// uint32_t start_addr = (start_block * dev_info.block_size) + dev_info.base_address;
 
-	return write_normalized(node, dev_info.device, start_addr, block_count, buffer, length);
+	return write_normalized(node, dev_info.device, start_block, block_count, buffer, length);
 }
 
 bool kburnUsbIspReadChunk(
@@ -142,7 +146,7 @@ bool kburnUsbIspReadChunk(
 	ifNotReturnFalse(check_input(node, start_block, length, dev_info));
 
 	uint32_t block_count = length / dev_info.block_size;
-	uint32_t start_addr = (start_block * dev_info.block_size) + dev_info.base_address;
+	// uint32_t start_addr = (start_block * dev_info.block_size) + dev_info.base_address;
 
-	return read_normalized(node, dev_info.device, start_addr, block_count, buffer, length);
+	return read_normalized(node, dev_info.device, start_block, block_count, buffer, length);
 }

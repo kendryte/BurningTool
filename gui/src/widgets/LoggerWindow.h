@@ -6,7 +6,7 @@
 class LoggerWindow : public QTextEdit {
 	Q_OBJECT
 
-	bool autoScroll;
+	bool autoScroll = true;
 	QFile logfile;
 
   public slots:

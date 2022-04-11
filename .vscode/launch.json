@@ -28,7 +28,6 @@
 			"type": "cppdbg",
 			"request": "launch",
 			"program": "${command:cmake.launchTargetPath}",
-			// "program": "${workspaceFolder}/build-${env:HOSTNAME}${env:COMPUTERNAME}/dist/bin/test.exe",
 			"args": [],
 			"stopAtEntry": false,
 			"cwd": "${workspaceFolder}/build-${env:HOSTNAME}${env:COMPUTERNAME}",
@@ -53,7 +52,7 @@
 					"ignoreFailures": true
 				}
 			],
-			"visualizerFile": "c:\\Users\\gongt\\AppData\\Roaming\\Code - Insiders\\User\\workspaceStorage\\82361f188e5031ae3af5a22e4bf00a4d\\tonka3000.qtvsctools\\qt.natvis.xml"
+			"visualizerFile": "/root/.vscode-server-insiders/data/User/workspaceStorage/ce15d615a573ca90ab41c11fe8bfd156/tonka3000.qtvsctools/qt.natvis.xml"
 		}
 	]
 }

@@ -2,7 +2,6 @@
 #include "MainWindow.h"
 #include <QApplication>
 #include <QLocale>
-#include <QMessageBox>
 #include <QTranslator>
 
 QApplication *a;
@@ -33,14 +32,4 @@ int main(int argc, char *argv[]) {
 
 QString tr(const char *s, const char *c, int n) {
 	return a->tr(s, c, n);
-}
-
-void fatalAlert(kburn_err_t err) {
-	if (err != KBurnNoErr) {
-		auto e = kburnSplitErrorCode(err);
-		qWarning() << "error kind=" << e.kind << ", code=" << e.code << QChar('\n');
-		QMessageBox msg(QMessageBox::Icon::Critical, translator.tr("错误"), translator.tr("无法初始化读写功能"), QMessageBox::StandardButton::Close);
-		msg.exec();
-		abort();
-	}
 }

@@ -16,10 +16,14 @@ SingleBurnWindow::~SingleBurnWindow() {
 	delete ui;
 }
 
-void SingleBurnWindow::setLibrary(class BurnLibrary *library) {
+void SingleBurnWindow::showEvent(QShowEvent *event) {
+	QWidget::showEvent(event);
+
+	auto library = BurnLibrary::instance();
 	QObject::connect(library, &BurnLibrary::onSerialPortList, this, &SingleBurnWindow::handleSerialPortList);
 	QObject::connect(this, &SingleBurnWindow::startBurn, library, &BurnLibrary::startBurn);
 }
+
 void SingleBurnWindow::on_btnStartBurn_clicked() {
 	if (work) {
 		// ????

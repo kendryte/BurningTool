@@ -23,10 +23,11 @@ void print_progress(void *ctx, const struct kburnDeviceNode *dev, size_t current
 	cout << "loading: " << current << '/' << length << "\t " << (int)(current * 100 / length) << "%" << endl;
 }
 
-static void perror(kburn_err_t e) {
-	auto errs = kburnSplitErrorCode(e);
+static void perror(const kburnDeviceError *const e) {
+	auto errs = kburnSplitErrorCode(e->code);
 	cout << "    - kind: " << (errs.kind >> 32) << endl;
 	cout << "    - code: " << errs.code << endl;
+	cout << "    - msg : " << test_null(e->errorMessage) << endl;
 }
 
 void handle(void *ctx, kburnDeviceNode *dev) {
@@ -36,7 +37,7 @@ void handle(void *ctx, kburnDeviceNode *dev) {
 	cout << "  * error status: " << dev->error->code << ", " << test_null(dev->error->errorMessage) << endl;
 
 	if (dev->error->code != KBurnNoErr) {
-		perror(dev->error->code);
+		perror(dev->error);
 		return;
 	}
 
@@ -73,8 +74,8 @@ void handle_usb(void *ctx, kburnDeviceNode *dev) {
 	for (size_t i = 0; i < 512; i++) {
 		test_block[i] = rand();
 	}
-	uint32_t testAddress = 50;
 
+	uint32_t testAddress = (1024 * 1024 * 2) / 512;
 	cout << "test read memory size:" << endl;
 	if (!kburnUsbIspGetMemorySize(dev, KBURN_USB_ISP_EMMC, &size_info)) {
 		cout << "  * error status: " << dev->error->code << ", " << test_null(dev->error->errorMessage) << endl;
@@ -84,19 +85,31 @@ void handle_usb(void *ctx, kburnDeviceNode *dev) {
 		cout << "  * max_block_addr: " << size_info.last_block_address << endl;
 	}
 
+	// cout << "test erase emmc:" << endl;
+	// char oneMb[1024 * 1024];
+	// memset(oneMb, 0, 1024 * 1024);
+	// for (size_t block = 0; block < size_info.block_count; block++) {
+	// 	if (!kburnUsbIspWriteChunk(dev, size_info, block, oneMb, 1024 * 1024)) {
+	// 		perror(dev->error);
+	// 	}
+	// }
+
 	cout << "test write emmc:" << endl;
-	r = kburnUsbIspWriteChunk(dev, size_info, testAddress, test_block, 512);
-	perror(r);
+	if (!kburnUsbIspWriteChunk(dev, size_info, testAddress, test_block, 512)) {
+		perror(dev->error);
+	}
 
 	cout << "test read emmc:" << endl;
 	uint8_t out_test[512];
 	memset(out_test, 0, 512);
-	r = kburnUsbIspReadChunk(dev, size_info, testAddress, 512, out_test);
-	perror(r);
-	if (memcmp(out_test, test_block, 0) == 0) {
-		cout << "    - data same" << endl;
+	if (!kburnUsbIspReadChunk(dev, size_info, testAddress, 512, out_test)) {
+		perror(dev->error);
 	} else {
-		cout << "    - data wrong" << endl;
+		if (memcmp(out_test, test_block, 0) == 0) {
+			cout << "    - data same" << endl;
+		} else {
+			cout << "    - data wrong" << endl;
+		}
 	}
 }
 

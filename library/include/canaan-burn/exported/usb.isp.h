@@ -67,8 +67,7 @@ bool kburnUsbIspReadChunk(kburnDeviceNode *node, const kburnDeviceMemorySizeInfo
  * @param buffer_size 数据长度，单位字节，函数处理时会转成块，所以传入字节需要是dev_info.block_size的整数倍，一次最多10MB数据
  * @param dev_info 设备块大小信息
  */
-bool kburnUsbIspWriteChunk(
-	kburnDeviceNode *node, const kburnDeviceMemorySizeInfo dev_info, kburn_stor_block_t address, void *buffer, uint32_t length);
+bool kburnUsbIspWriteChunk(kburnDeviceNode *node, const kburnDeviceMemorySizeInfo dev_info, kburn_stor_block_t block, void *buffer, uint32_t length);
 /** 写入数据，但不要求任何对齐，效率较低，注意地址单位是字节 */
 bool kburnUsbIspReadUnaligned(
 	kburnDeviceNode *node, const kburnDeviceMemorySizeInfo dev_info, kburn_stor_address_t address, uint32_t length, void *buffer);
