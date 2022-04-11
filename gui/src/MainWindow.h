@@ -13,6 +13,7 @@ class MainWindow : public QMainWindow {
 	Q_OBJECT
 	KBCTX context;
 	bool closing = false;
+	bool shown = false;
 
   protected:
 	void showEvent(QShowEvent *ev);

@@ -51,6 +51,11 @@ SettingsWindow::~SettingsWindow() {
 
 void SettingsWindow::showEvent(QShowEvent *event) {
 	QWidget::showEvent(event);
+
+	if (shown)
+		return;
+	shown = true;
+
 	reloadSettings();
 }
 
@@ -221,13 +226,11 @@ void SettingsWindow::reloadSettings() {
 		kburnSetSerialWriteTimeout(context, v);
 	}
 
-
 	{
 		auto v = settings.value(SETTING_SERIAL_RETRY, 6).toUInt();
 		ui->inputSerialRetry->setValue(v);
 		kburnSetSerialFailRetry(context, v);
 	}
-
 
 	ui->actionBar->button(QDialogButtonBox::Save)->setEnabled(false);
 	ui->actionBar->button(QDialogButtonBox::Discard)->setEnabled(false);

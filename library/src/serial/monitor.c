@@ -30,7 +30,7 @@ static void on_event(void *ctx, ser_dev_evt_t evt, const ser_dev_t *dev) {
 }
 
 static void first_init_list(void *UNUSED(ctx), KBCTX scope, const bool *const quit) {
-	if (!quit) {
+	if (!*quit) {
 		init_list_all_serial_devices(scope);
 	}
 }

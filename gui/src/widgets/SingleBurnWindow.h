@@ -13,6 +13,7 @@ class SingleBurnWindow : public QWidget {
 	Q_OBJECT
 	QFutureWatcher<void> *future = NULL;
 	FlashTask *work = NULL;
+	bool shown = false;
 
   public:
 	explicit SingleBurnWindow(QWidget *parent = nullptr);

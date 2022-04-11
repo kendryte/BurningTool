@@ -43,6 +43,10 @@ set_target_properties(
 	MACOSX_BUNDLE TRUE
 	WIN32_EXECUTABLE TRUE)
 
+if(WIN32)
+	target_link_options(BurningTool BEFORE PRIVATE -static-libgcc -static-libstdc++)
+endif()
+
 qt_finalize_executable(BurningTool)
 
 target_include_directories(
@@ -63,12 +67,20 @@ install(
 	ARCHIVE DESTINATION lib
 )
 
-add_custom_command(
-	OUTPUT "${CMAKE_BINARY_DIR}/dist/bin/BurningTool${CMAKE_EXECUTABLE_SUFFIX}"
-	COMMAND ${CMAKE_COMMAND} --install "${CMAKE_BINARY_DIR}" --prefix "${CMAKE_BINARY_DIR}/dist" --verbose
-	DEPENDS "${CMAKE_CURRENT_BINARY_DIR}/BurningTool${CMAKE_EXECUTABLE_SUFFIX}"
-)
-add_custom_target(
-	INSTALL_DEBUG_FOLDER ALL
-	DEPENDS "${CMAKE_BINARY_DIR}/dist/bin/BurningTool${CMAKE_EXECUTABLE_SUFFIX}"
-)
+if(NOT DEFINED CACHE{QT_BIN_DIR})
+	message(FATAL_ERROR "missing QT_BIN_DIR in cache, need reconfigure")
+endif()
+
+if(WIN32)
+	install(CODE "
+		execute_process(
+			COMMAND \"${CMAKE_COMMAND}\"
+			\"-DQT_BIN_DIR=${QT_BIN_DIR}\"
+			\"-DCMAKE_CACHEFILE_DIR=${CMAKE_BINARY_DIR}\"
+			-P \"${CMAKE_CURRENT_LIST_DIR}/win-install.cmake\"
+			WORKING_DIRECTORY \"\${CMAKE_INSTALL_PREFIX}\"
+			COMMAND_ECHO STDOUT
+			COMMAND_ERROR_IS_FATAL ANY
+		)
+	")
+endif()

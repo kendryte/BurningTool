@@ -35,6 +35,7 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
 
 	connect(ui->settingsWindow, &SettingsWindow::settingsChanged, this, &MainWindow::updateSettingStatus);
 	connect(ui->settingsWindow, &SettingsWindow::settingsUnsaved, this, &MainWindow::disableOtherTabs);
+	connect(ui->manualBurnWindow, &SingleBurnWindow::startBurn, this->ui->textLog, &LoggerWindow::clear);
 
 	updateSettingStatus();
 }
@@ -65,6 +66,14 @@ void MainWindow::updateSettingStatus() {
 
 void MainWindow::showEvent(QShowEvent *event) {
 	QMainWindow::showEvent(event);
+
+	if (shown)
+		return;
+	shown = true;
+
+	ui->settingsWindow->showEvent(event);
+	ui->manualBurnWindow->showEvent(event);
+
 	BurnLibrary::instance()->start();
 }
 

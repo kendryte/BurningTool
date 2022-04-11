@@ -19,6 +19,10 @@ SingleBurnWindow::~SingleBurnWindow() {
 void SingleBurnWindow::showEvent(QShowEvent *event) {
 	QWidget::showEvent(event);
 
+	if (shown)
+		return;
+	shown = true;
+
 	auto library = BurnLibrary::instance();
 	QObject::connect(library, &BurnLibrary::onSerialPortList, this, &SingleBurnWindow::handleSerialPortList);
 	QObject::connect(this, &SingleBurnWindow::startBurn, library, &BurnLibrary::startBurn);
@@ -61,18 +65,25 @@ void SingleBurnWindow::on_btnStartBurn_clicked() {
 }
 
 void SingleBurnWindow::setProgressText(const QString &progressText) {
+#ifdef WIN32
 	ui->textStatus->setText(progressText);
+#else
 	if (progressText.isEmpty()) {
 		ui->progressBar->setFormat("%p%");
 	} else {
 		ui->progressBar->setFormat(progressText + ": %p%");
 	}
+#endif
 }
 
 void SingleBurnWindow::resetProgressState() {
 	setProgressText("");
 	ui->textStatus->setStyleSheet("QLabel {}");
+
+#ifdef WIN32
 	ui->textStatus->setText(tr("就绪"));
+#endif
+
 	ui->textPortInfo->setText("");
 	ui->progressBar->setRange(0, 100);
 	ui->progressBar->setValue(0);

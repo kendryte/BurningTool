@@ -167,8 +167,8 @@ void dispose_all(disposable_list_t *r) {
 	m_assert_ptr(r, "dispose: got null ptr");
 	m_assert(!r->disposed, "dispose twice");
 
-	r->disposed = true;
 	lock(r->mutex);
+	r->disposed = true;
 
 	bool selfDisposing = r->size > 0 && r->head->callback == free_pointer && r->head->object == r;
 	debug_trace_function("%s [size=%d, selfDisposing=%d]", NULLSTR(r->comment), r->size, selfDisposing);
@@ -218,7 +218,8 @@ void dispose(disposable target) {
 
 	// debug_print("  * dispose callback return, size=%d", target->size);
 	m_assert(
-		plength - 1 == r->size, "not call to dispose_list_delete(): %s at %s", DEBUG_OBJ_TITLE(current->__debug), DEBUG_OBJ_PATH(current->__debug));
+		plength - 1 == r->size, "not call to dispose_list_delete(): %.100s at %.100s", DEBUG_OBJ_TITLE(current->__debug),
+		DEBUG_OBJ_PATH(current->__debug));
 }
 
 DECALRE_DISPOSE(free_pointer, void) {

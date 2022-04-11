@@ -16,6 +16,7 @@ class SettingsWindow : public QWidget {
 	QFile fd;
 	Ui::SettingsWindow *ui;
 	QSettings settings;
+	bool shown = false;
 
   public:
 	explicit SettingsWindow(QWidget *parent = nullptr);

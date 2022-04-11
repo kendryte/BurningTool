@@ -17,14 +17,15 @@ FlashTask::~FlashTask() {
 
 void FlashTask::setProgressValue(size_t value) {
 	output.setProgressValue(bytesWritten + value);
+	qWarning() << "set progress: " << value;
 }
 
 void FlashTask::nextStage(const QString &title, size_t bytes) {
 	bytesWritten += bytesNextStage;
 	bytesNextStage = bytes;
 	output.setProgressRange(bytesWritten, bytesWritten + bytes);
-	output.setProgressValue(bytesWritten);
 	emit progressTextChanged(title);
+	qWarning() << "set stage: " << title << " bytes: " << bytes;
 }
 
 void FlashTask::serial_isp_progress(void *self, const kburnDeviceNode *dev, size_t current, size_t length) {
@@ -91,7 +92,7 @@ void FlashTask::run() {
 		size_t chunk_size = ((CHUNK_SIZE / devInfo.block_size) + (CHUNK_SIZE % devInfo.block_size > 0 ? 1 : 0)) * devInfo.block_size;
 		char readBuffer[chunk_size];
 		memset(readBuffer, 0, chunk_size);
-		size_t block = 0;
+		size_t block = 0, readProgress = 0;
 		while (!imageStream.atEnd()) {
 			size_t actread = imageStream.readRawData(readBuffer, chunk_size);
 
@@ -112,13 +113,17 @@ void FlashTask::run() {
 			testCancel();
 
 			block += chunk_size / devInfo.block_size;
-			setProgressValue(block * chunk_size);
+
+			readProgress += actread;
+			setProgressValue(readProgress);
 		}
 	} catch (KBurnException e) {
 		result = new KBurnException(e); // copy: prevent access free-ed error message, free in ~FlashTask
 		output.setException(e);
 		return;
 	}
+
+	nextStage(::tr(""), 100);
 	output.finish();
 }
 
