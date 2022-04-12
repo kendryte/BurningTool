@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE QtCreatorProject>
-<!-- Written by QtCreator 7.0.0, 2022-04-12T10:47:18. -->
+<!-- Written by QtCreator 7.0.0, 2022-04-12T10:52:00. -->
 <qtcreator>
  <data>
   <variable>EnvironmentId</variable>
@@ -108,8 +108,9 @@
 -DQT_QMAKE_EXECUTABLE:STRING=%{Qt:qmakeExecutable}
 -DCMAKE_PREFIX_PATH:STRING=%{Qt:QT_INSTALL_PREFIX}
 -DCMAKE_C_COMPILER:STRING=%{Compiler:Executable:C}
--DCMAKE_CXX_COMPILER:STRING=%{Compiler:Executable:Cxx}</value>
-    <value type="QString" key="ProjectExplorer.BuildConfiguration.BuildDirectory">%{sourceDir}/../build-%{Env:HOSTNAME}%{Env:COMPUTERNAME}-Qt%{Qt:Version}-%{BuildConfig:Name}</value>
+-DCMAKE_CXX_COMPILER:STRING=%{Compiler:Executable:Cxx}
+-DOpenGL_GL_PREFERENCE:UNINITIALIZED=GLVND</value>
+    <value type="QString" key="ProjectExplorer.BuildConfiguration.BuildDirectory">A:/test/build-SHABAO-DESKTOP-Qt%{Qt:Version}-%{BuildConfig:Name}</value>
     <valuemap type="QVariantMap" key="ProjectExplorer.BuildConfiguration.BuildStepList.0">
      <valuemap type="QVariantMap" key="ProjectExplorer.BuildStepList.Step.0">
       <valuelist type="QVariantList" key="CMakeProjectManager.MakeStep.BuildTargets">
@@ -224,7 +225,7 @@
     <value type="bool" key="RunConfiguration.UseLibrarySearchPath">true</value>
     <value type="bool" key="RunConfiguration.UseQmlDebugger">false</value>
     <value type="bool" key="RunConfiguration.UseQmlDebuggerAuto">true</value>
-    <value type="QString" key="RunConfiguration.WorkingDirectory.default">%{sourceDir}/../build-%{Env:HOSTNAME}%{Env:COMPUTERNAME}-Qt%{Qt:Version}-%{BuildConfig:Name}</value>
+    <value type="QString" key="RunConfiguration.WorkingDirectory.default">A:/test/build-SHABAO-DESKTOP-Qt6.2.3-Debug</value>
    </valuemap>
    <value type="qlonglong" key="ProjectExplorer.Target.RunConfigurationCount">1</value>
   </valuemap>

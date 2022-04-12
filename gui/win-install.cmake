@@ -30,20 +30,16 @@ execute_process(
 )
 
 # TODO
-set(MINGW_PATH "C:/msys64/mingw64")
-file(INSTALL "${MINGW_PATH}/bin/libwinpthread-1.dll" DESTINATION "${DIST_DIR}/bin")
+find_program(MAKE_ABSOLUTE "${CMAKE_MAKE_PROGRAM}" REQUIRED)
+get_filename_component(MINGW_PATH "${MAKE_ABSOLUTE}" DIRECTORY)
+file(INSTALL "${MINGW_PATH}/libwinpthread-1.dll" DESTINATION "${DIST_DIR}/bin")
 
-# /mingw64/bin/libwinpthread-1.dll
-# execute_process(
-# COMMAND strings.exe
-# "BurningTool.exe"
-# OUTPUT_FILE "${CMAKE_CACHEFILE_DIR}/strings.txt"
-# WORKING_DIRECTORY "${DIST_DIR}/bin"
-# COMMAND_ECHO STDOUT
-# COMMAND_ERROR_IS_FATAL ANY
-# )
-# file(STRINGS "${CMAKE_CACHEFILE_DIR}/strings.txt" lines REGEX "\\.dll")
+set(SYSTEM32_PATH "$ENV{SystemRoot}/system32")
 
-# foreach(line IN LISTS lines)
-# message(" !! ${line}")
-# endforeach()
+if(NOT EXISTS "${SYSTEM32_PATH}/notepad.exe")
+	message(FATAL_ERROR "invalid windows install: system32 \"${SYSTEM32_PATH}\" not valid")
+endif()
+
+foreach(i vcruntime140d.dll ucrtbased.dll)
+	file(INSTALL "${SYSTEM32_PATH}/${i}" DESTINATION "${DIST_DIR}/bin")
+endforeach()

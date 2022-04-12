@@ -84,3 +84,16 @@ if(WIN32)
 		)
 	")
 endif()
+
+set(MY_VERSION $DATE)
+
+if(DEFINED ENV{CI})
+	set(IS_CI TRUE)
+else()
+	set(IS_CI FALSE)
+endif()
+
+string(TIMESTAMP MY_VERSION_STRING "%Y-%m-%d.%H:%M")
+
+configure_file("${CMAKE_CURRENT_LIST_DIR}/src/config.h.in" "${CMAKE_CURRENT_LIST_DIR}/autogen/config.h")
+target_include_directories(BurningTool PRIVATE "${CMAKE_CURRENT_LIST_DIR}/autogen/")
