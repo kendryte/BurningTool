@@ -93,6 +93,10 @@ target_include_directories(canaan_burn PUBLIC "${CMAKE_CURRENT_LIST_DIR}/include
 
 if(DEFINED ENV{CI})
 	target_compile_options(canaan_burn PRIVATE -Wno-error=attributes -Wno-error=format-security)
+
+	if(WIN32)
+		target_compile_options(canaan_burn PRIVATE -Wno-error=format)
+	endif()
 endif()
 
 # ############################  USB  #######################################
