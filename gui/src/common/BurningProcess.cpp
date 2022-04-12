@@ -3,6 +3,8 @@
 #include <canaan-burn/canaan-burn.h>
 #include <QFile>
 #include <QFileInfo>
+#include <QFuture>
+#include <QThread>
 
 #define CHUNK_SIZE 1024 * 1024
 
@@ -136,3 +138,16 @@ void FlashTask::testCancel() {
 		throw KBurnException(tr("用户主动取消"));
 	}
 }
+
+QFuture<void> FlashTask::future() const {
+	return output.future();
+}
+
+void FlashTask::onSerialConnected(kburnDeviceNode *node) {
+	inputs.set(0, node);
+	emit onDeviceChange(node);
+};
+void FlashTask::onUsbConnected(kburnDeviceNode *node) {
+	inputs.set(1, node);
+	emit onDeviceChange(node);
+};

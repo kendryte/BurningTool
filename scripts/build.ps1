@@ -45,9 +45,13 @@ if (-Not (Test-Path $sourceDirectory)) {
 	exit 6
 }
 
-$buildDirectory = Get-VScodeSetting "cmake.buildDirectory"
-if (-Not (Test-Path $buildDirectory)) {
-	New-Item $buildDirectory -ItemType Directory | Out-Null
+if ($env:CI) {
+	$buildDirectory = $(Get-Location)
+} else {
+	$buildDirectory = Get-VScodeSetting "cmake.buildDirectory"
+	if (-Not (Test-Path $buildDirectory)) {
+		New-Item $buildDirectory -ItemType Directory | Out-Null
+	}
 }
 
 $cmakeDefines = @(Build-CMakeArguments)

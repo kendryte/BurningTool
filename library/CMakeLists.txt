@@ -91,6 +91,10 @@ push_source_code(canaan_burn bridge lib)
 
 target_include_directories(canaan_burn PUBLIC "${CMAKE_CURRENT_LIST_DIR}/include")
 
+if(DEFINED ENV{CI})
+	target_compile_options(canaan_burn PRIVATE -Wno-error=attributes -Wno-error=format-security)
+endif()
+
 # ############################  USB  #######################################
 find_package(libusb CONFIG REQUIRED)
 target_include_directories(canaan_burn PRIVATE ${LIBUSB_INCLUDE_DIRS})

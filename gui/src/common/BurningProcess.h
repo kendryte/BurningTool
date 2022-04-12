@@ -44,7 +44,7 @@ class FlashTask : public QObject, public QRunnable {
 	};
 	void run();
 
-	auto future() { return output.future(); }
+	QFuture<void> future() const;
 	void cancel();
 
 	const KBurnException *getResult() { return result; }
@@ -56,12 +56,6 @@ class FlashTask : public QObject, public QRunnable {
 	void progressTextChanged(const QString &title);
 
   public slots:
-	void onSerialConnected(kburnDeviceNode *node) {
-		inputs.set(0, node);
-		emit onDeviceChange(node);
-	};
-	void onUsbConnected(kburnDeviceNode *node) {
-		inputs.set(1, node);
-		emit onDeviceChange(node);
-	};
+	void onSerialConnected(kburnDeviceNode *node);
+	void onUsbConnected(kburnDeviceNode *node);
 };

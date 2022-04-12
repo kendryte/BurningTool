@@ -6,3 +6,4 @@ sysimage*
 .vscode/*.DB*
 *.img
 *.bin
+autogen

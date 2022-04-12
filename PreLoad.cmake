@@ -41,6 +41,13 @@ function(find_qt)
 		message("  - no QT_QMAKE_EXECUTABLE")
 	endif()
 
+	if(EXISTS "$ENV{Qt6_DIR}")
+		set(QT_MAYBE "$ENV{Qt6_DIR}")
+		find_qt_at("${QT_MAYBE}")
+	else()
+		message("  - no Qt6_DIR")
+	endif()
+
 	if(EXISTS "${QT_DIR}")
 		set(QT_MAYBE "${QT_DIR}")
 		find_qt_at("${QT_MAYBE}")

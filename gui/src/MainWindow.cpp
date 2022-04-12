@@ -1,5 +1,6 @@
 #include "MainWindow.h"
 #include "common/BurnLibrary.h"
+#include "config.h"
 #include "main.h"
 #include "ui_MainWindow.h"
 #include <QCloseEvent>
@@ -12,6 +13,9 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
 	BurnLibrary::createInstance(this);
 
 	ui->setupUi(this);
+
+	QString getTitleVersion(void);
+	setWindowTitle(windowTitle() + getTitleVersion());
 
 	ui->mainSplitter->setStretchFactor(1, 0);
 	ui->mainSplitter->setCollapsible(0, false);

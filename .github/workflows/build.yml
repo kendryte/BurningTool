@@ -1,0 +1,68 @@
+name: CMake
+
+on:
+  push:
+    branches: [master]
+
+env:
+  BUILD_TYPE: Debug
+
+jobs:
+  build:
+    strategy:
+      matrix:
+        system:
+          - ubuntu-latest
+          - windows-latest
+    runs-on: ${{ matrix.system }}
+
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          submodules: recursive
+
+      - name: Cache dependencies
+        id: cache-deps
+        uses: actions/cache@v3
+        env:
+          cache-name: cache-node-modules
+        with:
+          # npm cache files are stored in `~/.npm` on Linux/macOS
+          path: |
+            QtInstall
+            vcpkg/packages
+            vcpkg/buildtrees
+            vcpkg/downloads
+          key: ${{ runner.os }}-build-deps-${{ hashFiles('vcpkg.json') }}
+          restore-keys: |
+            ${{ runner.os }}-build-deps-
+
+      - name: Install Qt
+        uses: jurplel/install-qt-action@v2
+        with:
+          cached: ${{ steps.cache-deps.outputs.cache-hit }}
+          version: 6.2.4
+          arch: win64_mingw
+          archives: qtbase
+          dir: "${{github.workspace}}/QtInstall"
+
+      - name: Install system dependencies
+        shell: pwsh
+        if: runner.os == 'Linux'
+        run: sudo apt install libudev-dev
+
+      - name: Create Build Folder
+        shell: pwsh
+        run: mkdir "${{runner.temp}}/build-${{github.sha}}"
+
+      - name: CMake Build
+        shell: pwsh
+        run: ${{github.workspace}}/scripts/build.ps1
+        working-directory: ${{runner.temp}}/build-${{github.sha}}
+        env:
+          QT_INSTALL_DIR: "${{github.workspace}}/QtInstall"
+
+      - name: CMake Install
+        shell: pwsh
+        run: cmake --install . --prefix "${{github.workspace}}/dist"
+        working-directory: ${{runner.temp}}/build-${{github.sha}}
