@@ -6,9 +6,9 @@ $ErrorActionPreference = "Stop"
 $env:HTTP_PROXY = ''
 $env:HTTPS_PROXY = ''
 
-$workspaceFolder = Resolve-Path "${PSScriptRoot}/.."
-$workspaceFolderBasename = Split-Path $workspaceFolder -Leaf
-$cwd = Get-Location
+$workspaceFolder = $(Resolve-Path "${PSScriptRoot}/..").Path
+$workspaceFolderBasename = $(Split-Path $workspaceFolder -Leaf)
+$cwd = $(Get-Location).Path
 $defaultBuildTask = "CMake: Build"
 $pathSeparator = [IO.Path]::DirectorySeparatorChar
 
@@ -46,7 +46,7 @@ if (-Not (Test-Path $sourceDirectory)) {
 }
 
 if ($env:CI) {
-	$buildDirectory = $(Get-Location)
+	$buildDirectory = $cwd
 } else {
 	$buildDirectory = Get-VScodeSetting "cmake.buildDirectory"
 	if (-Not (Test-Path $buildDirectory)) {
