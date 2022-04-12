@@ -8,6 +8,16 @@ env:
   BUILD_TYPE: Debug
 
 jobs:
+  cancel:
+    name: Cancel Previous Runs
+    runs-on: ubuntu-latest
+    steps:
+      - name: cancel running workflows
+        uses: GongT/cancel-previous-workflows@v1.1
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+          DELETE: "yes"
+
   build:
     strategy:
       matrix:
@@ -51,6 +61,19 @@ jobs:
         if: runner.os == 'Linux'
         run: sudo apt install libudev-dev
 
+      - name: Install msys64
+        uses: msys2/setup-msys2@v2
+        if: runner.os == 'Windows'
+        with:
+          location: C:/msys64
+          update: true
+          release: false
+          install: >-
+            base-devel
+            mingw-w64-x86_64-binutils
+            mingw-w64-x86_64-gcc
+            mingw-w64-x86_64-make
+
       - name: Create Build Folder
         shell: pwsh
         run: mkdir "${{runner.temp}}/build-${{github.sha}}"
@@ -64,5 +87,64 @@ jobs:
 
       - name: CMake Install
         shell: pwsh
-        run: cmake --install . --prefix "${{github.workspace}}/dist"
+        run: cmake --install . --prefix "${{github.workspace}}/dist/KendryteBurningTool"
         working-directory: ${{runner.temp}}/build-${{github.sha}}
+
+      - name: Create zip
+        shell: pwsh
+        run: Compress-Archive -Path "KendryteBurningTool" -DestinationPath "${{ runner.os }}.zip"
+        working-directory: ${{github.workspace}}/dist
+
+      - name: upload
+        uses: actions/upload-artifact@v2
+        with:
+          name: built-binary
+          path: dist/${{ runner.os }}.zip
+          if-no-files-found: error
+
+  release:
+    name: Create latest release
+    needs:
+      - build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Create Release
+        id: release
+        uses: GongT/actions-recreate-release@0eccdfe77165640ce33239b47cae6ea3de465cc5
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: latest
+          release_name: Latest
+          body: Auto build from ${{ github.sha }} (master)
+          draft: false
+          prerelease: false
+
+      - name: Download Artifact
+        id: download
+        uses: actions/download-artifact@v2
+        with:
+          name: built-binary
+          path: ./dist/
+
+      - name: Upload Release Asset
+        uses: actions/upload-release-asset@v1.0.1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.release.outputs.upload_url }}
+          asset_path: ${{ steps.download.outputs.download-path }}/Windows.zip
+          asset_name: windows.zip
+          asset_content_type: application/zip
+
+      - name: Upload Release Asset
+        uses: actions/upload-release-asset@v1.0.1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.release.outputs.upload_url }}
+          asset_path: ${{ steps.download.outputs.download-path }}/Linux.zip
+          asset_name: linux.zip
+          asset_content_type: application/zip

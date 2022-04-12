@@ -59,15 +59,31 @@ $cmakeDefines = @(Build-CMakeArguments)
 if ($env:CMAKE_MAKE_PROGRAM -And (Test-Path $env:CMAKE_MAKE_PROGRAM)) {
 	$cmakeDefines += "-DCMAKE_MAKE_PROGRAM=$env:CMAKE_MAKE_PROGRAM"
 } elseif ($IsWindows) {
+	$mingwMake = ""
 	if (Test-Path C:\msys64) {
-		$env:PATH = "C:\msys64\mingw64\bin;C:\msys64\clang64\bin;" + $env:PATH
+		$env:Path = "C:\msys64\mingw64\bin;C:\msys64\clang64\bin;" + $env:Path
 		Write-Output "using default C:\msys64"
+
+		if (Test-Path "C:\msys64\mingw64\bin\mingw32-make.exe") {
+			$mingwMake = "C:\msys64\mingw64\bin\mingw32-make.exe"
+			Write-Output "using GNU make at ${mingwMake}"
+		}
 	}
-	$mingwMake = $(Get-Command mingw32-make.exe -ErrorAction SilentlyContinue | Select-Object -ExpandProperty Definition)
-	if (-Not($mingwMake)) {
-		Write-Error "can not find mingw32-make.exe in `$PATH"
+
+	if (-Not $mingwMake) {
+		$mingwMake = $(Get-Command mingw32-make.exe -CommandType Application -ErrorAction SilentlyContinue | Select-Object -ExpandProperty Definition)
+
+		if ($mingwMake -Like "*chocolatey*") {
+			Write-Error "find ${mingwMake} from chocolatey in `$PATH, it's too old (${env:Path})"
+			exit 1
+		}
+	}
+
+	if (-Not $mingwMake) {
+		Write-Error "can not find mingw32-make.exe in `$PATH (${env:Path})"
 		exit 1
 	}
+
 	$mingwMake = $mingwMake -replace "\\", "/"
 	$cmakeDefines += "-DCMAKE_MAKE_PROGRAM=$mingwMake"
 
