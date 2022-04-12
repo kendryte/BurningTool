@@ -60,7 +60,7 @@ if ($env:CMAKE_MAKE_PROGRAM -And (Test-Path $env:CMAKE_MAKE_PROGRAM)) {
 	$cmakeDefines += "-DCMAKE_MAKE_PROGRAM=$env:CMAKE_MAKE_PROGRAM"
 } elseif ($IsWindows) {
 	if (Test-Path C:\msys64) {
-		$env:PATH += ";C:\msys64\mingw64\bin;C:\msys64\clang64\bin"
+		$env:PATH = "C:\msys64\mingw64\bin;C:\msys64\clang64\bin;" + $env:PATH
 		Write-Output "using default C:\msys64"
 	}
 	$mingwMake = $(Get-Command mingw32-make.exe -ErrorAction SilentlyContinue | Select-Object -ExpandProperty Definition)
