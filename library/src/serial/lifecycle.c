@@ -75,6 +75,7 @@ kburn_err_t on_serial_device_attach(KBCTX scope, const char *path, bool need_ver
 
 	IfErrorReturn(create_empty_device_instance(scope, &node));
 	debug_print(KBURN_LOG_INFO, "new device created: %p", (void *)node);
+	DeferCall(mark_destroy_device_node, node);
 
 	IfErrorReturn(serial_port_init(node->serial, path));
 	dispose_list_add(node->disposable_list, toDisposable(destroy_serial_port, node->serial));

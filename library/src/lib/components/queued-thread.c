@@ -63,6 +63,7 @@ kburn_err_t event_thread_init(KBCTX scope, const char *title, event_handler hand
 	IfErrorReturn(queue_create(&ret->queue));
 
 	IfErrorReturn(thread_create(title, event_queue_thread_main, ret, scope, &ret->thread));
+	thread_resume(ret->thread);
 
 	DeferAbort;
 	return KBurnNoErr;

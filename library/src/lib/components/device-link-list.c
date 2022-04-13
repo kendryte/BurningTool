@@ -122,25 +122,25 @@ static inline port_link_element *find_serial_device(KBCTX scope, const char *pat
 	return curs;
 }
 
-static inline port_link_element *find_usb_device_by_vidpidpath(KBCTX scope, uint16_t vid, uint8_t pid, const uint8_t *path) {
+static inline port_link_element *find_usb_device_by_vidpidpath(KBCTX scope, uint16_t vid, uint16_t pid, const uint8_t path[MAX_USB_PATH_LENGTH]) {
 	port_link_element *curs = NULL;
 
 	autolock(scope->openDeviceList->exclusion);
 	for (curs = scope->openDeviceList->head; curs != NULL; curs = curs->next) {
-		if (curs->node->usb->deviceInfo.idVendor == vid && curs->node->usb->deviceInfo.idProduct == pid &&
-		    strncmp((char *)path, (char *)curs->node->usb->deviceInfo.path, MAX_USB_PATH_LENGTH) == 0) {
+		int samePath = memcmp((char *)path, (char *)curs->node->usb->deviceInfo.path, MAX_USB_PATH_LENGTH);
+		if (curs->node->usb->deviceInfo.idVendor == vid && curs->node->usb->deviceInfo.idProduct == pid && samePath == 0) {
 			break;
 		}
 	}
 	return curs;
 }
 
-kburnDeviceNode *get_device_by_serial_port_path(KBCTX scope, const char *path) {
+kburnDeviceNode *get_device_by_serial_port_path(KBCTX scope, const char path[MAX_USB_PATH_LENGTH]) {
 	port_link_element *ret = find_serial_device(scope, path);
 	return ret ? ret->node : NULL;
 }
 
-kburnDeviceNode *get_device_by_usb_port_path(KBCTX scope, uint16_t vid, uint8_t pid, const uint8_t *path) {
+kburnDeviceNode *get_device_by_usb_port_path(KBCTX scope, uint16_t vid, uint16_t pid, const uint8_t path[MAX_USB_PATH_LENGTH]) {
 	port_link_element *ret = find_usb_device_by_vidpidpath(scope, vid, pid, path);
 	return ret ? ret->node : NULL;
 }

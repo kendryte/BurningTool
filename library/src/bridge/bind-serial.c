@@ -102,6 +102,39 @@ static uint32_t handle_one_device(kburnSerialDeviceNode *dev) {
 	return false;
 }
 
+static inline bool t(kburnDeviceNode *serial_node) {
+	use_device(serial_node);
+
+	kburnSerialDeviceNode *dev = serial_node->serial;
+	if (!dev->init) { // TODO: need lock with deinit
+		return true;
+	}
+
+	if (dev->binding == NULL) {
+		dev->binding = calloc(1, sizeof(binding_state));
+	}
+
+	uint32_t found_bind = handle_one_device(dev);
+	if (found_bind > 0) {
+		dev->isUsbBound = true;
+		free(dev->binding);
+		dev->binding = NULL;
+
+		recreate_waitting_list(scopeOf(serial_node));
+
+		kburnDeviceNode *new_usb_node = get_device_by_bind_id(scopeOf(serial_node), found_bind);
+		if (new_usb_node == NULL) {
+			debug_print(KBURN_LOG_ERROR, COLOR_FMT("bind target usb port gone, bind_id=%d, maybe disconnected?"), COLOR_ARG(RED, found_bind));
+			return true;
+		}
+		copy_serial_device(serial_node, new_usb_node);
+
+		return true;
+	}
+
+	return false;
+}
+
 // TODO: use condition
 void pair_serial_ports_thread(void *UNUSED(ctx), KBCTX scope, const bool *const quit) {
 	int delay = 100;
@@ -113,34 +146,11 @@ void pair_serial_ports_thread(void *UNUSED(ctx), KBCTX scope, const bool *const 
 		}
 
 		for (kburnDeviceNode **ptr = scope->waittingDevice->list; *ptr != NULL; ptr++) {
-			kburnDeviceNode *serial_node = *ptr;
-			kburnSerialDeviceNode *dev = serial_node->serial;
-			if (!dev->init) { // TODO: need lock with deinit
-				continue;
+			bool handled = t(*ptr);
+
+			if (!handled) {
+				item_waitting_pair++;
 			}
-
-			if (dev->binding == NULL) {
-				dev->binding = calloc(1, sizeof(binding_state));
-			}
-
-			uint32_t found_bind = handle_one_device(dev);
-			if (found_bind > 0) {
-				dev->isUsbBound = true;
-				free(dev->binding);
-				dev->binding = NULL;
-
-				recreate_waitting_list(scope);
-
-				kburnDeviceNode *new_usb_node = get_device_by_bind_id(scope, found_bind);
-				if (new_usb_node == NULL) {
-					debug_print(KBURN_LOG_ERROR, COLOR_FMT("bind target usb port gone, bind_id=%d, maybe disconnected?"), COLOR_ARG(RED, found_bind));
-					continue;
-				}
-				copy_serial_device(serial_node, new_usb_node);
-
-				continue;
-			}
-			item_waitting_pair++;
 		}
 
 		unlock(scope->waittingDevice->mutex);

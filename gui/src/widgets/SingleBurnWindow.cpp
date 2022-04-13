@@ -27,9 +27,8 @@ void SingleBurnWindow::showEvent(QShowEvent *event) {
 	shown = true;
 
 	auto library = BurnLibrary::instance();
-	QObject::connect(library, &BurnLibrary::onSerialPortList, this, &SingleBurnWindow::handleSerialPortList);
-	QObject::connect(this, &SingleBurnWindow::startedBurn, library, &BurnLibrary::startBurn);
-	QObject::connect(ui->inputComPortList, &QComboBox::currentTextChanged, this, &SingleBurnWindow::resetProgressState);
+	connect(library, &BurnLibrary::onSerialPortList, this, &SingleBurnWindow::handleSerialPortList);
+	connect(this, &SingleBurnWindow::startedBurn, library, &BurnLibrary::startBurn);
 }
 
 void SingleBurnWindow::on_btnStartBurn_clicked() {
@@ -74,7 +73,7 @@ void SingleBurnWindow::setProgressText(const QString &progressText) {
 #endif
 }
 
-void SingleBurnWindow::setConfigureStata(bool incomplete) {
+void SingleBurnWindow::setConfigureState(bool incomplete) {
 	if (work) {
 		return;
 	}
@@ -112,7 +111,10 @@ void SingleBurnWindow::resetProgressState() {
 void SingleBurnWindow::resumeState() {
 	delete future;
 	future = NULL;
-	delete work;
+	if (!BurnLibrary::instance()->deleteBurnTask(work)) {
+		qErrnoWarning("wired state: work not in registry");
+		delete work;
+	}
 	work = NULL;
 	setEnabled(true);
 }
@@ -123,6 +125,8 @@ void SingleBurnWindow::setEnabled(bool enabled) {
 }
 
 void SingleBurnWindow::handleSerialPortList(const QMap<QString, QString> &list) {
+	disconnect(ui->inputComPortList, &QComboBox::currentTextChanged, this, &SingleBurnWindow::resetProgressState);
+
 	QString save(ui->inputComPortList->currentText());
 
 	bool custom = true;
@@ -148,6 +152,8 @@ void SingleBurnWindow::handleSerialPortList(const QMap<QString, QString> &list) 
 		int sel = qMax(titles.indexOf(save), 0);
 		ui->inputComPortList->setCurrentIndex(sel);
 	}
+
+	connect(ui->inputComPortList, &QComboBox::currentTextChanged, this, &SingleBurnWindow::resetProgressState);
 }
 
 void SingleBurnWindow::handleDeviceStateChange(const kburnDeviceNode *dev) {

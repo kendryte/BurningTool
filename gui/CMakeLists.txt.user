@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE QtCreatorProject>
-<!-- Written by QtCreator 7.0.0, 2022-04-13T12:58:07. -->
+<!-- Written by QtCreator 7.0.0, 2022-04-13T13:13:52. -->
 <qtcreator>
  <data>
   <variable>EnvironmentId</variable>
@@ -94,27 +94,26 @@
   <variable>ProjectExplorer.Project.Target.0</variable>
   <valuemap type="QVariantMap">
    <value type="QString" key="DeviceType">Desktop</value>
-   <value type="QString" key="ProjectExplorer.ProjectConfiguration.DefaultDisplayName">Desktop Qt 6.2.3 MinGW 64-bit</value>
-   <value type="QString" key="ProjectExplorer.ProjectConfiguration.DisplayName">Desktop Qt 6.2.3 MinGW 64-bit</value>
-   <value type="QString" key="ProjectExplorer.ProjectConfiguration.Id">qt.qt6.623.win64_mingw_kit</value>
+   <value type="QString" key="ProjectExplorer.ProjectConfiguration.DefaultDisplayName">Desktop Qt 6.3.0 MinGW 64-bit</value>
+   <value type="QString" key="ProjectExplorer.ProjectConfiguration.DisplayName">Desktop Qt 6.3.0 MinGW 64-bit</value>
+   <value type="QString" key="ProjectExplorer.ProjectConfiguration.Id">qt.qt6.630.win64_mingw_kit</value>
    <value type="qlonglong" key="ProjectExplorer.Target.ActiveBuildConfiguration">0</value>
    <value type="qlonglong" key="ProjectExplorer.Target.ActiveDeployConfiguration">0</value>
-   <value type="qlonglong" key="ProjectExplorer.Target.ActiveRunConfiguration">0</value>
+   <value type="qlonglong" key="ProjectExplorer.Target.ActiveRunConfiguration">-1</value>
    <valuemap type="QVariantMap" key="ProjectExplorer.Target.BuildConfiguration.0">
     <value type="QString" key="CMake.Build.Type">Debug</value>
     <value type="QString" key="CMake.Initial.Parameters">-DCMAKE_GENERATOR:STRING=MinGW Makefiles
 -DCMAKE_BUILD_TYPE:STRING=Debug
--DCMAKE_PROJECT_INCLUDE_BEFORE:PATH=%{IDE:ResourcePath}/package-manager/auto-setup.cmake
--DQT_QMAKE_EXECUTABLE:STRING=%{Qt:qmakeExecutable}
--DCMAKE_PREFIX_PATH:STRING=%{Qt:QT_INSTALL_PREFIX}
--DCMAKE_C_COMPILER:STRING=%{Compiler:Executable:C}
--DCMAKE_CXX_COMPILER:STRING=%{Compiler:Executable:Cxx}
--DOpenGL_GL_PREFERENCE:UNINITIALIZED=GLVND</value>
-    <value type="QString" key="ProjectExplorer.BuildConfiguration.BuildDirectory">A:/test/build-SHABAO-DESKTOP-Qt%{Qt:Version}-%{BuildConfig:Name}</value>
+-DCMAKE_PROJECT_INCLUDE_BEFORE:FILEPATH=%{IDE:ResourcePath}/package-manager/auto-setup.cmake
+-DQT_QMAKE_EXECUTABLE:FILEPATH=%{Qt:qmakeExecutable}
+-DCMAKE_PREFIX_PATH:PATH=%{Qt:QT_INSTALL_PREFIX}
+-DCMAKE_C_COMPILER:FILEPATH=%{Compiler:Executable:C}
+-DCMAKE_CXX_COMPILER:FILEPATH=%{Compiler:Executable:Cxx}</value>
+    <value type="QString" key="ProjectExplorer.BuildConfiguration.BuildDirectory">${sourceDir}/../build-%{Env:HOSTNAME}%{Env:COMPUTERNAME}-Qt%{Qt:Version}-%{BuildConfig:Name}</value>
     <valuemap type="QVariantMap" key="ProjectExplorer.BuildConfiguration.BuildStepList.0">
      <valuemap type="QVariantMap" key="ProjectExplorer.BuildStepList.Step.0">
       <valuelist type="QVariantList" key="CMakeProjectManager.MakeStep.BuildTargets">
-       <value type="QString"></value>
+       <value type="QString">all</value>
       </valuelist>
       <value type="QString" key="CMakeProjectManager.MakeStep.CMakeArguments">--parallel</value>
       <value type="bool" key="ProjectExplorer.BuildStep.Enabled">true</value>
@@ -152,19 +151,19 @@
     <value type="QString" key="CMake.Build.Type">Release</value>
     <value type="QString" key="CMake.Initial.Parameters">-DCMAKE_GENERATOR:STRING=MinGW Makefiles
 -DCMAKE_BUILD_TYPE:STRING=Release
--DCMAKE_PROJECT_INCLUDE_BEFORE:PATH=%{IDE:ResourcePath}/package-manager/auto-setup.cmake
--DQT_QMAKE_EXECUTABLE:STRING=%{Qt:qmakeExecutable}
--DCMAKE_PREFIX_PATH:STRING=%{Qt:QT_INSTALL_PREFIX}
--DCMAKE_C_COMPILER:STRING=%{Compiler:Executable:C}
--DCMAKE_CXX_COMPILER:STRING=%{Compiler:Executable:Cxx}</value>
-    <value type="QString" key="ProjectExplorer.BuildConfiguration.BuildDirectory">%{sourceDir}/../build-%{Env:HOSTNAME}%{Env:COMPUTERNAME}-Qt%{Qt:Version}-%{BuildConfig:Name}</value>
+-DCMAKE_PROJECT_INCLUDE_BEFORE:FILEPATH=%{IDE:ResourcePath}/package-manager/auto-setup.cmake
+-DQT_QMAKE_EXECUTABLE:FILEPATH=%{Qt:qmakeExecutable}
+-DCMAKE_PREFIX_PATH:PATH=%{Qt:QT_INSTALL_PREFIX}
+-DCMAKE_C_COMPILER:FILEPATH=%{Compiler:Executable:C}
+-DCMAKE_CXX_COMPILER:FILEPATH=%{Compiler:Executable:Cxx}</value>
+    <value type="QString" key="ProjectExplorer.BuildConfiguration.BuildDirectory">${sourceDir}/../build-%{Env:HOSTNAME}%{Env:COMPUTERNAME}-Qt%{Qt:Version}-%{BuildConfig:Name}</value>
     <valuemap type="QVariantMap" key="ProjectExplorer.BuildConfiguration.BuildStepList.0">
      <valuemap type="QVariantMap" key="ProjectExplorer.BuildStepList.Step.0">
       <valuelist type="QVariantList" key="CMakeProjectManager.MakeStep.BuildTargets">
        <value type="QString">all</value>
       </valuelist>
+      <value type="QString" key="CMakeProjectManager.MakeStep.CMakeArguments">--parallel</value>
       <value type="bool" key="ProjectExplorer.BuildStep.Enabled">true</value>
-      <value type="QString" key="ProjectExplorer.ProjectConfiguration.DisplayName">Build</value>
       <value type="QString" key="ProjectExplorer.ProjectConfiguration.Id">CMakeProjectManager.MakeStep</value>
      </valuemap>
      <value type="qlonglong" key="ProjectExplorer.BuildStepList.StepsCount">1</value>
@@ -178,7 +177,6 @@
        <value type="QString">clean</value>
       </valuelist>
       <value type="bool" key="ProjectExplorer.BuildStep.Enabled">true</value>
-      <value type="QString" key="ProjectExplorer.ProjectConfiguration.DisplayName">Build</value>
       <value type="QString" key="ProjectExplorer.ProjectConfiguration.Id">CMakeProjectManager.MakeStep</value>
      </valuemap>
      <value type="qlonglong" key="ProjectExplorer.BuildStepList.StepsCount">1</value>
@@ -225,7 +223,7 @@
     <value type="bool" key="RunConfiguration.UseLibrarySearchPath">true</value>
     <value type="bool" key="RunConfiguration.UseQmlDebugger">false</value>
     <value type="bool" key="RunConfiguration.UseQmlDebuggerAuto">true</value>
-    <value type="QString" key="RunConfiguration.WorkingDirectory.default">A:/test/build-SHABAO-DESKTOP-Qt6.2.3-Debug</value>
+    <value type="QString" key="RunConfiguration.WorkingDirectory.default">${sourceDir}/../build-%{Env:HOSTNAME}%{Env:COMPUTERNAME}-Qt%{Qt:Version}-%{BuildConfig:Name}</value>
    </valuemap>
    <value type="qlonglong" key="ProjectExplorer.Target.RunConfigurationCount">1</value>
   </valuemap>

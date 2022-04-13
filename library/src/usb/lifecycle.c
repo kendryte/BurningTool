@@ -93,7 +93,10 @@ kburn_err_t open_single_usb_port(KBCTX scope, struct libusb_device *dev, bool us
 	int r;
 	kburnDeviceNode *node;
 	IfErrorReturn(create_empty_device_instance(scope, &node));
-	DeferDispose(node->disposable_list, node->usb, destroy_usb_port);
+	debug_print(KBURN_LOG_INFO, "new device created: %p", (void *)node);
+	DeferCall(mark_destroy_device_node, node);
+
+	dispose_list_add(node->disposable_list, toDisposable(destroy_usb_port, node->usb));
 
 	node->usb->device = dev;
 

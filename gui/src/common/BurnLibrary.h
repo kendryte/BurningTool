@@ -19,12 +19,13 @@ class BurnLibrary : public QObject {
 	on_device_remove_t previousOnDeviceRemove;
 	on_device_handle_t previousOnHandleSerial;
 	on_device_handle_t previousOnHandleUsb;
+	on_device_list_change_t previousOnDeviceListChange;
 	on_debug_log_t previousOnDebugLog;
 	kburnDebugColors previousColors;
 
 	kburnSerialDeviceList list = {0, NULL};
 	QMap<QString, QString> knownSerialPorts;
-	QMap<QString, class FlashTask *> runningFlash;
+	QMap<QString, class FlashTask *> runningFlash; // TODO: need mutex
 
 	BurnLibrary(QWidget *parent);
 
@@ -40,6 +41,8 @@ class BurnLibrary : public QObject {
 	static KBCTX context();
 	static BurnLibrary *instance();
 
+	bool deleteBurnTask(FlashTask *task);
+
   private:
 	bool handleConnectSerial(const kburnDeviceNode *dev);
 	bool handleConnectUsb(const kburnDeviceNode *dev);
@@ -47,6 +50,7 @@ class BurnLibrary : public QObject {
 	void handleHandleSerial(kburnDeviceNode *dev);
 	void handleHandleUsb(kburnDeviceNode *dev);
 	void handleDebugLog(kburnLogType type, const char *message);
+	void handleDeviceListChange(bool isUsb);
 
   public slots:
 	class FlashTask *startBurn(const QString &serialPath);

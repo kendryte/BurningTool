@@ -41,7 +41,7 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
 }
 
 void MainWindow::disableOtherActions(bool disable) {
-	ui->manualBurnWindow->setConfigureStata(disable);
+	ui->manualBurnWindow->setConfigureState(disable);
 }
 
 void MainWindow::updateSettingStatus() {

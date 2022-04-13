@@ -59,9 +59,7 @@ static inline void set_started_to_true(thread_passing_object *context) {
 
 __thread thread_passing_object *__current_thread_object = NULL;
 thread_condition_t *thread_get_condition(kbthread thread) {
-	if (!thread->started) {
-		thread->started = true;
-	}
+	m_assert(thread->started, "thread not even start, call thread_resume first!");
 	return &thread->condition;
 }
 thread_condition_t *get_current_thread_condition() {

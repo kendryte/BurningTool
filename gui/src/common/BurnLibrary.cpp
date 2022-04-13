@@ -86,6 +86,9 @@ void BurnLibrary::start() {
 	previousOnDeviceRemove = kburnOnDeviceDisconnect(
 		ctx, [](void *self, const kburnDeviceNode *dev) { reinterpret_cast<BurnLibrary *>(self)->handleDeviceRemove(dev); }, this);
 
+	previousOnDeviceListChange = kburnOnDeviceListChange(
+		ctx, [](void *self, bool isUsb) { reinterpret_cast<BurnLibrary *>(self)->handleDeviceListChange(isUsb); }, this);
+
 #pragma GCC diagnostic pop
 
 	auto err = kburnStartWaitingDevices(ctx);
@@ -93,13 +96,19 @@ void BurnLibrary::start() {
 		fatalAlert(err);
 	}
 
-	reloadList();
+	handleDeviceListChange(false);
 }
 
 void BurnLibrary::handleDebugLog(kburnLogType level, const char *cstr) {
 	auto line = QString::fromUtf8(cstr);
 	std::cerr << cstr << std::endl;
 	emit onDebugLog(line);
+}
+
+void BurnLibrary::handleDeviceListChange(bool isUsb) {
+	if (!isUsb) {
+		reloadList();
+	}
 }
 
 void BurnLibrary::reloadList() {
@@ -111,11 +120,13 @@ void BurnLibrary::reloadList() {
 		return;
 	}
 
+	emit onDebugLog(QString("kburnGetSerialList: ") + QString::number(list.size));
+
 	knownSerialPorts.clear();
 	for (auto i = 0; i < list.size; i++) {
 		QString r;
 		r += QString::fromLatin1(list.list[i].path) + " - [" + QString::number(list.list[i].usbIdVendor, 16).leftJustified(4, '0') + ":" +
-			 QString::number(list.list[i].usbIdProduct, 16).leftJustified(4, '0') + "] ";
+		     QString::number(list.list[i].usbIdProduct, 16).leftJustified(4, '0') + "] ";
 #if WIN32
 		r += QString::fromUtf8(list.list[i].title) + " (" + QString::fromUtf8(list.list[i].hwid) + ")";
 #elif __linux__
@@ -131,6 +142,12 @@ void BurnLibrary::reloadList() {
 FlashTask *BurnLibrary::startBurn(const QString &selectedSerial) {
 	const QString &comPortPath = knownSerialPorts.value(selectedSerial, selectedSerial);
 	FlashTask *task = new FlashTask(ctx, comPortPath, imagePath);
+
+	if (runningFlash.contains(comPortPath)) {
+		runningFlash[comPortPath]->cancel();
+		deleteBurnTask(runningFlash[comPortPath]);
+	}
+
 	runningFlash[comPortPath] = task;
 
 	QThreadPool::globalInstance()->start(task);
@@ -138,9 +155,18 @@ FlashTask *BurnLibrary::startBurn(const QString &selectedSerial) {
 	return task;
 }
 
-bool BurnLibrary::handleConnectSerial(const kburnDeviceNode *dev) {
-	reloadList();
+bool BurnLibrary::deleteBurnTask(FlashTask *task) {
+	if (!runningFlash.values().contains(task)) {
+		return false;
+	}
 
+	runningFlash.remove(task->comPort);
+	delete task;
+
+	return true;
+}
+
+bool BurnLibrary::handleConnectSerial(const kburnDeviceNode *dev) {
 	auto run = runningFlash.value(QString::fromLatin1(dev->serial->deviceInfo.path));
 	if (run != NULL) {
 		return true;
@@ -152,8 +178,6 @@ bool BurnLibrary::handleConnectUsb(const kburnDeviceNode *dev) {
 	return true;
 }
 void BurnLibrary::handleDeviceRemove(const kburnDeviceNode *dev) {
-	reloadList();
-
 	if (dev && dev->serial) {
 		auto path = QString::fromLatin1(dev->serial->deviceInfo.path);
 		auto run = runningFlash.value(path);

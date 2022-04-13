@@ -20,23 +20,23 @@ class SingleBurnWindow : public QWidget {
 	void resumeState();
 
   public:
-    explicit SingleBurnWindow(QWidget *parent = nullptr);
-    ~SingleBurnWindow();
+	explicit SingleBurnWindow(QWidget *parent = nullptr);
+	~SingleBurnWindow();
 
 	void showEvent(QShowEvent *event);
-	void setConfigureStata(bool incomplete);
+	void setConfigureState(bool incomplete);
 
   signals:
-    class FlashTask *startedBurn(const QString &sysImg);
-    class FlashTask *completedBurn(bool successful);
+	class FlashTask *startedBurn(const QString &sysImg);
+	class FlashTask *completedBurn(bool successful);
 
   private slots:
-    void setEnabled(bool enabled);
-    void resetProgressState();
-    void setCompleteState();
-    void setErrorState();
-    void setProgressText(const QString &tip);
-    void on_btnStartBurn_clicked();
-    void handleDeviceStateChange(const struct kburnDeviceNode *dev);
-    void handleSerialPortList(const QMap<QString, QString> &list);
+	void setEnabled(bool enabled);
+	void resetProgressState();
+	void setCompleteState();
+	void setErrorState();
+	void setProgressText(const QString &tip);
+	void on_btnStartBurn_clicked();
+	void handleDeviceStateChange(const struct kburnDeviceNode *dev);
+	void handleSerialPortList(const QMap<QString, QString> &list);
 };

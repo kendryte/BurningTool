@@ -23,7 +23,6 @@ class FlashTask : public QObject, public QRunnable {
 	size_t bytesWritten = 0;
 	size_t bytesNextStage = 0;
 	const QString systemImage;
-	const QString comPort;
 	KBCTX scope;
 
 	EventStack inputs;
@@ -38,6 +37,8 @@ class FlashTask : public QObject, public QRunnable {
 	void testCancel();
 
   public:
+	const QString comPort;
+
 	~FlashTask();
 	FlashTask(KBCTX scope, const QString &comPort, const QString &systemImage) : scope(scope), comPort(comPort), systemImage(systemImage), inputs(2) {
 		this->setAutoDelete(false);

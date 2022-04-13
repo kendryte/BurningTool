@@ -4,6 +4,7 @@
 #include "components/device-link-list.h"
 
 DEFINE_REGISTER_SWAPPER(kburnOnDeviceDisconnect, scope->on_disconnect, on_device_remove)
+DEFINE_REGISTER_SWAPPER(kburnOnDeviceListChange, scope->on_list_change, on_device_list_change)
 
 static void destroy_device(void *UNUSED(ctx), kburnDeviceNode *context) {
 	recreate_waitting_list(context->_scope);
@@ -38,9 +39,7 @@ void mark_destroy_device_node(kburnDeviceNode *instance) {
 kburn_err_t create_empty_device_instance(KBCTX scope, kburnDeviceNode **output) {
 	DeferEnabled;
 
-	disposable_list_t *disposable_list = DeferFree(CheckNull(disposable_list_init("device instance")));
-	DeferCall(disposable_list_deinit, disposable_list);
-	DeferCall(dispose_all, disposable_list);
+	disposable_list_t *disposable_list = CheckNull(disposable_list_init("device instance"));
 
 	kburnDeviceError *error = MyAlloc(kburnDeviceError);
 	register_dispose_pointer(disposable_list, error);
@@ -70,6 +69,7 @@ kburn_err_t create_empty_device_instance(KBCTX scope, kburnDeviceNode **output) 
 		sizeof(kburnDeviceNode));
 
 	lock_bind_destruct(empty_device_instance->reference_lock, destroy_device, NULL, empty_device_instance);
+	DeferCall(device_instance_collect, empty_device_instance);
 
 	empty_device_instance->guid = (uint64_t)empty_device_instance;
 	empty_device_instance->serial->parent = empty_device_instance;

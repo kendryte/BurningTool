@@ -4,10 +4,14 @@
 #include "libserial.list.h"
 #include "lifecycle.h"
 #include "private-types.h"
+#include "components/call-user-handler.h"
 #include "components/device-link-list.h"
 
 static void on_event(void *ctx, ser_dev_evt_t evt, const ser_dev_t *dev) {
 	KBCTX scope = ctx;
+
+	CALL_HANDLE_SYNC(scope->on_list_change, false);
+
 	switch (evt) {
 	case SER_DEV_EVT_ADDED:
 		debug_print(KBURN_LOG_INFO, "[monitor] connect: %s", dev->path);
@@ -16,13 +20,9 @@ static void on_event(void *ctx, ser_dev_evt_t evt, const ser_dev_t *dev) {
 	case SER_DEV_EVT_REMOVED:
 		debug_print(KBURN_LOG_INFO, "[monitor] remove : %s", dev->path);
 		kburnDeviceNode *device = get_device_by_serial_port_path(scope, dev->path);
+
 		if (device) {
 			destroy_serial_port(device->disposable_list, device->serial);
-		} else {
-			if (scope->on_disconnect.handler) {
-				debug_print(KBURN_LOG_DEBUG, "\tscope::on_disconnect()");
-				scope->on_disconnect.handler(scope->on_disconnect.context, NULL);
-			}
 		}
 
 		break;

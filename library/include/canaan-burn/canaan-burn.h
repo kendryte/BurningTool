@@ -65,6 +65,11 @@ PUBLIC on_device_handle_t kburnOnSerialConfirm(KBCTX scope, on_device_handle han
 PUBLIC on_device_remove_t kburnOnDeviceDisconnect(KBCTX scope, on_device_remove disconnect_callback, void *ctx);
 
 /**
+ * 设备列表发生某些改变时调用（比connect、disconnect早）
+ */
+PUBLIC on_device_list_change_t kburnOnDeviceListChange(KBCTX scope, on_device_list_change change_callback, void *ctx);
+
+/**
  * 新设备连接回调，当返回false时，不试图连接（忽略该端口）
  */
 PUBLIC on_device_connect_t kburnOnUsbConnect(KBCTX scope, on_device_connect verify_callback, void *ctx);

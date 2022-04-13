@@ -19,18 +19,6 @@ struct mlock {
 #endif
 };
 
-static void really_destroy(kb_mutex_t mlock) {
-	int err = pthread_mutex_destroy(&mlock->mutex);
-	if (err != 0) {
-		debug_print(KBURN_LOG_ERROR, COLOR_FMT("failed pthread_mutex_destroy: %d: %s"), COLOR_ARG(YELLOW, err, strerror(err)));
-	}
-	free(mlock);
-
-	if (mlock->destruct) {
-		mlock->destruct(mlock->context, mlock->object);
-	}
-}
-
 kb_mutex_t lock_init() {
 	kb_mutex_t mlock = calloc(1, sizeof(struct mlock));
 	if (mlock == NULL) {
@@ -72,10 +60,23 @@ void lock_deinit(kb_mutex_t mlock) {
 
 static bool atomic_check_and_destroy(kb_mutex_t mlock) {
 	bool last = reference_decrease(mlock->waitting);
-	if (last && mlock->mark_delete) {
-		really_destroy(mlock);
+	if (mlock->mark_delete) {
+		if (last) {
+			pthread_mutex_unlock(&mlock->mutex);
+			int err = pthread_mutex_destroy(&mlock->mutex);
+			if (err != 0) {
+				debug_print(KBURN_LOG_ERROR, COLOR_FMT("failed pthread_mutex_destroy: %d: %s"), COLOR_ARG(YELLOW, err, strerror(err)));
+			}
+
+			if (mlock->destruct) {
+				mlock->destruct(mlock->context, mlock->object);
+			}
+
+			free(mlock);
+		}
 		return false;
 	}
+
 	return true;
 }
 
@@ -84,10 +85,6 @@ bool _kb__lock(kb_mutex_t mlock, debug_bundle dbg) {
 #else
 bool _kb__lock(kb_mutex_t mlock) {
 #endif
-	if (mlock->mark_delete) {
-		return false;
-	}
-
 	reference_increase(mlock->waitting);
 	m_assert0(pthread_mutex_lock(&mlock->mutex), "pthread_mutex_lock failed");
 	if (!atomic_check_and_destroy(mlock)) {

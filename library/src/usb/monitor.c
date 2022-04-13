@@ -7,6 +7,7 @@
 #include "lifecycle.h"
 #include "private-types.h"
 #include "subsystem.h"
+#include "components/call-user-handler.h"
 #include "components/device-link-list.h"
 #include "components/queued-thread.h"
 #include <pthread.h>
@@ -20,9 +21,11 @@ static void init_list_all_usb_devices_threaded(void *UNUSED(_ctx), KBCTX scope, 
 static void _pump_libusb_event(struct passing_data *recv) {
 	debug_print(KBURN_LOG_DEBUG, "handle event in thread.");
 
+	KBCTX scope = ((struct passing_data *)recv)->scope;
+	CALL_HANDLE_SYNC(scope->on_list_change, true);
+
 	libusb_hotplug_event event = ((struct passing_data *)recv)->event;
 	kburnUsbDeviceInfoSlice defInfo = ((struct passing_data *)recv)->dev;
-	KBCTX scope = ((struct passing_data *)recv)->scope;
 
 	if (LIBUSB_HOTPLUG_EVENT_DEVICE_ARRIVED == event) {
 		debug_print(KBURN_LOG_INFO, "libusb event: ARRIVED");
@@ -47,11 +50,6 @@ static void _pump_libusb_event(struct passing_data *recv) {
 		kburnDeviceNode *node = get_device_by_usb_port_path(scope, defInfo.idVendor, defInfo.idProduct, defInfo.path);
 		if (node != NULL) {
 			destroy_usb_port(node->disposable_list, node->usb);
-		} else {
-			if (scope->on_disconnect.handler) {
-				debug_print(KBURN_LOG_DEBUG, "\tscope::on_disconnect()");
-				scope->on_disconnect.handler(scope->on_disconnect.context, NULL);
-			}
 		}
 	} else {
 		debug_print(KBURN_LOG_ERROR, "Unhandled event %d\n", event);

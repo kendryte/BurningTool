@@ -12,6 +12,7 @@
 typedef struct kburnContext {
 	char signature[sizeof(CONTEXT_MEMORY_SIGNATURE)];
 	on_device_remove_t on_disconnect;
+	on_device_list_change_t on_list_change;
 
 	struct serial_subsystem_context *const serial;
 	struct usb_subsystem_context *const usb;

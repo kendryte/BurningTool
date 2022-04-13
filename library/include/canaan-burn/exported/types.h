@@ -42,13 +42,14 @@ typedef enum kburnLogType
 } kburnLogType;
 
 #define CONCAT(a, b) a##b
-#define declare_callback(ret, name, ...)            \
-	typedef ret (*name)(void *ctx, __VA_ARGS__);    \
-	typedef struct CONCAT(name, _callback_bundle) { \
-		name handler;                               \
-		void *context;                              \
+#define declare_callback(ret, name, ...)                       \
+	typedef ret (*name)(void *ctx __VA_OPT__(, ) __VA_ARGS__); \
+	typedef struct CONCAT(name, _callback_bundle) {            \
+		name handler;                                          \
+		void *context;                                         \
 	} CONCAT(name, _t)
 
+declare_callback(void, on_device_list_change, bool isUsb);
 declare_callback(bool, on_device_connect, const kburnDeviceNode *dev);
 declare_callback(void, on_device_remove, const kburnDeviceNode *dev);
 declare_callback(void, on_device_handle, kburnDeviceNode *dev);
