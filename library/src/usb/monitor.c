@@ -10,12 +10,59 @@
 #include "components/call-user-handler.h"
 #include "components/device-link-list.h"
 #include "components/queued-thread.h"
+#include <libusb.h>
 #include <pthread.h>
 
 static void init_list_all_usb_devices_threaded(void *UNUSED(_ctx), KBCTX scope, const bool *const q) {
 	if (!q) {
 		init_list_all_usb_devices(scope);
 	}
+}
+
+void _auto_libusb_free_device_list(libusb_device ***pval) {
+	if (*pval == NULL)
+		return;
+	libusb_free_device_list(*pval, true);
+}
+
+static bool open_this_usb_device(KBCTX scope, uint16_t vid, uint16_t pid, const uint8_t in_path[MAX_USB_PATH_LENGTH]) {
+	debug_trace_function("%d, %d, %.8s", vid, pid, usb_debug_path_string(in_path));
+	libusb_device **__attribute__((cleanup(_auto_libusb_free_device_list))) list = NULL;
+	ssize_t dev_count = libusb_get_device_list(scope->usb->libusb, &list);
+	if (!check_libusb(dev_count)) {
+		debug_print_libusb_error("libusb_get_device_list()", dev_count);
+		return NULL;
+	}
+	for (int i = 0; i < dev_count; i++) {
+		libusb_device *dev = list[i];
+		struct libusb_device_descriptor desc;
+
+		int r = libusb_get_device_descriptor(dev, &desc);
+		if (!check_libusb(r)) {
+			continue;
+		}
+
+		if (vid != desc.idVendor || pid != desc.idProduct) {
+			continue;
+		}
+
+		uint8_t path[MAX_USB_PATH_LENGTH] = {0};
+		if (usb_get_device_path(dev, path) < LIBUSB_SUCCESS) {
+			continue;
+		}
+
+		if (strncmp((const char *)path, (const char *)in_path, MAX_USB_PATH_LENGTH) == 0) {
+			kburn_err_t r = open_single_usb_port(scope, dev, true, NULL);
+			if (r != KBurnNoErr) {
+				debug_print(KBURN_LOG_ERROR, "failed open single port: %" PRIu64, r);
+				return false;
+			}
+			return true;
+		}
+	}
+
+	debug_print(KBURN_LOG_ERROR, "failed get device!");
+	return false;
 }
 
 static void _pump_libusb_event(struct passing_data *recv) {
@@ -35,16 +82,8 @@ static void _pump_libusb_event(struct passing_data *recv) {
 			return;
 		}
 
-		libusb_device *dev = get_usb_device(scope->usb->libusb, defInfo.idVendor, defInfo.idProduct, defInfo.path);
-		if (!dev) {
-			debug_print(
-				KBURN_LOG_ERROR, "failed get device: [%04x: %04x] %s", defInfo.idVendor, defInfo.idProduct, usb_debug_path_string(defInfo.path));
-			return;
-		}
-		kburn_err_t r = open_single_usb_port(scope, dev, true, NULL);
-		if (r != KBurnNoErr) {
-			debug_print(KBURN_LOG_ERROR, "failed open single port: %" PRIu64, r);
-		}
+		open_this_usb_device(scope, defInfo.idVendor, defInfo.idProduct, defInfo.path);
+
 	} else if (LIBUSB_HOTPLUG_EVENT_DEVICE_LEFT == event) {
 		debug_print(KBURN_LOG_INFO, "libusb event: LEFT");
 		kburnDeviceNode *node = get_device_by_usb_port_path(scope, defInfo.idVendor, defInfo.idProduct, defInfo.path);
@@ -69,7 +108,7 @@ void push_libusb_event(KBCTX scope, libusb_hotplug_event event, const struct kbu
 	data->scope = scope;
 	data->dev = *devInfo;
 	data->event = event;
-	event_thread_queue(scope->usb->event_queue, data);
+	event_thread_queue(scope->usb->event_queue, data, false);
 }
 
 void usb_monitor_destroy(KBCTX scope) {
@@ -109,11 +148,6 @@ kburn_err_t usb_monitor_prepare(KBCTX scope) {
 	} else {
 		debug_print(KBURN_LOG_DEBUG, "libUsbHasWathcer: polling");
 		scope->usb->event_mode = USB_EVENT_POLLING;
-	}
-
-	int r = libusb_set_option(scope->usb->libusb, LIBUSB_OPTION_LOG_LEVEL, LIBUSB_LOG_LEVEL_INFO);
-	if (r < 0) {
-		debug_print_libusb_error("log level set failed", r);
 	}
 
 	IfErrorReturn(event_thread_init(scope, "libusb pump", pump_libusb_event, &scope->usb->event_queue));

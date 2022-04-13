@@ -39,7 +39,9 @@ void _thread_wait_event(thread_condition_t *ppctx, test_condition test, on_condi
 
 	lock(ctx->mutex);
 	while (!test(state)) {
+		debug_trace_function("wait");
 		pthread_cond_wait(&ctx->cond, raw_lock(ctx->mutex));
+		debug_trace_function("wakeup");
 		if (!*ppctx) {
 			unlock(ctx->mutex);
 			return;
@@ -65,4 +67,12 @@ kb_mutex_t thread_get_event_lock(thread_condition_t *ppctx) {
 		return NULL;
 
 	return ctx->mutex;
+}
+
+pthread_cond_t *thread_get_event_condition(thread_condition_t *ppctx) {
+	thread_condition_t ctx = *ppctx;
+	if (!ctx)
+		return NULL;
+
+	return &ctx->cond;
 }

@@ -12,7 +12,7 @@ kburn_err_t global_init_user_handle_thread(KBCTX scope) {
 }
 
 void user_handler_wrap_async(struct user_handler_wrap_data *data) {
-	event_thread_queue(data->device->_scope->user_event, data);
+	event_thread_queue(data->device->_scope->user_event, data, true);
 }
 void user_handler_wrap_sync(struct user_handler_wrap_data *data) {
 	user_callback_thread(NULL, data);
@@ -23,5 +23,5 @@ void _user_handler_wrap_async_new(on_device_handle handler, void *context, kburn
 	data->context = context;
 	data->handler = handler;
 	data->device = device;
-	event_thread_queue(data->device->_scope->user_event, data);
+	event_thread_queue(data->device->_scope->user_event, data, true);
 }

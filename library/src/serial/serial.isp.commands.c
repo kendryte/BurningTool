@@ -1,6 +1,6 @@
 #include "basic/errors.h"
 #include "basic/sleep.h"
-#include "baudtate.h"
+#include "baudrate.h"
 #include "device.h"
 #include "isp.h"
 #include "low.h"

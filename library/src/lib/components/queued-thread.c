@@ -25,10 +25,9 @@ static inline bool queue_is_not_empty(event_queue_thread *context) {
 	return queue_size(context->queue) > 0;
 }
 static inline void work_in_queue(event_queue_thread *context) {
-	void *data = queue_shift(context->queue);
-	if (data == NULL) {
-		debug_print(KBURN_LOG_ERROR, "strange: queue shift got null");
-	} else {
+	void *data;
+	while ((data = queue_shift(context->queue)) != NULL) {
+		debug_trace_function("queue:" FMT_SIZET " - 0x%p", queue_size(context->queue) + 1, (void *)data);
 		context->handler(context->scope, data);
 	}
 }
@@ -69,7 +68,7 @@ kburn_err_t event_thread_init(KBCTX scope, const char *title, event_handler hand
 	return KBurnNoErr;
 }
 
-kburn_err_t event_thread_queue(event_queue_thread *et, void *event) {
+kburn_err_t event_thread_queue(event_queue_thread *et, void *event, bool auto_fire) {
 	if (!et) {
 		debug_print(KBURN_LOG_WARN, "push to thread after queue deinited.");
 		return make_error_code(KBURN_ERROR_KIND_COMMON, KBurnObjectDestroy);
@@ -77,7 +76,16 @@ kburn_err_t event_thread_queue(event_queue_thread *et, void *event) {
 
 	thread_event_autolock(thread_get_condition(et->thread));
 
+	debug_trace_function("queue:" FMT_SIZET " + 0x%p", queue_size(et->queue), (void *)event);
 	kburn_err_t r = queue_push(et->queue, event);
 
+	if (auto_fire) {
+		event_thread_fire(et);
+	}
+
 	return r;
+}
+
+void event_thread_fire(event_queue_thread *et) {
+	thread_fire_event(thread_get_condition(et->thread));
 }

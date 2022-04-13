@@ -17,6 +17,7 @@ typedef struct polling_context {
 	HWND window;
 	bool notify;
 	dynamic_array_t *prevList;
+	struct libusb_context *libusb;
 } polling_context;
 
 static inline bool match_device(int vid, int pid, const kburnUsbDeviceInfoSlice *devInfo) {
@@ -37,7 +38,7 @@ static void push_event(KBCTX scope, bool add, const kburnUsbDeviceInfoSlice *dev
 }
 
 static void fill_usb_array(KBCTX scope, dynamic_array_t *array) {
-	ssize_t r = list_usb_ports(scope, array->body, array->size);
+	ssize_t r = list_usb_ports(scope->usb->polling_context->libusb, array->body, array->size);
 	if (r <= 0)
 		return;
 
@@ -47,7 +48,7 @@ static void fill_usb_array(KBCTX scope, dynamic_array_t *array) {
 		debug_print(KBURN_LOG_INFO, "resize device buffer to: " FMT_SIZET, dev_count);
 		array_fit(array, dev_count + 5);
 
-		r = list_usb_ports(scope, array->body, array->size);
+		r = list_usb_ports(scope->usb->polling_context->libusb, array->body, array->size);
 
 		if (r <= 0)
 			return;
@@ -138,6 +139,8 @@ static LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lPara
 
 	array_move(oldList, &newList);
 
+	event_thread_fire(scope->usb->event_queue);
+
 	return 0;
 }
 
@@ -187,6 +190,9 @@ static HWND create_event_window(KBCTX scope) {
 static void usb_monitor_polling_thread(void *UNUSED(context), KBCTX scope, const bool *const quit) {
 	scope->usb->polling_context->prevList = array_create(kburnUsbDeviceInfoSlice, 10);
 
+	int r = libusb_init(&scope->usb->polling_context->libusb);
+	m_assert(r >= 0, "libusb init fail in windows event thread (return %d)", r);
+
 	HWND hwnd = create_event_window(scope);
 	if (!hwnd) {
 		m_abort("create window failed");
@@ -231,6 +237,9 @@ static void usb_monitor_polling_thread(void *UNUSED(context), KBCTX scope, const
 		debug_print_win32("WIN32 DestroyWindow Failed!");
 	}
 
+	libusb_exit(scope->usb->polling_context->libusb);
+	scope->usb->polling_context->libusb = NULL;
+
 	array_delete(scope->usb->polling_context->prevList);
 }
 
@@ -251,6 +260,7 @@ kburn_err_t usb_monitor_polling_prepare(KBCTX scope) {
 	scope->usb->polling_context = MyAlloc(struct polling_context);
 	IfErrorReturn(thread_create("usb poll", usb_monitor_polling_thread, NULL, scope, &scope->usb->polling_context->thread));
 	dispose_list_add(scope->threads, toDisposable(quit_windows_thread, scope->usb->polling_context));
+	thread_resume(scope->usb->polling_context->thread);
 
 	return KBurnNoErr;
 }

@@ -2,6 +2,7 @@
 
 #include "./errors.h"
 #include "./prefix.h"
+#include "time.h"
 
 DEFINE_START
 
@@ -27,6 +28,7 @@ typedef struct kburnDeviceNode {
 	PCONST bool destroy_in_progress;
 	PCONST bool disconnect_should_call;
 	PCONST uint32_t bind_id;
+	PCONST time_t bind_wait_timing;
 
 	PCONST struct mlock *reference_lock;
 } kburnDeviceNode;

@@ -125,6 +125,7 @@ kburn_err_t open_single_usb_port(KBCTX scope, struct libusb_device *dev, bool us
 		debug_print(KBURN_LOG_INFO, "user verify pass");
 	}
 
+#ifndef WIN32
 	r = libusb_kernel_driver_active(node->usb->handle, 0);
 	if (r == 0) {
 		debug_print(KBURN_LOG_DEBUG, "libusb kernel driver is already set to this device");
@@ -138,8 +139,10 @@ kburn_err_t open_single_usb_port(KBCTX scope, struct libusb_device *dev, bool us
 	} else if (r == LIBUSB_ERROR_NOT_SUPPORTED) {
 		debug_print_libusb_result("open_single_usb_port: system not support detach kernel driver", r);
 	}
+#endif
 
-	libusb_clear_halt(node->usb->handle, 0);
+	// libusb_lock_events(scope->usb->libusb);
+	// libusb_clear_halt(node->usb->handle, 0);
 	int lastr = -1;
 	for (int i = 0; i < 20; i++) {
 		r = libusb_claim_interface(node->usb->handle, 0);

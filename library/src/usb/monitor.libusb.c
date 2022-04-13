@@ -34,6 +34,7 @@ static int on_libusb_hotplug_event(struct libusb_context *UNUSED(ctx), struct li
 		debug_print(KBURN_LOG_WARN, "Unhandled event %d\n", event);
 	}
 
+	event_thread_fire(scope->usb->event_queue);
 	return 0;
 }
 

@@ -19,14 +19,14 @@ void _thread_wait_event(thread_condition_t *ppctx, test_condition test, on_condi
 	_thread_wait_event(ppctx, (test_condition)test, (on_condition_is_true)handle, context)
 void thread_fire_event(thread_condition_t *ppctx);
 kb_mutex_t thread_get_event_lock(thread_condition_t *ppctx);
-#define thread_event_autolock(ppctx)                                                                      \
-	__extension__({                                                                                       \
-		thread_condition_t *_th_event_ppctx = ppctx;                                                      \
-		thread_condition_t __attribute__((cleanup(thread_fire_event))) _th_event_pctx = *_th_event_ppctx; \
-		kb_mutex_t _th_event_lock = thread_get_event_lock(_th_event_ppctx);                               \
-		bool r = false;                                                                                   \
-		if (_th_event_lock) {                                                                             \
-			r = autolock(_th_event_lock);                                                                 \
-		}                                                                                                 \
-		r;                                                                                                \
+pthread_cond_t *thread_get_event_condition(thread_condition_t *ppctx);
+#define thread_event_autolock(ppctx)                                        \
+	__extension__({                                                         \
+		thread_condition_t *_th_event_ppctx = ppctx;                        \
+		kb_mutex_t _th_event_lock = thread_get_event_lock(_th_event_ppctx); \
+		bool r = false;                                                     \
+		if (_th_event_lock) {                                               \
+			r = autolock(_th_event_lock);                                   \
+		}                                                                   \
+		r;                                                                  \
 	})

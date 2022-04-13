@@ -10,22 +10,6 @@
 #include "canaan-burn/canaan-burn.h"
 #include <libusb.h>
 
-kburn_err_t kburnOpenUsb(KBCTX scope, uint16_t vid, uint16_t pid, const uint8_t *path) {
-	if (!scope->usb->libusb) {
-		usb_subsystem_init(scope);
-	}
-
-	libusb_device *dev = get_usb_device(scope->usb->libusb, vid, pid, path);
-
-	if (dev == NULL) {
-		return make_error_code(KBURN_ERROR_KIND_COMMON, KBurnUsbDeviceNotFound);
-	}
-
-	IfErrorReturn(open_single_usb_port(scope, dev, false, NULL));
-
-	return KBurnNoErr;
-}
-
 kburn_err_t kburnPollUsb(KBCTX scope) {
 	if (!scope->usb->subsystem_inited) {
 		usb_subsystem_init(scope);
@@ -47,13 +31,13 @@ kburnUsbDeviceList kburnGetUsbList(KBCTX scope) {
 	}
 
 	dynamic_array_t *array = scope->list2;
-	ssize_t list_size = list_usb_ports(scope, array->body, array->size);
+	ssize_t list_size = list_usb_ports(scope->usb->libusb, array->body, array->size);
 	if (list_size < 0) {
 		return (kburnUsbDeviceList){.size = 0, .list = NULL};
 	}
 	if ((size_t)list_size > array->size) {
 		array_fit(array, list_size + 5);
-		list_size = list_usb_ports(scope, array->body, array->size);
+		list_size = list_usb_ports(scope->usb->libusb, array->body, array->size);
 	}
 
 	array->length = MIN(list_size, array->size);

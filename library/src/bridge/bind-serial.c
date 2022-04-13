@@ -1,3 +1,4 @@
+#include "../serial/lifecycle.h"
 #include "../serial/move-device.h"
 #include "../serial/private-types.h"
 #include "basic/sleep.h"
@@ -110,6 +111,14 @@ static inline bool t(kburnDeviceNode *serial_node) {
 		return true;
 	}
 
+	if (!serial_node->bind_wait_timing) {
+		serial_node->bind_wait_timing = time(NULL);
+	} else if (time(NULL) - serial_node->bind_wait_timing > 10) {
+		set_error(serial_node, KBURN_ERROR_KIND_COMMON, KBurnUsbBindTimeout, "usb port not appear");
+		destroy_serial_port(serial_node->disposable_list, serial_node->serial);
+		return true;
+	}
+
 	if (dev->binding == NULL) {
 		dev->binding = calloc(1, sizeof(binding_state));
 	}
@@ -156,7 +165,7 @@ void pair_serial_ports_thread(void *UNUSED(ctx), KBCTX scope, const bool *const 
 		unlock(scope->waittingDevice->mutex);
 
 		if (item_waitting_pair > 0) {
-			delay = 100;
+			delay = 500;
 		} else if (delay < 1000) {
 			delay += 10;
 		}
