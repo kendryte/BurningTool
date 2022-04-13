@@ -2,6 +2,7 @@
 #include "base.h"
 #include "context.h"
 #include "descriptor.h"
+#include "device.h"
 #include "libusb.list.h"
 #include "lifecycle.h"
 #include "private-types.h"
@@ -125,8 +126,7 @@ kburn_err_t usb_monitor_prepare(KBCTX scope) {
 		IfErrorReturn(usb_monitor_polling_prepare(scope));
 	}
 
-	kbthread no_use;
-	thread_create("usb init scan", init_list_all_usb_devices_threaded, NULL, scope, &no_use);
+	thread_create("usb init scan", init_list_all_usb_devices_threaded, NULL, scope, NULL);
 
 	return KBurnNoErr;
 }

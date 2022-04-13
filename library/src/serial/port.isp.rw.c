@@ -75,6 +75,8 @@ slip_error_t _serial_isp_slip_send_request(kburnSerialDeviceNode *node, isp_requ
 }
 
 static isp_response_t *serial_isp_command_send_low(kburnSerialDeviceNode *node, isp_request_t *command) {
+	use_device(node);
+
 	size_t input_buffer_size = 256;
 	uint8_t *input_buffer = calloc(input_buffer_size, sizeof(uint8_t));
 
@@ -151,7 +153,6 @@ isp_response_t *serial_isp_command_send_low_retry(kburnSerialDeviceNode *node, i
 		tries = node->parent->_scope->serial->settings.retry_times;
 	}
 
-	autolock(node->mutex);
 	for (int curr = 1; curr < tries; curr++) {
 		if (node->isSwitchIsp || node->isUsbBound) {
 			debug_print(KBURN_LOG_ERROR, "this port is already binded");

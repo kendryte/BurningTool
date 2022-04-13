@@ -118,6 +118,9 @@ PUBLIC void kburnFreeUsbList(KBCTX scope);
 PUBLIC kburn_err_t kburnPollSerial(KBCTX scope);
 PUBLIC kburn_err_t kburnPollUsb(KBCTX scope);
 
+PUBLIC void kburnDeviceRef(kburnDeviceNode *node);
+PUBLIC void kburnDeviceUnRef(kburnDeviceNode *node);
+
 DEFINE_END
 
 #include "./exported/config-api.h"

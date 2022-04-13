@@ -18,7 +18,7 @@ waiting_list_t *waiting_list_init() {
 }
 
 DECALRE_DISPOSE(waiting_list_deinit, waiting_list_t) {
-	lock_deinit(&context->mutex);
+	lock_deinit(context->mutex);
 	free(context);
 }
 DECALRE_DISPOSE_END()

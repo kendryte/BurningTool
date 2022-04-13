@@ -93,8 +93,6 @@ typedef struct kburnSerialDeviceNode {
 	PCONST struct isp_state *isp;
 	PCONST struct binding_state *binding;
 	PCONST struct ser *m_dev_handle;
-
-	PCONST kb_mutex_t mutex;
 } kburnSerialDeviceNode;
 
 typedef struct kburn_serial_device_list {

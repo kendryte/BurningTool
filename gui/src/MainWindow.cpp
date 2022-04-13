@@ -92,6 +92,7 @@ void MainWindow::closeEvent(QCloseEvent *ev) {
 	}
 
 	closing = true;
+	saveWindowSize();
 	setDisabled(true);
 
 	QSettings settings(QSettings::Scope::UserScope, SETTINGS_CATEGORY, "ui");

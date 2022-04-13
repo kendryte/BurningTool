@@ -7,7 +7,6 @@
 #include "private-types.h"
 #include "components/call-user-handler.h"
 #include "components/device-link-list.h"
-#include "components/lifecycle-helper.h"
 
 static bool confirm_port_is_ready(kburnSerialDeviceNode *node) {
 	if (!kburnSerialIspGreeting(node)) {
@@ -24,36 +23,32 @@ static inline void free_handle(void *handle) {
 	}
 }
 
-DECALRE_DISPOSE(destroy_serial_port, kburnDeviceNode) {
-	kburnSerialDeviceNode *serial = context->serial;
-	debug_trace_function("%p[%s]", (void *)serial, OPTSTR(serial->deviceInfo.path, "*invalid*"));
+DECALRE_DISPOSE(destroy_serial_port, kburnSerialDeviceNode) {
+	debug_trace_function("%p[%s]", (void *)context, OPTSTR(context->deviceInfo.path, "*invalid*"));
+	use_device(context);
 
-	if (!serial->init) {
+	if (!context->init) {
 		return;
 	}
 
-	lock(serial->mutex);
+	serial_isp_delete(context);
 
-	serial_isp_delete(serial);
-
-	if (serial->binding) {
-		free(serial->binding);
-		serial->binding = NULL;
+	if (context->binding) {
+		free(context->binding);
+		context->binding = NULL;
 	}
 
-	if (serial->isOpen) {
-		serial_low_close(serial);
+	if (context->isOpen) {
+		serial_low_close(context);
 	}
 
-	if (serial->m_dev_handle != NULL) {
-		ser_destroy(serial->m_dev_handle);
+	if (context->m_dev_handle != NULL) {
+		ser_destroy(context->m_dev_handle);
 	}
 
-	serial->init = false;
+	context->init = false;
 
-	unlock(serial->mutex);
-	lock_deinit(&serial->mutex);
-	device_instance_collect(context->_scope, context);
+	device_instance_collect(get_node(context));
 }
 DECALRE_DISPOSE_END()
 
@@ -63,7 +58,6 @@ kburn_err_t serial_port_init(kburnSerialDeviceNode *serial, const char *path) {
 	m_assert(!serial->init, "serial port must not already inited");
 
 	serial->deviceInfo = driver_get_devinfo(path);
-	serial->mutex = CheckNull(lock_init());
 
 	serial_isp_open(serial);
 
@@ -80,11 +74,10 @@ kburn_err_t on_serial_device_attach(KBCTX scope, const char *path, bool need_ver
 	kburnDeviceNode *node = NULL;
 
 	IfErrorReturn(create_empty_device_instance(scope, &node));
-	DeferDispose(scope->disposables, node, destroy_device);
 	debug_print(KBURN_LOG_INFO, "new device created: %p", (void *)node);
 
 	IfErrorReturn(serial_port_init(node->serial, path));
-	dispose_list_add(node->disposable_list, toDisposable(destroy_serial_port, node));
+	dispose_list_add(node->disposable_list, toDisposable(destroy_serial_port, node->serial));
 
 	if (need_verify && (scope->serial->on_verify.handler != NULL)) {
 		if (!CALL_HANDLE_SYNC(scope->serial->on_verify, node)) {

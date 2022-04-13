@@ -2,9 +2,8 @@
 
 #include "context.h"
 #include "basic/disposable.h"
+#include "basic/reference-count.h"
 #include "canaan-burn/exported/serial.isp.h"
-
-DECALRE_DISPOSE_HEADER(destroy_device, kburnDeviceNode);
 
 __attribute__((always_inline)) static inline kburnDeviceNode *__p(kburnDeviceNode *v) {
 	return v;
@@ -37,5 +36,15 @@ void _clear_error(kburnDeviceNode *node);
 void slip_error(kburnSerialDeviceNode *node, int err);
 
 kburn_err_t create_empty_device_instance(KBCTX scope, kburnDeviceNode **output);
-void device_instance_collect(KBCTX scope, kburnDeviceNode *instance);
-// kburn_err_t set_device_chip_id(kburnDeviceNode *output, chip_id_t chipId);
+void device_instance_collect(kburnDeviceNode *dev);
+void mark_destroy_device_node(kburnDeviceNode *dev);
+
+#define use_device(node)                     \
+	__extension__({                          \
+		kburnDeviceNode *n = get_node(node); \
+		bool r = false;                      \
+		if (!n->destroy_in_progress) {       \
+			r = autolock(n->reference_lock); \
+		}                                    \
+		r;                                   \
+	})

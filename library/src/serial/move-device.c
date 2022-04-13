@@ -5,6 +5,7 @@
 
 void copy_serial_device(kburnDeviceNode *src, kburnDeviceNode *dst) {
 	debug_trace_function();
+
 	dst->serial->parent = dst;
 	dst->serial->isUsbBound = true;
 	dst->serial->deviceInfo = src->serial->deviceInfo;
@@ -14,5 +15,5 @@ void copy_serial_device(kburnDeviceNode *src, kburnDeviceNode *dst) {
 #endif
 
 	src->disconnect_should_call = false;
-	destroy_device(src->_scope->disposables, src);
+	mark_destroy_device_node(src);
 }

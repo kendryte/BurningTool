@@ -17,7 +17,7 @@ static bool greeting(kburnSerialDeviceNode *node, bool auto_switch) {
 
 	hello_pkt->op = ISP_NOP;
 
-	if (!serial_isp_command_send_low_retry(node, hello_pkt, -1)) {
+	if (!serial_isp_command_send_low_retry(node, hello_pkt, scopeOf(node)->serial->settings.retry_times)) {
 		debug_print(KBURN_LOG_ERROR, "greeting: FAILED");
 
 		if (!auto_switch) {
@@ -41,7 +41,7 @@ static bool greeting(kburnSerialDeviceNode *node, bool auto_switch) {
 				return false;
 			}
 
-			if (!serial_isp_command_send_low_retry(node, hello_pkt, -1)) {
+			if (!serial_isp_command_send_low_retry(node, hello_pkt, scopeOf(node)->serial->settings.retry_times)) {
 				debug_print(KBURN_LOG_ERROR, "greeting: high/low speed also FAILED");
 				return false;
 			}
@@ -164,7 +164,7 @@ bool kburnSerialIspMemoryWrite(
 		memcpy(packet->data, data + offset, packet->data_len);
 
 		packet->checksum = 0;
-		if (!serial_isp_command_send_low_retry(node, packet, -1)) {
+		if (!serial_isp_command_send_low_retry(node, packet, scopeOf(node)->serial->settings.retry_times)) {
 			return false;
 		}
 

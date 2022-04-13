@@ -27,7 +27,6 @@ void FlashTask::nextStage(const QString &title, size_t bytes) {
 	bytesNextStage = bytes;
 	output.setProgressRange(bytesWritten, bytesWritten + bytes);
 	emit progressTextChanged(title);
-	qWarning() << "set stage: " << title << " bytes: " << bytes;
 }
 
 void FlashTask::serial_isp_progress(void *self, const kburnDeviceNode *dev, size_t current, size_t length) {

@@ -10,7 +10,6 @@
 #include "private-types.h"
 #include "components/call-user-handler.h"
 #include "components/device-link-list.h"
-#include "components/lifecycle-helper.h"
 #include <libusb.h>
 
 /****************************************************
@@ -63,8 +62,8 @@ _quit:
 
 DECALRE_DISPOSE(destroy_usb_port, kburnUsbDeviceNode) {
 	debug_trace_function("USB[0x%p: %s]", (void *)context->device, usb_debug_path_string(context->deviceInfo.path));
+	use_device(context);
 
-	lock(context->mutex);
 	if (context->isClaim) {
 		context->isClaim = false;
 		libusb_release_interface(context->handle, 0);
@@ -80,8 +79,8 @@ DECALRE_DISPOSE(destroy_usb_port, kburnUsbDeviceNode) {
 	free(context->deviceInfo.descriptor);
 
 	context->init = false;
-	unlock(context->mutex);
-	lock_deinit(&context->mutex);
+
+	device_instance_collect(get_node(context));
 }
 DECALRE_DISPOSE_END()
 
@@ -94,10 +93,8 @@ kburn_err_t open_single_usb_port(KBCTX scope, struct libusb_device *dev, bool us
 	int r;
 	kburnDeviceNode *node;
 	IfErrorReturn(create_empty_device_instance(scope, &node));
-	DeferDispose(scope->disposables, node, destroy_device);
 	DeferDispose(node->disposable_list, node->usb, destroy_usb_port);
 
-	node->usb->mutex = CheckNull(lock_init());
 	node->usb->device = dev;
 
 	IfUsbErrorLogSetReturn(libusb_open(dev, &node->usb->handle));

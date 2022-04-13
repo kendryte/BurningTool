@@ -1,117 +1,113 @@
-#define has_kb_mutex 1
-
-#include <pthread.h>
-
-#define THREAD_TITLE_BUFF_SIZE 32
-typedef struct kb_mutex {
-	pthread_mutex_t *mutex;
-	char holder[THREAD_TITLE_BUFF_SIZE];
-	const char *varname;
-	const char *file;
-	int line;
-} kb_mutex;
-
+#include "lock.h"
+#include "array.h"
 #include "sleep.h"
-#include <stdbool.h>
-#include <stdint.h>
-#include <stdlib.h>
 #include <errno.h>
-#include <string.h>
+#include <pthread.h>
 #include "debug/print.h"
 
-pthread_mutex_t *_kb_init_lock() {
-	// debug_print("[lock] init");
-	pthread_mutexattr_t attr;
-	pthread_mutex_t *ret = calloc(1, sizeof(pthread_mutex_t));
-	if (ret == NULL) {
-		debug_print(KBURN_LOG_ERROR, "  ! memory error");
-		return NULL;
-	}
-	pthread_mutexattr_init(&attr);
-	pthread_mutexattr_settype(&attr, PTHREAD_MUTEX_ERRORCHECK);
-	pthread_mutex_init(ret, &attr);
-	return ret;
-}
-void _kb_deinit_lock(pthread_mutex_t **mutex) {
-	debug_print(KBURN_LOG_TRACE, "[lock] deinit");
-	int err = pthread_mutex_destroy(*mutex);
+struct mlock {
+	referece_counter_t waitting;
+	pthread_mutex_t mutex;
+
+	reference_destroy destruct;
+	void *context;
+	void *object;
+	bool mark_delete;
+
+#ifndef NDEBUG
+	debug_bundle _dbg;
+#endif
+};
+
+static void really_destroy(kb_mutex_t mlock) {
+	int err = pthread_mutex_destroy(&mlock->mutex);
 	if (err != 0) {
 		debug_print(KBURN_LOG_ERROR, COLOR_FMT("failed pthread_mutex_destroy: %d: %s"), COLOR_ARG(YELLOW, err, strerror(err)));
 	}
-	free(*mutex);
-	*mutex = NULL;
+	free(mlock);
+
+	if (mlock->destruct) {
+		mlock->destruct(mlock->context, mlock->object);
+	}
 }
 
-void _kb_lock(pthread_mutex_t *mutex) {
-	// debug_print(KBURN_LOG_TRACE, "  lock", (void *)mutex, sizeof(pthread_mutex_t));
-	m_assert0(pthread_mutex_lock(mutex), "pthread_mutex_lock failed");
-}
+kb_mutex_t lock_init() {
+	kb_mutex_t mlock = calloc(1, sizeof(struct mlock));
+	if (mlock == NULL) {
+		debug_print(KBURN_LOG_ERROR, "  ! memory error");
+		return NULL;
+	}
 
-void _kb_unlock(pthread_mutex_t *mutex) {
-	// debug_print(KBURN_LOG_TRACE, "unlock", (void *)mutex, sizeof(pthread_mutex_t));
-	m_assert0(pthread_mutex_unlock(mutex), "pthread_mutex_unlock failed");
-}
+	pthread_mutexattr_t attr;
+	pthread_mutexattr_init(&attr);
+	pthread_mutexattr_settype(&attr, PTHREAD_MUTEX_ERRORCHECK); // PTHREAD_MUTEX_RECURSIVE
+	pthread_mutex_init(&mlock->mutex, &attr);
 
-kb_mutex *_kb__init_lock() {
-	kb_mutex *mlock = calloc(1, sizeof(kb_mutex));
-	mlock->mutex = _kb_init_lock();
 	return mlock;
 }
 
-void _kb__deinit_lock(kb_mutex **pmlock) {
-	kb_mutex *mlock = *pmlock;
-	*pmlock = NULL;
-
-	pthread_mutex_destroy(mlock->mutex);
-	free(mlock->mutex);
-	free(mlock);
+void _lock_bind_destruct(kb_mutex_t mlock, reference_destroy destruct, void *context, void *object) {
+	m_assert(mlock->destruct == NULL, "duplicate call to _lock_register_destructor");
+	autolock(mlock);
+	mlock->destruct = destruct;
+	mlock->object = object;
+	mlock->context = context;
+	mlock->mark_delete = false;
 }
 
-static inline void _dbg_ln(const char *msg, const char *varname, const char *RELEASE_UNUSED(file), int RELEASE_UNUSED(line)) {
-	debug_print(KBURN_LOG_ERROR, COLOR_FMT("%s"), COLOR_ARG(RED, msg));
-	char buff[THREAD_TITLE_BUFF_SIZE] = {0};
-	pthread_getname_np(pthread_self(), buff, THREAD_TITLE_BUFF_SIZE);
-	debug_print_location(KBURN_LOG_ERROR, file, line, "[thread: %s] try lock - %s", buff, varname);
-}
-
-void _kb__lock(kb_mutex *mlock, const char *varname, const char *file, int line) {
-	if (mlock == NULL) {
-		_dbg_ln("lock uninit mutex object", varname, file, line);
-		// no return
+void lock_deinit(kb_mutex_t mlock) {
+	if (mlock->mark_delete) {
+		return;
 	}
 
-	if (mlock->mutex == NULL) {
-		_dbg_ln("lock destroy mutex object", varname, file, line);
-		// no return
+	lock(mlock);
+
+	mlock->mark_delete = true;
+
+	unlock(mlock);
+	if (lock(mlock)) {
+		unlock(mlock);
 	}
-
-	// debug_print("lock %p", (void *)mlock->mutex);
-	int re = pthread_mutex_timedlock(mlock->mutex, &(struct timespec){.tv_nsec = 0, .tv_sec = 5});
-	if (re == ETIMEDOUT) {
-		_dbg_ln("can not aquire lock in 5s", varname, file, line);
-		debug_print_location(KBURN_LOG_ERROR, mlock->file, mlock->line, "[thread: %s] hold by %s", mlock->holder, mlock->varname);
-
-		_kb_lock(mlock->mutex);
-	} else if (re != 0) {
-		_dbg_ln(strerror(re), varname, file, line);
-		m_abort("lock error");
-	}
-
-	mlock->file = file;
-	mlock->line = line;
-	mlock->varname = varname;
-	pthread_getname_np(pthread_self(), mlock->holder, THREAD_TITLE_BUFF_SIZE);
 }
 
-void _kb__unlock(kb_mutex *mlock) {
-	// debug_print("unlock %p", (void *)mlock->mutex);
-	_kb_unlock(mlock->mutex);
-	mlock->file = NULL;
-	mlock->line = -1;
-	mlock->holder[0] = '\0';
-	mlock->varname = NULL;
+static bool atomic_check_and_destroy(kb_mutex_t mlock) {
+	bool last = reference_decrease(mlock->waitting);
+	if (last && mlock->mark_delete) {
+		really_destroy(mlock);
+		return false;
+	}
+	return true;
 }
 
-pthread_mutex_t *_kb__raw_lock(kb_mutex *mlock) {
-	return mlock->mutex;
+#ifndef NDEBUG
+bool _kb__lock(kb_mutex_t mlock, debug_bundle dbg) {
+#else
+bool _kb__lock(kb_mutex_t mlock) {
+#endif
+	if (mlock->mark_delete) {
+		return false;
+	}
+
+	reference_increase(mlock->waitting);
+	m_assert0(pthread_mutex_lock(&mlock->mutex), "pthread_mutex_lock failed");
+	if (!atomic_check_and_destroy(mlock)) {
+		return false;
+	}
+
+#ifndef NDEBUG
+	mlock->_dbg = dbg;
+#endif
+
+	return true;
+}
+
+void unlock(kb_mutex_t mlock) {
+#ifndef NDEBUG
+	memset(&mlock->_dbg, 0, sizeof(struct debug_bundle));
+#endif
+	m_assert0(pthread_mutex_unlock(&mlock->mutex), "pthread_mutex_unlock failed");
+}
+
+pthread_mutex_t *raw_lock(kb_mutex_t mlock) {
+	return &mlock->mutex;
 }

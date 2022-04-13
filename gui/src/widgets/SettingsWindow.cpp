@@ -17,7 +17,7 @@
 #define SETTING_SERIAL_RETRY "serial-write-retry"
 
 static const QList<uint32_t> baudrates = {9600,    115200,  230400,  460800,  576000,  921600,  1000000,
-                                          1152000, 1500000, 2000000, 2500000, 3000000, 3500000, 4000000};
+										  1152000, 1500000, 2000000, 2500000, 3000000, 3500000, 4000000};
 
 static const QMap<uint8_t, enum KBurnSerialConfigByteSize> bsMap = {
 	{8, KBurnSerialConfigByteSize_8},
@@ -27,10 +27,10 @@ static const QMap<uint8_t, enum KBurnSerialConfigByteSize> bsMap = {
 };
 
 static const QMap<QString, enum KBurnSerialConfigParity> parMap = {
-	{"None",  KBurnSerialConfigParityNone },
+    {"None",  KBurnSerialConfigParityNone },
     {"Odd",   KBurnSerialConfigParityOdd  },
     {"Even",  KBurnSerialConfigParityEven },
-	{"Mark",  KBurnSerialConfigParityMark },
+    {"Mark",  KBurnSerialConfigParityMark },
     {"Space", KBurnSerialConfigParitySpace},
 };
 
@@ -43,6 +43,10 @@ static const QMap<float, enum KBurnSerialConfigStopBits> sbMap = {
 SettingsWindow::SettingsWindow(QWidget *parent)
 	: QWidget(parent), ui(new Ui::SettingsWindow), settings(QSettings::Scope::UserScope, SETTINGS_CATEGORY, "burning") {
 	ui->setupUi(this);
+
+	ui->actionBar->button(QDialogButtonBox::RestoreDefaults)->setText(tr("恢复默认"));
+	ui->actionBar->button(QDialogButtonBox::Save)->setText(tr("保存设置"));
+	ui->actionBar->button(QDialogButtonBox::Discard)->setText(tr("取消"));
 }
 
 SettingsWindow::~SettingsWindow() {

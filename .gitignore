@@ -7,3 +7,4 @@ sysimage*
 *.img
 *.bin
 autogen
+*.html

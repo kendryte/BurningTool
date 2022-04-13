@@ -4,6 +4,10 @@
 #include <stddef.h>
 #include <stdint.h>
 
+#define GENERIC_LINE(type, fn) \
+	type:                      \
+	fn
+
 #ifdef UNUSED
 #elif defined(__GNUC__)
 #define UNUSED(x) UNUSED_##x __attribute__((unused))
@@ -53,6 +57,7 @@
 #include "basic/macros.endian.h"
 #pragma GCC diagnostic pop
 
+#include "basic/macros.atomic.h"
 #include "basic/macros.public_interface.h"
 
 #if WIN32
@@ -67,3 +72,6 @@ static inline uint64_t guid() {
 	guid += rand() % 9;
 	return guid;
 }
+
+#include <signal.h>
+#define debugger raise(SIGABRT)

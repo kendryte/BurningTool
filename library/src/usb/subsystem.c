@@ -63,6 +63,7 @@ kburn_err_t usb_subsystem_init(KBCTX scope) {
 	if (err != KBurnNoErr) {
 		return err;
 	}
+	thread_resume(scope->usb->libusb_thread);
 
 	debug_print(KBURN_LOG_DEBUG, "libusb init complete");
 

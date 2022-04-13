@@ -102,12 +102,15 @@ static uint32_t handle_one_device(kburnSerialDeviceNode *dev) {
 	return false;
 }
 
+// TODO: use condition
 void pair_serial_ports_thread(void *UNUSED(ctx), KBCTX scope, const bool *const quit) {
 	int delay = 100;
 	while (!*quit) {
 		int item_waitting_pair = 0;
 
-		lock(scope->waittingDevice->mutex);
+		if (!lock(scope->waittingDevice->mutex)) {
+			break;
+		}
 
 		for (kburnDeviceNode **ptr = scope->waittingDevice->list; *ptr != NULL; ptr++) {
 			kburnDeviceNode *serial_node = *ptr;

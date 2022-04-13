@@ -12,6 +12,7 @@ kburn_err_t serial_subsystem_init(KBCTX scope) {
 	if (r != KBurnNoErr) {
 		return r;
 	}
+	thread_resume(scope->serial->pairing_thread);
 
 	scope->serial->subsystem_inited = true;
 	return KBurnNoErr;

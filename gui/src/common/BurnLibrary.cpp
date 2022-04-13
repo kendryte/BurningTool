@@ -115,7 +115,7 @@ void BurnLibrary::reloadList() {
 	for (auto i = 0; i < list.size; i++) {
 		QString r;
 		r += QString::fromLatin1(list.list[i].path) + " - [" + QString::number(list.list[i].usbIdVendor, 16).leftJustified(4, '0') + ":" +
-		     QString::number(list.list[i].usbIdProduct, 16).leftJustified(4, '0') + "] ";
+			 QString::number(list.list[i].usbIdProduct, 16).leftJustified(4, '0') + "] ";
 #if WIN32
 		r += QString::fromUtf8(list.list[i].title) + " (" + QString::fromUtf8(list.list[i].hwid) + ")";
 #elif __linux__
@@ -154,11 +154,13 @@ bool BurnLibrary::handleConnectUsb(const kburnDeviceNode *dev) {
 void BurnLibrary::handleDeviceRemove(const kburnDeviceNode *dev) {
 	reloadList();
 
-	if (dev && (dev->serial->init || dev->serial->isUsbBound)) {
-		auto run = runningFlash.value(QString::fromLatin1(dev->serial->deviceInfo.path));
+	if (dev && dev->serial) {
+		auto path = QString::fromLatin1(dev->serial->deviceInfo.path);
+		auto run = runningFlash.value(path);
 		if (run != NULL) {
 			qDebug() << "known device disconnect" << QChar::LineFeed;
 			run->cancel();
+			runningFlash.remove(path);
 
 			return;
 		}

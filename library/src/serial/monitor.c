@@ -17,7 +17,7 @@ static void on_event(void *ctx, ser_dev_evt_t evt, const ser_dev_t *dev) {
 		debug_print(KBURN_LOG_INFO, "[monitor] remove : %s", dev->path);
 		kburnDeviceNode *device = get_device_by_serial_port_path(scope, dev->path);
 		if (device) {
-			destroy_serial_port(device->disposable_list, device);
+			destroy_serial_port(device->disposable_list, device->serial);
 		} else {
 			if (scope->on_disconnect.handler) {
 				debug_print(KBURN_LOG_DEBUG, "\tscope::on_disconnect()");
@@ -60,7 +60,7 @@ kburn_err_t serial_monitor_prepare(KBCTX scope) {
 		return KBurnNoErr;
 	}
 
-	thread_create("serial init list", first_init_list, NULL, scope, &scope->serial->init_list_thread);
+	thread_create("serial init scan", first_init_list, NULL, scope, NULL);
 
 	return KBurnNoErr;
 }

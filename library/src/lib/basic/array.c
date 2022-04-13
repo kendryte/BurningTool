@@ -36,6 +36,42 @@ void array_delete(dynamic_array_t *array) {
 	}
 }
 
+void p_array_remove(dynamic_array_t *array, size_t index) {
+	m_assert(array->element_size == sizeof(void *), "p_array_push must use on pointer array");
+	void **ptr = array->body;
+
+	ptr[index] = NULL;
+}
+
+void p_array_push(dynamic_array_t *array, void *new_element) {
+	m_assert(array->element_size == sizeof(void *), "p_array_push must use on pointer array");
+	void **ptr = array->body;
+
+	ssize_t emp = p_array_find(array, NULL);
+	if (emp >= 0) {
+		ptr[emp] = new_element;
+		return;
+	}
+
+	if (array->length == array->size) {
+		array_grow(array, 5);
+	}
+
+	ptr[array->length++] = new_element;
+}
+
+ssize_t p_array_find(dynamic_array_t *array, void *needle) {
+	m_assert(array->element_size == sizeof(void *), "p_array_push must use on pointer array");
+
+	void **ptr = array->body;
+	for (size_t i = 0; i < array->length; i++) {
+		if (ptr[i] == needle) {
+			return i;
+		}
+	}
+	return -1;
+}
+
 void array_move(dynamic_array_t *dst, dynamic_array_t *src) {
 	array_resize(dst, 0);
 

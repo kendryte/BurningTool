@@ -1,4 +1,5 @@
 #include "disposable.h"
+#include "lock.h"
 #include <stdlib.h>
 #include "debug/print.h"
 
@@ -49,7 +50,7 @@ disposable_list_t *disposable_list_init(const char *comment) {
 }
 
 void disposable_list_deinit(disposable_list_t *list) {
-	lock_deinit(&list->mutex);
+	lock_deinit(list->mutex);
 	free(list);
 }
 
@@ -64,7 +65,7 @@ disposable dispose_list_add(disposable_list_t *r, disposable e) {
 		m_assert(r->size == 0, "free self must at first element");
 	}
 
-	lock(r->mutex);
+	autolock(r->mutex);
 
 	debug_trace_function("<%s>[%d], %s%s", NULLSTR(r->comment), r->size, DEBUG_OBJ_TITLE(e._dbg), DEBUG_OBJ_PATH(e._dbg));
 	disposable_list_element_t *ele = calloc(1, sizeof(disposable_list_element_t));
@@ -88,7 +89,6 @@ disposable dispose_list_add(disposable_list_t *r, disposable e) {
 	r->tail = ele;
 	r->size++;
 
-	unlock(r->mutex);
 	return e;
 }
 
@@ -136,7 +136,7 @@ void dispose_list_cancel(disposable_list_t *r, disposable e) {
 	debug_trace_function("<%s>[%d], %s%s", NULLSTR(r->comment), r->size, DEBUG_OBJ_TITLE(e._dbg), DEBUG_OBJ_PATH(e._dbg));
 
 	if (!r->disposed) {
-		lock(r->mutex);
+		autolock(r->mutex);
 	}
 
 	bool found = false;
@@ -157,17 +157,13 @@ void dispose_list_cancel(disposable_list_t *r, disposable e) {
 		debug_list_content(r);
 		m_abort("dispose not found object");
 	}
-
-	if (!r->disposed) {
-		unlock(r->mutex);
-	}
 }
 
 void dispose_all(disposable_list_t *r) {
 	m_assert_ptr(r, "dispose: got null ptr");
 	m_assert(!r->disposed, "dispose twice");
 
-	lock(r->mutex);
+	autolock(r->mutex);
 	r->disposed = true;
 
 	bool selfDisposing = r->size > 0 && r->head->callback == free_pointer && r->head->object == r;
@@ -195,8 +191,6 @@ void dispose_all(disposable_list_t *r) {
 			}
 		}
 	}
-
-	unlock(r->mutex);
 }
 
 void dispose(disposable target) {

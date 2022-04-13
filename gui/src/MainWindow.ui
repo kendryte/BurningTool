@@ -37,7 +37,7 @@
         </sizepolicy>
        </property>
        <property name="currentIndex">
-        <number>2</number>
+        <number>0</number>
        </property>
        <widget class="SettingsWindow" name="settingsWindow">
         <attribute name="title">
@@ -145,8 +145,14 @@
     </property>
     <addaction name="btnOpenWebsite"/>
    </widget>
+   <widget class="QMenu" name="menu">
+    <property name="title">
+     <string>检查更新</string>
+    </property>
+   </widget>
    <addaction name="menuF_ile"/>
    <addaction name="menu_A_bout"/>
+   <addaction name="menu"/>
   </widget>
   <widget class="QStatusBar" name="statusbar"/>
   <action name="btnOpenWebsite">

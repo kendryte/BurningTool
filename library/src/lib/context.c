@@ -2,6 +2,7 @@
 #include "../bridge/bind-wait-list.h"
 #include "../serial/private-types.h"
 #include "../usb/private-types.h"
+#include "basic/lock.h"
 #include "basic/resource-tracker.h"
 #include "components/call-user-handler.h"
 #include "components/device-link-list.h"
@@ -24,6 +25,11 @@ void kburnGlobalDestroy() {
 
 kburn_err_t kburnCreate(KBCTX *ppCtx) {
 	debug_trace_function();
+
+	if (!lib_global_scope) {
+		atexit(kburnGlobalDestroy);
+		lib_global_scope = disposable_list_init("library global");
+	}
 
 	DeferEnabled;
 
@@ -71,11 +77,6 @@ kburn_err_t kburnCreate(KBCTX *ppCtx) {
 			.monitor_inited = false,
 		},
 		sizeof(kburnContext));
-
-	if (!lib_global_scope) {
-		atexit(kburnGlobalDestroy);
-		lib_global_scope = disposable_list_init("library global");
-	}
 
 	dispose_list_add(lib_global_scope, toDisposable(dispose_all_and_deinit, dis));
 	dispose_list_add(lib_global_scope, toDisposable(dispose_all_and_deinit, threads));

@@ -10,37 +10,35 @@
 typedef struct event_queue_thread {
 	kbthread thread;
 	queue_t queue;
-	pthread_cond_t cond;
-	kb_mutex_t mutex;
 	event_handler handler;
+	KBCTX scope;
 } event_queue_thread;
 
 static DECALRE_DISPOSE(event_thread_queue_deinit, event_queue_thread *) {
 	event_queue_thread *obj = *context;
 	*context = NULL;
-	pthread_cond_destroy(&obj->cond);
-	lock_deinit(&obj->mutex);
 	queue_destroy(obj->queue, free);
 }
 DECALRE_DISPOSE_END()
 
+static inline bool queue_is_not_empty(event_queue_thread *context) {
+	return queue_size(context->queue) > 0;
+}
+static inline void work_in_queue(event_queue_thread *context) {
+	void *data = queue_shift(context->queue);
+	if (data == NULL) {
+		debug_print(KBURN_LOG_ERROR, "strange: queue shift got null");
+	} else {
+		context->handler(context->scope, data);
+	}
+}
+
 void event_queue_thread_main(void *_ctx, KBCTX scope, const bool *const quit) {
 	event_queue_thread *context = _ctx;
+
+	context->scope = scope;
 	while (!*quit) {
-		lock(context->mutex);
-		while (queue_size(context->queue) == 0 && !*quit) {
-			pthread_cond_wait(&context->cond, raw_lock(context->mutex));
-		}
-
-		void *data = queue_shift(context->queue);
-		if (data == NULL) {
-			debug_print(KBURN_LOG_ERROR, "strange: queue shift got null");
-			continue;
-		}
-
-		context->handler(scope, data);
-
-		unlock(context->mutex);
+		current_thread_wait_event(queue_is_not_empty, work_in_queue, context);
 	}
 }
 
@@ -52,13 +50,6 @@ void event_thread_deinit(KBCTX scope, event_queue_thread **queue_thread) {
 	*queue_thread = NULL;
 }
 
-static DECALRE_DISPOSE(graceful_quit, event_queue_thread) {
-	thread_tell_quit(context->thread);
-	autolock(context->mutex);
-	pthread_cond_signal(&context->cond);
-}
-DECALRE_DISPOSE_END()
-
 kburn_err_t event_thread_init(KBCTX scope, const char *title, event_handler handler, event_queue_thread **out) {
 	DeferEnabled;
 
@@ -68,33 +59,24 @@ kburn_err_t event_thread_init(KBCTX scope, const char *title, event_handler hand
 	DeferDispose(scope->disposables, out, event_thread_queue_deinit);
 
 	ret->handler = handler;
-	ret->mutex = CheckNull(lock_init());
 
-	int r = pthread_cond_init(&ret->cond, NULL);
-	if (r != 0) {
-		debug_print(KBURN_LOG_ERROR, "pthread_cond_init failed with %d: %s", r, strerror(r));
-		return make_error_code(KBURN_ERROR_KIND_SYSCALL, r);
-	}
 	IfErrorReturn(queue_create(&ret->queue));
 
 	IfErrorReturn(thread_create(title, event_queue_thread_main, ret, scope, &ret->thread));
-	DeferDispose(scope->threads, ret, graceful_quit);
 
 	DeferAbort;
 	return KBurnNoErr;
 }
 
-kburn_err_t event_thread_queue(event_queue_thread *thread, void *event) {
-	if (!thread) {
+kburn_err_t event_thread_queue(event_queue_thread *et, void *event) {
+	if (!et) {
 		debug_print(KBURN_LOG_WARN, "push to thread after queue deinited.");
 		return make_error_code(KBURN_ERROR_KIND_COMMON, KBurnObjectDestroy);
 	}
 
-	autolock(thread->mutex);
+	thread_event_autolock(thread_get_condition(et->thread));
 
-	kburn_err_t r = queue_push(thread->queue, event);
-
-	pthread_cond_signal(&thread->cond);
+	kburn_err_t r = queue_push(et->queue, event);
 
 	return r;
 }

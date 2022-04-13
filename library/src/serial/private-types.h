@@ -48,7 +48,6 @@ struct serial_settings {
 
 typedef struct serial_subsystem_context {
 	bool subsystem_inited;
-	kbthread init_list_thread;
 
 	bool monitor_prepared;
 	ser_dev_mon_t *monitor_instance;

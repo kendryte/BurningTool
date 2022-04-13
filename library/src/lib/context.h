@@ -1,16 +1,8 @@
 #pragma once
 
+#include "canaan-burn/exported/types.h"
 #include <stdbool.h>
 #include <string.h>
-
-#define has_kb_mutex 1
-#ifndef NDEBUG
-typedef struct kb_mutex *kb_mutex_t;
-#else
-#include <pthread.h>
-typedef pthread_mutex_t *kb_mutex_t;
-#endif
-#include "canaan-burn/exported/types.h"
 
 #define CONTEXT_MEMORY_SIGNATURE "kburnCtx"
 

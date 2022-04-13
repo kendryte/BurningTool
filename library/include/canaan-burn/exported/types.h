@@ -15,10 +15,6 @@ typedef struct kburnDeviceError {
 	PCONST char *errorMessage;
 } kburnDeviceError;
 
-#if !defined(has_kb_mutex)
-typedef void *kb_mutex_t;
-#endif
-
 typedef struct kburnDeviceNode {
 	PCONST uint64_t guid;
 	PCONST kburnDeviceError *const error;
@@ -31,6 +27,8 @@ typedef struct kburnDeviceNode {
 	PCONST bool destroy_in_progress;
 	PCONST bool disconnect_should_call;
 	PCONST uint32_t bind_id;
+
+	PCONST struct mlock *reference_lock;
 } kburnDeviceNode;
 
 typedef enum kburnLogType

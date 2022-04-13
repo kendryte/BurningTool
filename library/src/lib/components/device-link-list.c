@@ -22,7 +22,7 @@ port_link_list *port_link_list_init() {
 	return ret;
 }
 DECALRE_DISPOSE(port_link_list_deinit, port_link_list) {
-	lock_deinit(&context->exclusion);
+	lock_deinit(context->exclusion);
 	free(context);
 }
 DECALRE_DISPOSE_END()
