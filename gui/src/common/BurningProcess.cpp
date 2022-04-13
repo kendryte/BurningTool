@@ -19,13 +19,13 @@ FlashTask::~FlashTask() {
 
 void FlashTask::setProgressValue(size_t value) {
 	output.setProgressValue(bytesWritten + value);
-	qWarning() << "set progress: " << value;
 }
 
 void FlashTask::nextStage(const QString &title, size_t bytes) {
 	bytesWritten += bytesNextStage;
 	bytesNextStage = bytes;
 	output.setProgressRange(bytesWritten, bytesWritten + bytes);
+	output.setProgressValue(0);
 	emit progressTextChanged(title);
 }
 

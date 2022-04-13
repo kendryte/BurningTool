@@ -50,10 +50,11 @@ jobs:
       - name: Install Qt
         uses: jurplel/install-qt-action@v2
         with:
+          # https://download.qt.io/online/qtsdkrepository/windows_x86/desktop/
           cached: ${{ steps.cache-deps.outputs.cache-hit }}
-          version: 6.2.4
+          version: 6.3.0
           arch: win64_mingw
-          archives: qtbase
+          archives: qtbase qt5compat
           dir: "${{github.workspace}}/QtInstall"
 
       - name: Install system dependencies

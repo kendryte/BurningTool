@@ -15,7 +15,6 @@ SingleBurnWindow::SingleBurnWindow(QWidget *parent) : QWidget(parent), ui(new Ui
 SingleBurnWindow::~SingleBurnWindow() {
 	if (work) {
 		work->cancel();
-		future->waitForFinished();
 	}
 	delete ui;
 }

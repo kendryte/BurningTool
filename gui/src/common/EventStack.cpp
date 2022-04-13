@@ -1,4 +1,5 @@
 #include "EventStack.h"
+#include <QDebug>
 #include <QList>
 
 EventStack::EventStack(int size) : list(QList<void *>(size, NULL)) {
@@ -26,10 +27,15 @@ void *EventStack::pick(unsigned int index) {
 		mutex.lock();
 		auto ret = list.at(index);
 		if (!ret) {
-			QDeadlineTimer deadline(10 * 1000);
 			if (canceled)
 				return NULL;
-			cond.wait(&mutex, deadline);
+
+			QDeadlineTimer deadline(10 * 1000);
+			bool success = cond.wait(&mutex, deadline);
+			if (!success) {
+				qDebug() << "process wait condition timeout.";
+				return NULL;
+			}
 		}
 		mutex.unlock();
 
