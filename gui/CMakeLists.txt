@@ -26,7 +26,12 @@ set(TS_FILES src/qt_zh_CN.ts)
 
 file(GLOB_RECURSE PROJECT_SOURCES "src/*.cpp" "src/*.h" "src/*.ui")
 
-qt_add_executable(BurningTool MANUAL_FINALIZATION ${PROJECT_SOURCES})
+if(WIN32)
+	enable_language("RC")
+	set(WIN32_RESOURCES "${CMAKE_CURRENT_SOURCE_DIR}/resources/main.rc")
+endif()
+
+qt_add_executable(BurningTool MANUAL_FINALIZATION ${PROJECT_SOURCES} ${WIN32_RESOURCES})
 
 qt_create_translation(QM_FILES "${CMAKE_CURRENT_LIST_DIR}/src" ${TS_FILES})
 

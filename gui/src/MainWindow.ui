@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>739</width>
-    <height>552</height>
+    <width>597</width>
+    <height>599</height>
    </rect>
   </property>
   <property name="minimumSize">
@@ -20,67 +20,21 @@
    <string>Kendryte buring tool</string>
   </property>
   <widget class="QWidget" name="mainView">
-   <layout class="QHBoxLayout" name="horizontalLayout">
+   <layout class="QVBoxLayout" name="verticalLayout_2">
     <item>
      <widget class="QSplitter" name="mainSplitter">
       <property name="orientation">
        <enum>Qt::Horizontal</enum>
       </property>
-      <property name="handleWidth">
-       <number>6</number>
-      </property>
-      <widget class="QTabWidget" name="mainTabView">
-       <property name="sizePolicy">
-        <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
-         <horstretch>0</horstretch>
-         <verstretch>0</verstretch>
-        </sizepolicy>
-       </property>
-       <property name="currentIndex">
-        <number>0</number>
-       </property>
-       <widget class="SettingsWindow" name="settingsWindow">
-        <attribute name="title">
-         <string>设置</string>
-        </attribute>
-       </widget>
-       <widget class="SingleBurnWindow" name="manualBurnWindow">
-        <attribute name="title">
-         <string>手动烧录</string>
-        </attribute>
-        <attribute name="toolTip">
-         <string>手动选择设备烧录</string>
-        </attribute>
-       </widget>
-       <widget class="QWidget" name="tabAutoBurn">
-        <attribute name="title">
-         <string>自动烧录</string>
-        </attribute>
-        <attribute name="toolTip">
-         <string>自动探测新设备并烧录</string>
-        </attribute>
-        <widget class="QGroupBox" name="groupBox_2">
-         <property name="geometry">
-          <rect>
-           <x>290</x>
-           <y>150</y>
-           <width>120</width>
-           <height>80</height>
-          </rect>
-         </property>
-         <property name="title">
-          <string>GroupBox</string>
-         </property>
-        </widget>
-       </widget>
-       <widget class="DebugWindow" name="tabDebug">
-        <attribute name="title">
-         <string>调试</string>
-        </attribute>
-        <attribute name="toolTip">
-         <string>调试页面</string>
-        </attribute>
-       </widget>
+      <widget class="QWidget" name="mainContainer" native="true">
+       <layout class="QVBoxLayout" name="verticalLayout">
+        <item>
+         <widget class="SettingsWindow" name="settingsWindow" native="true"/>
+        </item>
+        <item>
+         <widget class="SingleBurnWindow" name="manualBurnWindow" native="true"/>
+        </item>
+       </layout>
       </widget>
       <widget class="QWidget" name="debugLogView" native="true">
        <property name="sizePolicy">
@@ -126,7 +80,7 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>739</width>
+     <width>597</width>
      <height>17</height>
     </rect>
    </property>
@@ -154,7 +108,6 @@
    <addaction name="menu_A_bout"/>
    <addaction name="menu"/>
   </widget>
-  <widget class="QStatusBar" name="statusbar"/>
   <action name="btnOpenWebsite">
    <property name="text">
     <string>打开工具主页</string>
@@ -213,12 +166,6 @@
    <class>SingleBurnWindow</class>
    <extends>QWidget</extends>
    <header>widgets/SingleBurnWindow.h</header>
-   <container>1</container>
-  </customwidget>
-  <customwidget>
-   <class>DebugWindow</class>
-   <extends>QWidget</extends>
-   <header>widgets/DebugWindow.h</header>
    <container>1</container>
   </customwidget>
  </customwidgets>

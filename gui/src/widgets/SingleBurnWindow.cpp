@@ -5,6 +5,10 @@
 SingleBurnWindow::SingleBurnWindow(QWidget *parent) : QWidget(parent), ui(new Ui::SingleBurnWindow) {
 	ui->setupUi(this);
 
+	QSizePolicy sp_retain = ui->textStatus->sizePolicy();
+	sp_retain.setRetainSizeWhenHidden(true);
+	ui->textStatus->setSizePolicy(sp_retain);
+
 	resetProgressState();
 }
 
@@ -25,7 +29,8 @@ void SingleBurnWindow::showEvent(QShowEvent *event) {
 
 	auto library = BurnLibrary::instance();
 	QObject::connect(library, &BurnLibrary::onSerialPortList, this, &SingleBurnWindow::handleSerialPortList);
-	QObject::connect(this, &SingleBurnWindow::startBurn, library, &BurnLibrary::startBurn);
+	QObject::connect(this, &SingleBurnWindow::startedBurn, library, &BurnLibrary::startBurn);
+	QObject::connect(ui->inputComPortList, &QComboBox::currentTextChanged, this, &SingleBurnWindow::resetProgressState);
 }
 
 void SingleBurnWindow::on_btnStartBurn_clicked() {
@@ -33,9 +38,10 @@ void SingleBurnWindow::on_btnStartBurn_clicked() {
 		// ????
 		qErrnoWarning("Invalid state: re-run on_btnStartBurn_clicked; this is impossible\n");
 	}
-	work = emit startBurn(ui->inputComPortList->currentText());
+
+	work = emit startedBurn(ui->inputComPortList->currentText());
 	if (work == NULL) {
-		ui->textPortInfo->setText(tr("发生未知错误"));
+		ui->textStatus->failed(tr("发生未知错误"));
 		return;
 	}
 
@@ -43,21 +49,14 @@ void SingleBurnWindow::on_btnStartBurn_clicked() {
 	connect(work, &FlashTask::progressTextChanged, this, &SingleBurnWindow::setProgressText);
 
 	resetProgressState();
+	ui->textStatus->message(tr("烧录中..."));
 
 	setEnabled(false);
 
 	future = new QFutureWatcher<void>();
 
-	connect(future, &QFutureWatcher<void>::finished, this, &SingleBurnWindow::resumeState);
-	connect(future, &QFutureWatcher<void>::finished, this, &SingleBurnWindow::resetProgressState);
-	connect(future, &QFutureWatcher<void>::canceled, this, [=]() {
-		auto r = work->getResult();
-		auto e = kburnSplitErrorCode(r->errorCode);
-		ui->textStatus->setText(tr("错误: ") + QString::number(e.kind >> 32) + " - (" + QString::number(e.code, 16) + "), " + r->errorMessage);
-		ui->textStatus->setStyleSheet("QLabel { color : red; }");
-
-		resumeState();
-	});
+	connect(future, &QFutureWatcher<void>::finished, this, &SingleBurnWindow::setCompleteState);
+	connect(future, &QFutureWatcher<void>::canceled, this, &SingleBurnWindow::setErrorState);
 	connect(future, &QFutureWatcher<void>::progressRangeChanged, ui->progressBar, &QProgressBar::setRange);
 	connect(future, &QFutureWatcher<void>::progressValueChanged, ui->progressBar, &QProgressBar::setValue);
 
@@ -66,7 +65,7 @@ void SingleBurnWindow::on_btnStartBurn_clicked() {
 
 void SingleBurnWindow::setProgressText(const QString &progressText) {
 #ifdef WIN32
-	ui->textStatus->setText(progressText);
+	ui->textStatus->message(progressText);
 #else
 	if (progressText.isEmpty()) {
 		ui->progressBar->setFormat("%p%");
@@ -76,14 +75,36 @@ void SingleBurnWindow::setProgressText(const QString &progressText) {
 #endif
 }
 
+void SingleBurnWindow::setConfigureStata(bool incomplete) {
+	if (work) {
+		return;
+	}
+	if (incomplete) {
+		ui->textStatus->message(tr("需要保存设置"));
+	} else {
+		ui->textStatus->standby(tr("就绪"));
+	}
+	setDisabled(incomplete);
+}
+
+void SingleBurnWindow::setCompleteState() {
+	ui->textStatus->success(tr("完成！"));
+	resumeState();
+	emit completedBurn(true);
+}
+
+void SingleBurnWindow::setErrorState() {
+	auto r = work->getResult();
+	auto e = kburnSplitErrorCode(r->errorCode);
+	ui->textStatus->failed(tr("错误: ") + QString::number(e.kind >> 32) + " - (" + QString::number(e.code, 16) + "), " + r->errorMessage);
+
+	resumeState();
+	emit completedBurn(false);
+}
+
 void SingleBurnWindow::resetProgressState() {
 	setProgressText("");
-	ui->textStatus->setStyleSheet("QLabel {}");
-
-#ifdef WIN32
-	ui->textStatus->setText(tr("就绪"));
-#endif
-
+	ui->textStatus->standby(tr("就绪"));
 	ui->textPortInfo->setText("");
 	ui->progressBar->setRange(0, 100);
 	ui->progressBar->setValue(0);

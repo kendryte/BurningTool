@@ -16,18 +16,18 @@ class MainWindow : public QMainWindow {
 	bool shown = false;
 
   protected:
-	void showEvent(QShowEvent *ev);
+    void showEvent(QShowEvent *ev);
 
   public:
-	MainWindow(QWidget *parent = nullptr);
+    MainWindow(QWidget *parent = nullptr);
 
   private slots:
-	void on_btnOpenWebsite_triggered();
-	void on_btnSaveLog_triggered();
-	void updateSettingStatus();
-	void disableOtherTabs(bool disable);
+    void on_btnOpenWebsite_triggered();
+    void on_btnSaveLog_triggered();
+    void updateSettingStatus();
+    void disableOtherActions(bool disable);
 
   private:
-	void closeEvent(QCloseEvent *ev);
-	Ui::MainWindow *ui;
+    void closeEvent(QCloseEvent *ev);
+    Ui::MainWindow *ui;
 };

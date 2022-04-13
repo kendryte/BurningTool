@@ -28,43 +28,24 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
 		ui->mainSplitter->setSizes(QList<int>() << 100 << 0);
 	}
 
-	ui->mainTabView->setCurrentIndex(0);
-
-	for (int i = 2; i < ui->mainTabView->count(); i++) {
-		ui->mainTabView->setTabVisible(i, false);
-	}
-
 	auto library = BurnLibrary::instance();
 	QObject::connect(library, &BurnLibrary::onDebugLog, this->ui->textLog, &LoggerWindow::append);
 
 	connect(ui->settingsWindow, &SettingsWindow::settingsChanged, this, &MainWindow::updateSettingStatus);
-	connect(ui->settingsWindow, &SettingsWindow::settingsUnsaved, this, &MainWindow::disableOtherTabs);
-	connect(ui->manualBurnWindow, &SingleBurnWindow::startBurn, this->ui->textLog, &LoggerWindow::clear);
+	connect(ui->settingsWindow, &SettingsWindow::settingsUnsaved, this, &MainWindow::disableOtherActions);
+	connect(ui->manualBurnWindow, &SingleBurnWindow::startedBurn, this->ui->textLog, &LoggerWindow::clear);
+	connect(ui->manualBurnWindow, &SingleBurnWindow::startedBurn, this, [=] { ui->settingsWindow->setDisabled(true); });
+	connect(ui->manualBurnWindow, &SingleBurnWindow::completedBurn, this, [=] { ui->settingsWindow->setDisabled(false); });
 
 	updateSettingStatus();
 }
 
-void MainWindow::disableOtherTabs(bool disable) {
-	for (int i = 1; i < ui->mainTabView->count(); i++) {
-		ui->mainTabView->setTabEnabled(i, !disable);
-	}
+void MainWindow::disableOtherActions(bool disable) {
+	ui->manualBurnWindow->setConfigureStata(disable);
 }
 
 void MainWindow::updateSettingStatus() {
 	QFile file(ui->settingsWindow->getFile());
-	if (file.exists()) {
-		if (!ui->mainTabView->isTabEnabled(1)) {
-			for (auto i = 1; i < ui->mainTabView->count(); i++) {
-				ui->mainTabView->setTabEnabled(i, true);
-			}
-		}
-	} else {
-		ui->mainTabView->setCurrentIndex(0);
-		for (auto i = 1; i < ui->mainTabView->count(); i++) {
-			ui->mainTabView->setTabEnabled(i, false);
-		}
-	}
-
 	BurnLibrary::instance()->setSystemImagePath(file.fileName());
 }
 

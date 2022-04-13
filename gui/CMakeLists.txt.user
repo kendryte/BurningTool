@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE QtCreatorProject>
-<!-- Written by QtCreator 7.0.0, 2022-04-13T09:00:10. -->
+<!-- Written by QtCreator 7.0.0, 2022-04-13T12:23:55. -->
 <qtcreator>
  <data>
   <variable>EnvironmentId</variable>
@@ -108,7 +108,8 @@
 -DQT_QMAKE_EXECUTABLE:STRING=%{Qt:qmakeExecutable}
 -DCMAKE_PREFIX_PATH:STRING=%{Qt:QT_INSTALL_PREFIX}
 -DCMAKE_C_COMPILER:STRING=%{Compiler:Executable:C}
--DCMAKE_CXX_COMPILER:STRING=%{Compiler:Executable:Cxx}</value>
+-DCMAKE_CXX_COMPILER:STRING=%{Compiler:Executable:Cxx}
+-DOpenGL_GL_PREFERENCE:UNINITIALIZED=GLVND</value>
     <value type="QString" key="ProjectExplorer.BuildConfiguration.BuildDirectory">A:/test/build-SHABAO-DESKTOP-Qt%{Qt:Version}-%{BuildConfig:Name}</value>
     <valuemap type="QVariantMap" key="ProjectExplorer.BuildConfiguration.BuildStepList.0">
      <valuemap type="QVariantMap" key="ProjectExplorer.BuildStepList.Step.0">
