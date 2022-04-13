@@ -6,13 +6,30 @@
 #include <pthread.h>
 #include "debug/print.h"
 
-enum ThreadStage {
+enum ThreadStage
+{
 	THREAD_INIT = 0,
 	THREAD_PAUSE,
 	THREAD_RUNNING,
 	THREAD_QUITTING,
 	THREAD_COMPLETE,
 };
+
+static const char *stage_name(enum ThreadStage stage) {
+	switch (stage) {
+	case THREAD_INIT:
+		return "INIT";
+	case THREAD_PAUSE:
+		return "PAUSE";
+	case THREAD_RUNNING:
+		return "RUNNING";
+	case THREAD_QUITTING:
+		return "QUITTING";
+	case THREAD_COMPLETE:
+		return "COMPLETE";
+	}
+	return "???";
+}
 
 typedef struct thread_passing_object {
 	KBCTX scope;
@@ -34,7 +51,7 @@ void thread_tell_quit(thread_passing_object *thread) {
 	thread->quit_signal = true;
 	if (thread->stage != THREAD_COMPLETE) {
 		thread->stage = THREAD_QUITTING;
-		thread_fire_event(&thread->condition);
+		thread_condition_deinit(&thread->condition);
 	}
 }
 
@@ -47,14 +64,13 @@ void thread_resume(thread_passing_object *thread) {
 }
 
 static DECALRE_DISPOSE(_destroy_thread, thread_passing_object) {
-	debug_print(KBURN_LOG_DEBUG, COLOR_FMT("[thread]") " %s stage: %d", COLOR_ARG(YELLOW), context->debug_title, context->stage);
+	debug_print(KBURN_LOG_DEBUG, COLOR_FMT("[thread]") " %s stage: %s", COLOR_ARG(YELLOW), context->debug_title, stage_name(context->stage));
 
 	switch (context->stage) {
 	case THREAD_INIT:
 	case THREAD_PAUSE:
 	case THREAD_RUNNING:
 		thread_tell_quit(context);
-		thread_fire_event(&context->condition);
 		pthread_join(context->thread, NULL);
 		break;
 	case THREAD_QUITTING:
@@ -66,7 +82,6 @@ static DECALRE_DISPOSE(_destroy_thread, thread_passing_object) {
 		m_abort("invalid thread state");
 	}
 
-	thread_condition_deinit(&context->condition);
 	free(context);
 }
 DECALRE_DISPOSE_END()
@@ -96,12 +111,13 @@ static void *start_routine_wrapper(void *_ctx) {
 	kb_mutex_t rawlock = thread_get_event_lock(&context->condition);
 	pthread_cond_t *rawcond = thread_get_event_condition(&context->condition);
 
-	lock(rawlock);
 	if (context->stage == THREAD_QUITTING) {
 		debug_print(KBURN_LOG_WARN, "[thread] \"%s\" quit before start.", context->debug_title);
-		unlock(rawlock);
 		pthread_exit(NULL);
-	} else if (context->stage == THREAD_INIT) {
+	}
+
+	lock(rawlock);
+	if (context->stage == THREAD_INIT) {
 		context->stage = THREAD_PAUSE;
 	}
 
@@ -122,9 +138,14 @@ static void *start_routine_wrapper(void *_ctx) {
 	context->main(context->user_data, context->scope, &context->quit_signal);
 	debug_print(KBURN_LOG_INFO, "[thread] \"%s\" finished", context->debug_title);
 
-	lock(rawlock);
-	context->stage = THREAD_COMPLETE;
-	unlock(rawlock);
+	if (context->stage == THREAD_QUITTING) {
+		context->stage = THREAD_COMPLETE;
+	} else {
+		lock(rawlock);
+		context->stage = THREAD_COMPLETE;
+		unlock(rawlock);
+		thread_condition_deinit(&context->condition);
+	}
 
 	pthread_exit(NULL);
 	return NULL;
@@ -146,13 +167,13 @@ kburn_err_t thread_create(const char *debug_title, thread_function start_routine
 		thread->stage = THREAD_RUNNING;
 	}
 
+	thread->condition = thread_condition_init();
+
 	int thread_ret = pthread_create(&thread->thread, NULL, start_routine_wrapper, thread);
 	if (thread_ret != 0) {
 		debug_print(KBURN_LOG_ERROR, "[thread] failed create: %d", thread_ret);
 		return make_error_code(KBURN_ERROR_KIND_SYSCALL, thread_ret);
 	}
-
-	thread->condition = thread_condition_init();
 
 	dispose_list_add(scope->threads, toDisposable(_destroy_thread, thread));
 

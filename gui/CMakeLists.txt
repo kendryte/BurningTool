@@ -14,30 +14,27 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 project(BurningTool VERSION 0.1 LANGUAGES CXX)
 
 find_package(
-	QT NAMES Qt6
-	COMPONENTS Widgets LinguistTools
-	REQUIRED)
-find_package(
-	Qt${QT_VERSION_MAJOR}
-	COMPONENTS Widgets LinguistTools
+	Qt6
+	COMPONENTS Widgets LinguistTools Network Svg
 	REQUIRED)
 
 set(TS_FILES src/qt_zh_CN.ts)
 
 file(GLOB_RECURSE PROJECT_SOURCES "src/*.cpp" "src/*.h" "src/*.ui")
+set(PROJECT_RESOURCES "${CMAKE_CURRENT_SOURCE_DIR}/resources/main.qrc")
 
 if(WIN32)
 	enable_language("RC")
 	set(WIN32_RESOURCES "${CMAKE_CURRENT_SOURCE_DIR}/resources/main.rc")
 endif()
 
-qt_add_executable(BurningTool MANUAL_FINALIZATION ${PROJECT_SOURCES} ${WIN32_RESOURCES})
+qt_add_executable(BurningTool MANUAL_FINALIZATION "${PROJECT_SOURCES}" "${WIN32_RESOURCES}" "${PROJECT_RESOURCES}")
 
 qt_create_translation(QM_FILES "${CMAKE_CURRENT_LIST_DIR}/src" ${TS_FILES})
 
 target_include_directories(BurningTool PRIVATE "${CMAKE_CURRENT_LIST_DIR}/src")
 
-target_link_libraries(BurningTool PRIVATE Qt${QT_VERSION_MAJOR}::Widgets)
+target_link_libraries(BurningTool PRIVATE Qt6::Widgets Qt6::Network Qt6::Svg)
 
 set_target_properties(
 	BurningTool
@@ -99,6 +96,6 @@ else()
 endif()
 
 string(TIMESTAMP MY_VERSION_STRING "%Y-%m-%d.%H:%M")
-
-configure_file("${CMAKE_CURRENT_LIST_DIR}/src/config.h.in" "${CMAKE_CURRENT_LIST_DIR}/autogen/config.h")
-target_include_directories(BurningTool PRIVATE "${CMAKE_CURRENT_LIST_DIR}/autogen/")
+set(GITHUB_VERSION "$ENV{GITHUB_SHA}")
+configure_file("${CMAKE_CURRENT_LIST_DIR}/src/config.h.in" "${CMAKE_CURRENT_BINARY_DIR}/autogen/config.h")
+target_include_directories(BurningTool PRIVATE "${CMAKE_CURRENT_BINARY_DIR}/autogen/")

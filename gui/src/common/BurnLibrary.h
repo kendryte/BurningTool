@@ -57,6 +57,6 @@ class BurnLibrary : public QObject {
 	void setSystemImagePath(const QString &imagePath) { this->imagePath = imagePath; }
 
   signals:
-	void onDebugLog(QString message);
+	void onDebugLog(bool isTrace, QString message);
 	void onSerialPortList(const QMap<QString, QString> &portList);
 };

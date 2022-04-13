@@ -83,7 +83,7 @@ kburn_err_t usb_subsystem_init(KBCTX scope) {
 	DeferCall(libusb_exit, scope->usb->libusb);
 
 	libusb_set_log_cb(scope->usb->libusb, libusb_logger, LIBUSB_LOG_CB_GLOBAL);
-	r = libusb_set_option(scope->usb->libusb, LIBUSB_OPTION_LOG_LEVEL, LIBUSB_LOG_LEVEL_DEBUG);
+	r = libusb_set_option(scope->usb->libusb, LIBUSB_OPTION_LOG_LEVEL, LIBUSB_LOG_LEVEL_INFO);
 	if (r < 0) {
 		debug_print_libusb_error("log level set failed", r);
 	}

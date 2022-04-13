@@ -14,7 +14,7 @@
 #include <pthread.h>
 
 static void init_list_all_usb_devices_threaded(void *UNUSED(_ctx), KBCTX scope, const bool *const q) {
-	if (!q) {
+	if (!*q) {
 		init_list_all_usb_devices(scope);
 	}
 }

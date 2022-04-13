@@ -55,7 +55,7 @@ bool serial_low_switch_baudrate(kburnSerialDeviceNode *node, uint32_t speed) {
 }
 
 bool serial_low_write_data(kburnSerialDeviceNode *node, const void *data, size_t data_length, size_t *written) {
-	print_buffer(KBURN_LOG_TRACE, "PC→MCU", data, data_length);
+	print_buffer(KBURN_LOG_BUFFER, "PC→MCU", data, data_length);
 	int r = ser_write(node->m_dev_handle, data, data_length, written);
 	if (r != 0) {
 		copy_last_serial_io_error(node, r);
@@ -89,7 +89,7 @@ bool serial_low_read_data(kburnSerialDeviceNode *node, uint8_t **buffer, size_t 
 		return false;
 	}
 
-	print_buffer(KBURN_LOG_TRACE, "MCU→PC", *buffer, *buffer_size);
+	print_buffer(KBURN_LOG_BUFFER, "MCU→PC", *buffer, *buffer_size);
 	return true;
 }
 

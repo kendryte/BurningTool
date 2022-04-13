@@ -102,7 +102,7 @@ void BurnLibrary::start() {
 void BurnLibrary::handleDebugLog(kburnLogType level, const char *cstr) {
 	auto line = QString::fromUtf8(cstr);
 	std::cerr << cstr << std::endl;
-	emit onDebugLog(line);
+	emit onDebugLog(level == KBURN_LOG_TRACE, line);
 }
 
 void BurnLibrary::handleDeviceListChange(bool isUsb) {
@@ -116,11 +116,11 @@ void BurnLibrary::reloadList() {
 	memcpy(&list, &n, sizeof(list));
 
 	if (list.size < 0) {
-		emit onDebugLog(QString("serial device list failed."));
+		emit onDebugLog(false, QString("serial device list failed."));
 		return;
 	}
 
-	emit onDebugLog(QString("kburnGetSerialList: ") + QString::number(list.size));
+	emit onDebugLog(false, QString("kburnGetSerialList: ") + QString::number(list.size));
 
 	knownSerialPorts.clear();
 	for (auto i = 0; i < list.size; i++) {

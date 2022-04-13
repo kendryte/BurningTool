@@ -99,7 +99,7 @@ bool usb_lowlevel_command_send(
 
 	usbIspRequestPacket cbw = create_request(operation_index, data_length, direction, cdb);
 
-	print_buffer(KBURN_LOG_TRACE, "cbw", (void *)&cbw, sizeof(usbIspRequestPacket));
+	print_buffer(KBURN_LOG_BUFFER, "cbw", (void *)&cbw, sizeof(usbIspRequestPacket));
 
 	int written_size = 0;
 	if (!retry_libusb_bulk_transfer(node, endpoint_out, &cbw, sizeof(usbIspRequestPacket), &written_size, usb_timeout)) {
@@ -153,7 +153,7 @@ bool usb_lowlevel_status_read(kburnUsbDeviceNode *node, uint8_t endpoint_in, uin
 	int readed_size = 0;
 	ifNotReturnFalse(retry_libusb_bulk_transfer(node, endpoint_in, &csw, sizeof(usbIspResponsePacket), &readed_size, usb_timeout));
 
-	print_buffer(KBURN_LOG_TRACE, "csw", (void *)&csw, sizeof(usbIspResponsePacket));
+	print_buffer(KBURN_LOG_BUFFER, "csw", (void *)&csw, sizeof(usbIspResponsePacket));
 
 	if (readed_size != sizeof(usbIspResponsePacket)) {
 		debug_print(
@@ -174,7 +174,7 @@ bool usb_lowlevel_transfer(kburnUsbDeviceNode *node, enum InOut direction, void 
 	debug_trace_function("%s, %d bytes", direction == USB_READ ? "read" : "write", size);
 
 	if (direction == USB_WRITE) {
-		print_buffer(KBURN_LOG_TRACE, "PC→USB", buffer, size);
+		print_buffer(KBURN_LOG_BUFFER, "PC→USB", buffer, size);
 	}
 
 	int actual_size;
@@ -183,7 +183,7 @@ bool usb_lowlevel_transfer(kburnUsbDeviceNode *node, enum InOut direction, void 
 		return false;
 
 	if (direction == USB_READ) {
-		print_buffer(KBURN_LOG_TRACE, "USB→PC", buffer, actual_size);
+		print_buffer(KBURN_LOG_BUFFER, "USB→PC", buffer, actual_size);
 	}
 
 	if (actual_size != size) {

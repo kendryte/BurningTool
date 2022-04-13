@@ -6,46 +6,48 @@
 #include <QScrollBar>
 
 LoggerWindow::LoggerWindow(QWidget *parent) : QTextEdit(parent) {
-  autoScroll = false;
-  logfile.setFileName(QDir::currentPath() + "/burning_tool.html");
-  logfile.open(QIODeviceBase::Unbuffered | QIODeviceBase::Truncate |
-               QIODeviceBase::WriteOnly);
+	autoScroll = false;
+	logfile.setFileName(QDir::currentPath() + "/burning_tool.html");
+	logfile.open(QIODeviceBase::Unbuffered | QIODeviceBase::Truncate | QIODeviceBase::WriteOnly);
 }
 
-LoggerWindow::~LoggerWindow() {}
+LoggerWindow::~LoggerWindow() {
+}
 
 void LoggerWindow::scrollToBottom() {
-  if (autoScroll) {
-    verticalScrollBar()->setValue(verticalScrollBar()->maximum());
-  }
+	if (autoScroll) {
+		verticalScrollBar()->setValue(verticalScrollBar()->maximum());
+	}
 }
 
-void LoggerWindow::append(const QString &line) {
-  QString newLine =
-      QString::fromLatin1("<div style=\"white-space:pre;\">") + line + "</div>";
-  QTextEdit::append(newLine);
-  logfile.write((newLine + "\n").toUtf8());
+void LoggerWindow::append(bool isTrace, const QString &line) {
+	QString newLine = QString::fromLatin1("<div style=\"white-space:pre;\">") + line + "</div>";
+	logfile.write((newLine + "\n").toUtf8());
 
-  scrollToBottom();
+	if (isTrace && !trace_visible) {
+		return;
+	}
+
+	QTextEdit::append(newLine);
+
+	scrollToBottom();
 }
 
 void LoggerWindow::resizeEvent(QResizeEvent *e) {
-  QTextEdit::resizeEvent(e);
-  scrollToBottom();
+	QTextEdit::resizeEvent(e);
+	scrollToBottom();
 }
 
 void LoggerWindow::contextMenuEvent(QContextMenuEvent *event) {
-  QMenu *menu = createStandardContextMenu();
-  menu->addSeparator();
+	QMenu *menu = createStandardContextMenu();
+	menu->addSeparator();
 
-  QAction *act =
-      menu->addAction(tr("Auto Scroll"), this, &LoggerWindow::toggleAutoScroll);
-  act->setCheckable(true);
-  act->setChecked(autoScroll);
+	QAction *act = menu->addAction(tr("Auto Scroll"), this, &LoggerWindow::toggleAutoScroll);
+	act->setCheckable(true);
+	act->setChecked(autoScroll);
 
-  QAction *act2 =
-      menu->addAction(tr("Clear"), this, &LoggerWindow::clearScreen);
+	QAction *act2 = menu->addAction(tr("Clear"), this, &LoggerWindow::clearScreen);
 
-  menu->exec(event->globalPos());
-  delete menu;
+	menu->exec(event->globalPos());
+	delete menu;
 }

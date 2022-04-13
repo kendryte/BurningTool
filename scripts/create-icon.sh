@@ -12,7 +12,7 @@ ARG=()
 for I in 128 96 64 48 32; do
 	F=".temp/icon-$I.png"
 	ARG+=("$F")
-	convert icon.png -resize "${I}x${I}" "$F"
+	convert ../gui/resources/icon.png -resize "${I}x${I}" "$F"
 done
 
 convert "${ARG[@]}" ../gui/resources/application.ico

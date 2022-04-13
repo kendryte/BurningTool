@@ -54,7 +54,7 @@ jobs:
           cached: ${{ steps.cache-deps.outputs.cache-hit }}
           version: 6.3.0
           arch: win64_mingw
-          archives: qtbase qt5compat
+          archives: qtbase qt5compat qtsvg
           dir: "${{github.workspace}}/QtInstall"
 
       - name: Install system dependencies
@@ -93,7 +93,9 @@ jobs:
 
       - name: Create zip
         shell: pwsh
-        run: Compress-Archive -Path "KendryteBurningTool" -DestinationPath "${{ runner.os }}.zip"
+        run: |
+          Copy-Item "${{github.workspace}}/QtInstall" -Path -Destination -Force
+          Compress-Archive -Path "KendryteBurningTool" -DestinationPath "${{ runner.os }}.zip"
         working-directory: ${{github.workspace}}/dist
 
       - name: upload
