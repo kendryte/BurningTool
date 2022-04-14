@@ -10,6 +10,7 @@ autogen
 *.html
 *.log
 .temp
+Thumbs.db
 
 #
 CMakeFiles/

@@ -1,8 +1,8 @@
 #pragma once
 
-#include "common/BurningProcess.h"
 #include <canaan-burn/canaan-burn.h>
 #include <QFutureWatcher>
+#include <QList>
 #include <QWidget>
 
 namespace Ui {
@@ -13,30 +13,36 @@ class SingleBurnWindow : public QWidget {
 	Q_OBJECT
 
 	Ui::SingleBurnWindow *ui;
-	QFutureWatcher<void> *future = NULL;
-	FlashTask *work = NULL;
-	bool shown = false;
+	class BurningProcess *work;
+	QList<QMetaObject::Connection> stateConnections;
+	bool isDone = false;
+	bool autoDismiss = false;
 
-	void resumeState();
+	void attach(BurningProcess *work);
+	void setStartState();
 
   public:
-	explicit SingleBurnWindow(QWidget *parent = nullptr);
+	explicit SingleBurnWindow(QWidget *parent, class BurningProcess *work);
 	~SingleBurnWindow();
+	void setProgressInfinit();
+	void setAutoDismiss(bool autodis);
 
-	void showEvent(QShowEvent *event);
-	void setConfigureState(bool incomplete);
+	auto getWork() const { return work; }
 
-  signals:
-	class FlashTask *startedBurn(const QString &sysImg);
-	class FlashTask *completedBurn(bool successful);
+	void setSize(int size);
 
   private slots:
-	void setEnabled(bool enabled);
-	void resetProgressState();
 	void setCompleteState();
-	void setErrorState();
+	void setErrorState(const class KBurnException &reason);
+	void setCancellingState();
+
 	void setProgressText(const QString &tip);
-	void on_btnStartBurn_clicked();
 	void handleDeviceStateChange(const struct kburnDeviceNode *dev);
-	void handleSerialPortList(const QMap<QString, QString> &list);
+
+	void on_btnRetry_clicked();
+	void on_btnDismiss_clicked();
+	void on_btnTerminate_clicked();
+
+  signals:
+	void retryRequested();
 };

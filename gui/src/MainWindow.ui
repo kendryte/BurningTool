@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>597</width>
+    <width>933</width>
     <height>720</height>
    </rect>
   </property>
@@ -26,56 +26,98 @@
   <widget class="QWidget" name="mainView">
    <layout class="QVBoxLayout" name="verticalLayout_2">
     <item>
+     <widget class="SettingsWindow" name="settingsWindow" native="true">
+      <property name="minimumSize">
+       <size>
+        <width>300</width>
+        <height>200</height>
+       </size>
+      </property>
+     </widget>
+    </item>
+    <item>
      <widget class="QSplitter" name="mainSplitter">
       <property name="orientation">
        <enum>Qt::Horizontal</enum>
       </property>
-      <widget class="QWidget" name="mainContainer" native="true">
-       <layout class="QVBoxLayout" name="verticalLayout">
+      <widget class="QWidget" name="horizontalLayoutWidget">
+       <layout class="QHBoxLayout" name="horizontalLayout">
         <item>
-         <widget class="SettingsWindow" name="settingsWindow" native="true"/>
+         <layout class="QVBoxLayout" name="mainContainer">
+          <item>
+           <widget class="BuringControlWindow" name="burnControlWindow" native="true">
+            <property name="minimumSize">
+             <size>
+              <width>0</width>
+              <height>112</height>
+             </size>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QScrollArea" name="scrollArea">
+            <property name="frameShape">
+             <enum>QFrame::Panel</enum>
+            </property>
+            <property name="verticalScrollBarPolicy">
+             <enum>Qt::ScrollBarAlwaysOn</enum>
+            </property>
+            <property name="horizontalScrollBarPolicy">
+             <enum>Qt::ScrollBarAlwaysOff</enum>
+            </property>
+            <property name="widgetResizable">
+             <bool>true</bool>
+            </property>
+            <property name="alignment">
+             <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignTop</set>
+            </property>
+            <widget class="QWidget" name="jobListContainer">
+             <property name="geometry">
+              <rect>
+               <x>0</x>
+               <y>0</y>
+               <width>433</width>
+               <height>213</height>
+              </rect>
+             </property>
+             <layout class="QVBoxLayout" name="burnJobListView">
+              <property name="spacing">
+               <number>3</number>
+              </property>
+              <property name="sizeConstraint">
+               <enum>QLayout::SetMinimumSize</enum>
+              </property>
+              <property name="leftMargin">
+               <number>3</number>
+              </property>
+              <property name="topMargin">
+               <number>6</number>
+              </property>
+              <property name="rightMargin">
+               <number>3</number>
+              </property>
+              <property name="bottomMargin">
+               <number>6</number>
+              </property>
+              <item>
+               <spacer name="verticalSpacer">
+                <property name="orientation">
+                 <enum>Qt::Vertical</enum>
+                </property>
+                <property name="sizeHint" stdset="0">
+                 <size>
+                  <width>20</width>
+                  <height>40</height>
+                 </size>
+                </property>
+               </spacer>
+              </item>
+             </layout>
+            </widget>
+           </widget>
+          </item>
+         </layout>
         </item>
-        <item>
-         <widget class="SingleBurnWindow" name="manualBurnWindow" native="true"/>
-        </item>
-        <item>
-         <spacer name="verticalSpacer">
-          <property name="orientation">
-           <enum>Qt::Vertical</enum>
-          </property>
-          <property name="sizeHint" stdset="0">
-           <size>
-            <width>20</width>
-            <height>40</height>
-           </size>
-          </property>
-         </spacer>
-        </item>
-       </layout>
-      </widget>
-      <widget class="QWidget" name="debugLogView" native="true">
-       <property name="sizePolicy">
-        <sizepolicy hsizetype="Expanding" vsizetype="Preferred">
-         <horstretch>0</horstretch>
-         <verstretch>0</verstretch>
-        </sizepolicy>
-       </property>
-       <layout class="QVBoxLayout" name="verticalLayout_3">
-        <property name="spacing">
-         <number>0</number>
-        </property>
-        <property name="leftMargin">
-         <number>0</number>
-        </property>
-        <property name="topMargin">
-         <number>0</number>
-        </property>
-        <property name="rightMargin">
-         <number>0</number>
-        </property>
-        <property name="bottomMargin">
-         <number>0</number>
-        </property>
         <item>
          <widget class="LoggerWindow" name="textLog">
           <property name="undoRedoEnabled">
@@ -97,8 +139,8 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>597</width>
-     <height>17</height>
+     <width>933</width>
+     <height>22</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuF_ile">
@@ -210,9 +252,9 @@
    <container>1</container>
   </customwidget>
   <customwidget>
-   <class>SingleBurnWindow</class>
+   <class>BuringControlWindow</class>
    <extends>QWidget</extends>
-   <header>widgets/SingleBurnWindow.h</header>
+   <header>widgets/BuringControlWindow.h</header>
    <container>1</container>
   </customwidget>
  </customwidgets>

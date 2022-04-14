@@ -62,6 +62,14 @@ endif()
 add_dependencies(BurningTool canaan_burn)
 target_link_libraries(BurningTool PRIVATE canaan_burn)
 
+target_compile_definitions(BurningTool PRIVATE "SETTINGS_CATEGORY=\"kendryte\"")
+
+if(CMAKE_BUILD_TYPE STREQUAL "Release")
+	target_compile_definitions(BurningTool PRIVATE "IS_DEBUG=0")
+else()
+	target_compile_definitions(BurningTool PRIVATE "IS_DEBUG=1")
+endif()
+
 install(
 	TARGETS BurningTool
 	RUNTIME DESTINATION bin

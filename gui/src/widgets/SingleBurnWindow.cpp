@@ -1,159 +1,102 @@
 #include "SingleBurnWindow.h"
+#include "common/BurningProcess.h"
 #include "common/BurnLibrary.h"
+#include "common/MyException.h"
 #include "ui_SingleBurnWindow.h"
 
-SingleBurnWindow::SingleBurnWindow(QWidget *parent) : QWidget(parent), ui(new Ui::SingleBurnWindow) {
+SingleBurnWindow::SingleBurnWindow(QWidget *parent, BurningProcess *work) : QWidget(parent), ui(new Ui::SingleBurnWindow), work(work) {
 	ui->setupUi(this);
+
+	setStartState();
 
 	QSizePolicy sp_retain = ui->textStatus->sizePolicy();
 	sp_retain.setRetainSizeWhenHidden(true);
 	ui->textStatus->setSizePolicy(sp_retain);
 
-	resetProgressState();
+	stateConnections << connect(work, &BurningProcess::deviceStateNotify, this, &SingleBurnWindow::handleDeviceStateChange);
+	stateConnections << connect(work, &BurningProcess::stageChanged, this, &SingleBurnWindow::setProgressText);
+	stateConnections << connect(work, &BurningProcess::bytesChanged, ui->progressBar, &QProgressBar::setMaximum);
+	stateConnections << connect(work, &BurningProcess::progressChanged, ui->progressBar, &QProgressBar::setValue);
+
+	connect(work, &BurningProcess::completed, this, &SingleBurnWindow::setCompleteState);
+	connect(work, &BurningProcess::failed, this, &SingleBurnWindow::setErrorState);
+	connect(work, &BurningProcess::cancelRequested, this, &SingleBurnWindow::setCancellingState);
+	connect(work, &BurningProcess::destroyed, this, &QWidget::deleteLater);
 }
 
 SingleBurnWindow::~SingleBurnWindow() {
-	if (work) {
-		work->cancel();
-	}
+	BurnLibrary::instance()->deleteBurning(work);
+	work = NULL;
 	delete ui;
 }
 
-void SingleBurnWindow::showEvent(QShowEvent *event) {
-	QWidget::showEvent(event);
-
-	if (shown)
-		return;
-	shown = true;
-
-	auto library = BurnLibrary::instance();
-	connect(library, &BurnLibrary::onSerialPortList, this, &SingleBurnWindow::handleSerialPortList);
-	connect(this, &SingleBurnWindow::startedBurn, library, &BurnLibrary::startBurn);
+void SingleBurnWindow::setSize(int size) {
+	setFixedWidth(size);
 }
 
-void SingleBurnWindow::on_btnStartBurn_clicked() {
-	if (work) {
-		// ????
-		qErrnoWarning("Invalid state: re-run on_btnStartBurn_clicked; this is impossible\n");
+void SingleBurnWindow::setStartState() {
+	setProgressText("");
+	setProgressInfinit();
+
+	ui->progressBar->show();
+	ui->textStatus->hide();
+	ui->btnDismiss->hide();
+	ui->btnRetry->hide();
+	ui->btnTerminate->show();
+}
+
+void SingleBurnWindow::setCompleteState() {
+	ui->textStatus->success(tr("完成！"));
+
+	ui->progressBar->hide();
+	ui->textStatus->show();
+	ui->btnDismiss->show();
+	ui->btnRetry->hide();
+	ui->btnTerminate->hide();
+
+	if (autoDismiss) {
+		deleteLater();
 	}
+}
 
-	work = emit startedBurn(ui->inputComPortList->currentText());
-	if (work == NULL) {
-		ui->textStatus->failed(tr("发生未知错误"));
-		return;
+void SingleBurnWindow::setErrorState(const KBurnException &reason) {
+	auto e = kburnSplitErrorCode(reason.errorCode);
+	ui->textStatus->failed(tr("错误: ") + QString::number(e.kind >> 32) + " - (" + QString::number(e.code, 16) + "), " + reason.errorMessage);
+
+	ui->progressBar->hide();
+	ui->textStatus->show();
+	ui->btnDismiss->show();
+	ui->btnRetry->show();
+	ui->btnTerminate->hide();
+}
+
+void SingleBurnWindow::setCancellingState() {
+	for (auto conn : stateConnections) {
+		QObject::disconnect(conn);
 	}
-
-	connect(work, &FlashTask::onDeviceChange, this, &SingleBurnWindow::handleDeviceStateChange);
-	connect(work, &FlashTask::progressTextChanged, this, &SingleBurnWindow::setProgressText);
-
-	resetProgressState();
-	ui->textStatus->message(tr("烧录中..."));
-
-	setEnabled(false);
-
-	future = new QFutureWatcher<void>();
-
-	connect(future, &QFutureWatcher<void>::finished, this, &SingleBurnWindow::setCompleteState);
-	connect(future, &QFutureWatcher<void>::canceled, this, &SingleBurnWindow::setErrorState);
-	connect(future, &QFutureWatcher<void>::progressRangeChanged, ui->progressBar, &QProgressBar::setRange);
-	connect(future, &QFutureWatcher<void>::progressValueChanged, ui->progressBar, &QProgressBar::setValue);
-
-	future->setFuture(work->future());
+	ui->btnTerminate->setDisabled(true);
+	setProgressText(tr("正在取消"));
+	setProgressInfinit();
 }
 
 void SingleBurnWindow::setProgressText(const QString &progressText) {
-#ifdef WIN32
-	ui->textStatus->message(progressText);
-#else
 	if (progressText.isEmpty()) {
 		ui->progressBar->setFormat("%p%");
 	} else {
 		ui->progressBar->setFormat(progressText + ": %p%");
 	}
-#endif
 }
 
-void SingleBurnWindow::setConfigureState(bool incomplete) {
-	if (work) {
-		return;
-	}
-	if (incomplete) {
-		ui->textStatus->message(tr("需要保存设置"));
-	} else {
-		ui->textStatus->standby(tr("就绪"));
-	}
-	setDisabled(incomplete);
-}
-
-void SingleBurnWindow::setCompleteState() {
-	ui->textStatus->success(tr("完成！"));
-	resumeState();
-	emit completedBurn(true);
-}
-
-void SingleBurnWindow::setErrorState() {
-	auto r = work->getResult();
-	auto e = kburnSplitErrorCode(r->errorCode);
-	ui->textStatus->failed(tr("错误: ") + QString::number(e.kind >> 32) + " - (" + QString::number(e.code, 16) + "), " + r->errorMessage);
-
-	resumeState();
-	emit completedBurn(false);
-}
-
-void SingleBurnWindow::resetProgressState() {
-	setProgressText("");
-	ui->textStatus->standby(tr("就绪"));
-	ui->textPortInfo->setText("");
-	ui->progressBar->setRange(0, 100);
+void SingleBurnWindow::setProgressInfinit() {
+	ui->progressBar->setRange(0, 0);
 	ui->progressBar->setValue(0);
 }
 
-void SingleBurnWindow::resumeState() {
-	delete future;
-	future = NULL;
-	if (!BurnLibrary::instance()->deleteBurnTask(work)) {
-		qErrnoWarning("wired state: work not in registry");
-		delete work;
+void SingleBurnWindow::setAutoDismiss(bool autodis) {
+	autoDismiss = autodis;
+	if (isDone) {
+		deleteLater();
 	}
-	work = NULL;
-	setEnabled(true);
-}
-
-void SingleBurnWindow::setEnabled(bool enabled) {
-	ui->btnStartBurn->setEnabled(enabled);
-	ui->inputComPortList->setEnabled(enabled);
-}
-
-void SingleBurnWindow::handleSerialPortList(const QMap<QString, QString> &list) {
-	disconnect(ui->inputComPortList, &QComboBox::currentTextChanged, this, &SingleBurnWindow::resetProgressState);
-
-	QString save(ui->inputComPortList->currentText());
-
-	bool custom = true;
-	if (save.isEmpty()) {
-		custom = false;
-	} else {
-		for (int i = 0; i < ui->inputComPortList->count(); i++) {
-			if (ui->inputComPortList->itemText(i) == save) {
-				custom = false;
-				break;
-			}
-		}
-	}
-
-	ui->inputComPortList->clear();
-	auto titles = list.keys();
-	for (auto title : titles) {
-		ui->inputComPortList->addItem(title, list.value(title));
-	}
-	if (custom) {
-		ui->inputComPortList->setEditText(save);
-	} else {
-		int sel = qMax(titles.indexOf(save), 0);
-		ui->inputComPortList->setCurrentIndex(sel);
-	}
-
-	connect(ui->inputComPortList, &QComboBox::currentTextChanged, this, &SingleBurnWindow::resetProgressState);
 }
 
 void SingleBurnWindow::handleDeviceStateChange(const kburnDeviceNode *dev) {
@@ -205,5 +148,19 @@ void SingleBurnWindow::handleDeviceStateChange(const kburnDeviceNode *dev) {
 		val += QString::fromLatin1(dev->error->errorMessage);
 	}
 
-	ui->textPortInfo->setText(val);
+	setToolTip(val);
+}
+
+void SingleBurnWindow::on_btnRetry_clicked() {
+	emit retryRequested();
+	deleteLater();
+}
+
+void SingleBurnWindow::on_btnDismiss_clicked() {
+	deleteLater();
+}
+
+void SingleBurnWindow::on_btnTerminate_clicked() {
+	ui->btnTerminate->setDisabled(true);
+	work->cancel();
 }

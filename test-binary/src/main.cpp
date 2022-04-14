@@ -14,7 +14,7 @@ const char *test_null(const char *str) {
 	return str ? str : "NULL";
 }
 
-bool verify(void *ctx, const kburnDeviceNode *dev) {
+bool verify(void *ctx, kburnDeviceNode *dev) {
 	cout << "ask connect: " << dev->serial->deviceInfo.path << ", isUSB=" << dev->serial->deviceInfo.isUSB << endl;
 	return true;
 }
@@ -113,7 +113,7 @@ void handle_usb(void *ctx, kburnDeviceNode *dev) {
 	}
 }
 
-void disconnect(void *ctx, const kburnDeviceNode *dev) {
+void disconnect(void *ctx, kburnDeviceNode *dev) {
 	if (dev == NULL) {
 		cout << "unrelated device disconnected" << endl;
 		return;

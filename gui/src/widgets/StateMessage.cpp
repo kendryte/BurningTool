@@ -11,12 +11,21 @@ StateMessage::StateMessage(QWidget *parent) : QLabel(parent) {
 
 void StateMessage::setState(const QString &status, const QString &message) {
 	setStyleSheet(QStringLiteral("QLabel{") + status + "}");
-	setText(message);
+	setToolTip(message);
+	resize();
+}
+
+void StateMessage::resize() {
+	auto msg = toolTip();
+	QFontMetrics metrics(font());
+	QString elidedText = metrics.elidedText(msg, Qt::ElideRight, width());
+	QLabel::setText(msg);
 }
 
 void StateMessage::timerEvent(QTimerEvent *event) {
 	if (isHidden()) {
 		show();
+		resize();
 	} else {
 		hide();
 	}
@@ -46,7 +55,7 @@ void StateMessage::message(const QString &message) {
 void StateMessage::blink(bool b) {
 	if (b) {
 		if (!timer) {
-			timer = startTimer(1000);
+			// timer = startTimer(1000);
 		}
 	} else {
 		if (timer) {

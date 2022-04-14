@@ -12,8 +12,6 @@ class BurnLibrary : public QObject {
 	KBCTX ctx;
 	static class BurnLibrary *_instance;
 
-	QString imagePath;
-
 	on_device_connect_t previousOnConnectUsb;
 	on_device_connect_t previousOnConnectSerial;
 	on_device_remove_t previousOnDeviceRemove;
@@ -25,7 +23,7 @@ class BurnLibrary : public QObject {
 
 	kburnSerialDeviceList list = {0, NULL};
 	QMap<QString, QString> knownSerialPorts;
-	QMap<QString, class FlashTask *> runningFlash; // TODO: need mutex
+	QList<class BurningProcess *> jobs; // TODO: need mutex
 
 	BurnLibrary(QWidget *parent);
 
@@ -41,20 +39,27 @@ class BurnLibrary : public QObject {
 	static KBCTX context();
 	static BurnLibrary *instance();
 
-	bool deleteBurnTask(FlashTask *task);
+	class BurningProcess *prepareBurning(const class BuringRequest *request);
+	bool deleteBurning(class BurningProcess *task);
+	void executeBurning(class BurningProcess *task);
+
+	enum DeviceEvent
+	{
+		SerialAttached,
+		SerialReady,
+		UsbAttached,
+		UsbReady,
+		Disconnected,
+	};
 
   private:
-	bool handleConnectSerial(const kburnDeviceNode *dev);
-	bool handleConnectUsb(const kburnDeviceNode *dev);
-	void handleDeviceRemove(const kburnDeviceNode *dev);
+	bool handleConnectSerial(kburnDeviceNode *dev);
+	bool handleConnectUsb(kburnDeviceNode *dev);
+	void handleDeviceRemove(kburnDeviceNode *dev);
 	void handleHandleSerial(kburnDeviceNode *dev);
 	void handleHandleUsb(kburnDeviceNode *dev);
 	void handleDebugLog(kburnLogType type, const char *message);
 	void handleDeviceListChange(bool isUsb);
-
-  public slots:
-	class FlashTask *startBurn(const QString &serialPath);
-	void setSystemImagePath(const QString &imagePath) { this->imagePath = imagePath; }
 
   signals:
 	void onDebugLog(bool isTrace, QString message);

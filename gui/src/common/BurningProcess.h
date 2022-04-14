@@ -1,62 +1,73 @@
 #pragma once
 
-#include "EventStack.h"
+#include "BuringRequest.h"
+#include "BurnLibrary.h"
 #include "MyException.h"
 #include <canaan-burn/canaan-burn.h>
-#include <QPromise>
+#include <QFile>
+#include <QObject>
 #include <QRunnable>
 #include <QString>
 
-enum BurnStage
-{
-	Starting,
-	Serial,
-	Usb,
-};
-
-class FlashTask : public QObject, public QRunnable {
+class BurningProcess : public QObject, public QRunnable {
 	Q_OBJECT
 
-  private:
-	FlashTask();
+	QFile imageFile;
+	class QByteArray *buffer = NULL;
+	bool _isCanceled = false;
+	bool _isStarted = false;
+	bool _isCompleted = false;
+	KBurnException _result;
 
-	size_t bytesWritten = 0;
-	size_t bytesNextStage = 0;
-	const QString systemImage;
+  protected:
+	BurningProcess(KBCTX scope, const BuringRequest *request);
+
 	KBCTX scope;
+	class QDataStream *imageStream = NULL;
 
-	EventStack inputs;
-	QPromise<void> output;
+	void setResult(const KBurnException &reason);
+	void throwIfCancel();
 
-	KBurnException *result = NULL;
+	void setStage(const QString &title, int bytesToWrite = 0);
+	void setProgress(int writtenBytes);
 
-	void setProgressValue(size_t bytes);
-	static void serial_isp_progress(void *, const kburnDeviceNode *, size_t, size_t);
-
-	bool canceled = false;
-	void testCancel();
+	virtual qint64 prepare() = 0;
+	virtual bool step(kburn_stor_address_t address, const QByteArray &chunk) = 0;
 
   public:
-	const QString comPort;
+	const qint64 imageSize;
+	~BurningProcess();
 
-	~FlashTask();
-	FlashTask(KBCTX scope, const QString &comPort, const QString &systemImage) : scope(scope), comPort(comPort), systemImage(systemImage), inputs(2) {
-		this->setAutoDelete(false);
-	};
-	void run();
+	void run() Q_DECL_NOTHROW;
+	void _run();
+	void schedule();
 
-	QFuture<void> future() const;
+	virtual QString getTitle() const { return "UNKNOWN JOB"; }
+	virtual const QString &getIdentity() const = 0;
+	virtual bool pollingDevice(kburnDeviceNode *node, BurnLibrary::DeviceEvent event) = 0;
+	const KBurnException &getReason() { return _result; }
+
+	bool isCanceled() { return _isCanceled; }
+	bool isStarted() { return _isStarted; }
+	bool isCompleted() { return _isCompleted; }
+
+	void cancel(const KBurnException reason);
 	void cancel();
 
-	const KBurnException *getResult() { return result; }
-
-	void nextStage(const QString &title, size_t bytes = 0);
-
+	enum BurnStage
+	{
+		Starting,
+		Serial,
+		Usb,
+	};
   signals:
-	void onDeviceChange(const kburnDeviceNode *node);
-	void progressTextChanged(const QString &title);
+	void deviceStateNotify(kburnDeviceNode *node);
 
-  public slots:
-	void onSerialConnected(kburnDeviceNode *node);
-	void onUsbConnected(kburnDeviceNode *node);
+	void stageChanged(const QString &title);
+	void bytesChanged(int maximumBytes);
+	void progressChanged(int writtenBytes);
+
+	void cancelRequested();
+	void completed();
+	void failed(const KBurnException &reason);
 };

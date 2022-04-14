@@ -1,9 +1,12 @@
 #include "MainWindow.h"
+#include "common/BuringRequest.h"
+#include "common/BurningProcess.h"
 #include "common/BurnLibrary.h"
 #include "common/UpdateChecker.h"
 #include "config.h"
 #include "main.h"
 #include "ui_MainWindow.h"
+#include "widgets/SingleBurnWindow.h"
 #include <QCloseEvent>
 #include <QDesktopServices>
 #include <QFileDialog>
@@ -11,8 +14,6 @@
 #include <QUrl>
 
 #define SETTING_SPLIT_STATE "splitter-sizes"
-#define SETTING_LOG_TRACE "log-trace"
-#define SETTING_LOG_BUFFER "log-buffer"
 
 MainWindow::~MainWindow() {
 	delete updateChecker;
@@ -32,6 +33,7 @@ MainWindow::MainWindow(QWidget *parent)
 	ui->mainSplitter->setStretchFactor(1, 0);
 	ui->mainSplitter->setCollapsible(0, false);
 
+	/* setting */
 	qDebug() << "settings location: " << settings.fileName();
 	if (settings.contains(SETTING_SPLIT_STATE)) {
 		ui->mainSplitter->restoreState(settings.value(SETTING_SPLIT_STATE).toByteArray());
@@ -39,51 +41,40 @@ MainWindow::MainWindow(QWidget *parent)
 		ui->mainSplitter->setSizes(QList<int>() << 100 << 0);
 	}
 
-	bool shouldShowTraceLog = settings.value(SETTING_LOG_TRACE, IS_DEBUG).toBool();
-	connect(ui->btnToggleLogTrace, &QAction::toggled, this->ui->textLog, &LoggerWindow::setTraceLevelVisible);
-	connect(ui->btnToggleLogTrace, &QAction::toggled, this, [&](bool visible) { settings.setValue(SETTING_SPLIT_STATE, visible); });
-	ui->btnToggleLogTrace->setChecked(shouldShowTraceLog);
-	this->ui->textLog->setTraceLevelVisible(shouldShowTraceLog);
+	connect(ui->mainSplitter, &QSplitter::splitterMoved, this, &MainWindow::onResized);
+	if (ui->settingsWindow->getFile().isEmpty()) {
+		ui->mainSplitter->hide();
+	} else {
+		ui->settingsWindow->hide();
+	}
+	connect(ui->settingsWindow, &SettingsWindow::settingsCommited, ui->mainSplitter, &QSplitter::show);
+	connect(ui->settingsWindow, &SettingsWindow::settingsCommited, ui->settingsWindow, &SettingsWindow::hide);
 
-	bool shouldShowBufferDump = settings.value(SETTING_LOG_BUFFER, false).toBool();
-	ui->btnDumpBuffer->setChecked(shouldShowBufferDump);
+	connect(ui->burnControlWindow, &BuringControlWindow::showSettingRequested, ui->mainSplitter, &QSplitter::hide);
+	connect(ui->burnControlWindow, &BuringControlWindow::showSettingRequested, ui->settingsWindow, &SettingsWindow::show);
+	/* setting send */
 
-	auto library = BurnLibrary::instance();
-	QObject::connect(library, &BurnLibrary::onDebugLog, this->ui->textLog, &LoggerWindow::append);
+	connect(&traceSetting, &SettingsBool::changed, this->ui->textLog, &LoggerWindow::setTraceLevelVisible);
+	traceSetting.connectAction(ui->btnToggleLogTrace);
 
-	connect(ui->settingsWindow, &SettingsWindow::settingsChanged, this, &MainWindow::updateSettingStatus);
-	connect(ui->settingsWindow, &SettingsWindow::settingsUnsaved, this, &MainWindow::disableOtherActions);
-	connect(ui->manualBurnWindow, &SingleBurnWindow::startedBurn, this->ui->textLog, &LoggerWindow::clear);
-	connect(ui->manualBurnWindow, &SingleBurnWindow::startedBurn, this, [=] { ui->settingsWindow->setDisabled(true); });
-	connect(ui->manualBurnWindow, &SingleBurnWindow::completedBurn, this, [=] { ui->settingsWindow->setDisabled(false); });
+	connect(&logBufferSetting, &SettingsBool::changed, this, [](bool enable) { kburnSetLogBufferEnabled(enable); });
+	logBufferSetting.connectAction(ui->btnDumpBuffer);
 
-	updateSettingStatus();
-}
+	connect(BurnLibrary::instance(), &BurnLibrary::onDebugLog, ui->textLog, &LoggerWindow::append);
 
-void MainWindow::disableOtherActions(bool disable) {
-	ui->manualBurnWindow->setConfigureState(disable);
-}
-
-void MainWindow::updateSettingStatus() {
-	QFile file(ui->settingsWindow->getFile());
-	BurnLibrary::instance()->setSystemImagePath(file.fileName());
-}
-
-void MainWindow::showEvent(QShowEvent *event) {
-	QMainWindow::showEvent(event);
-
-	if (shown)
-		return;
-	shown = true;
-
-	ui->settingsWindow->showEvent(event);
-	ui->manualBurnWindow->showEvent(event);
+	connect(ui->burnControlWindow, &BuringControlWindow::newProcessRequested, this, &MainWindow::startNewBurnJob);
 
 	BurnLibrary::instance()->start();
 }
 
-void MainWindow::on_btnOpenWebsite_triggered() {
-	QDesktopServices::openUrl(QUrl("https://github.com/kendryte/BurningTool"));
+void MainWindow::onResized() {
+	auto width = ui->mainContainer->geometry().width();
+	ui->jobListContainer->setMaximumWidth(width);
+	// auto width = ui->jobListContainer->width();
+	auto list = ui->jobListContainer->findChildren<SingleBurnWindow *>();
+	for (auto p : list) {
+		p->setSize(width);
+	}
 }
 
 void MainWindow::closeEvent(QCloseEvent *ev) {
@@ -105,6 +96,10 @@ void MainWindow::closeEvent(QCloseEvent *ev) {
 	ev->accept();
 }
 
+void MainWindow::on_btnOpenWebsite_triggered() {
+	QDesktopServices::openUrl(QUrl("https://github.com/kendryte/BurningTool"));
+}
+
 void MainWindow::on_btnSaveLog_triggered() {
 	QString selFilter("Log File (*.html)");
 	QString str = QFileDialog::getSaveFileName(
@@ -115,11 +110,30 @@ void MainWindow::on_btnSaveLog_triggered() {
 	// TODO: flush and copy log file
 }
 
-void MainWindow::on_btnDumpBuffer_toggled(bool enable) {
-	kburnSetLogBufferEnabled(enable);
-	settings.setValue(SETTING_LOG_BUFFER, enable);
-}
-
 void MainWindow::on_btnOpenRelease_triggered() {
 	QDesktopServices::openUrl(QUrl("https://github.com/kendryte/BurningTool/releases/tag/latest"));
+}
+
+void MainWindow::startNewBurnJob(BuringRequest *partialRequest) {
+	partialRequest->systemImageFile = ui->settingsWindow->getFile();
+
+	BuringRequest *request = partialRequest;
+
+	auto instance = BurnLibrary::instance();
+	auto work = instance->prepareBurning(request);
+	if (!work) {
+		// TODO: alert?
+		return;
+	}
+
+	auto display = new SingleBurnWindow(this, work);
+	ui->burnJobListView->insertWidget(ui->burnJobListView->count() - 1, display, 0, Qt::AlignTop);
+
+	connect(display, &SingleBurnWindow::destroyed, [=]() {
+		instance->deleteBurning(work);
+		delete request;
+	});
+	connect(display, &SingleBurnWindow::retryRequested, [=]() { startNewBurnJob(request); });
+
+	instance->executeBurning(work);
 }

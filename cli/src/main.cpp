@@ -8,7 +8,7 @@ const char *test_null(const char *str) {
 	return str ? str : "NULL";
 }
 
-bool verify(const kburnDeviceNode *dev, void *ctx) {
+bool verify(kburnDeviceNode *dev, void *ctx) {
 	cout << "ask connect: " << dev->path << ", isUSB=" << dev->deviceInfo.isUSB << endl;
 	return true;
 }
@@ -20,7 +20,7 @@ void handle(kburnDeviceNode *dev, void *ctx) {
 	cout << "  * error status: " << dev->error->code << ", " << test_null(dev->error->errorMessage) << endl;
 }
 
-void disconnect(const kburnDeviceNode *dev, void *ctx) {
+void disconnect(kburnDeviceNode *dev, void *ctx) {
 	cout << "Disconnect: " << dev->path << endl;
 	cout << "  * isOpen: " << dev->isOpen << endl;
 	cout << "  * isConfirm: " << dev->isConfirm << endl;

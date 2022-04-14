@@ -1,12 +1,6 @@
 cmake_minimum_required(VERSION 3.5)
 
 get_filename_component(PROJECT_ROOT "${CMAKE_CURRENT_LIST_DIR}/.." ABSOLUTE)
-add_compile_definitions("PROJECT_ROOT=\"${PROJECT_ROOT}\"")
-add_compile_definitions("KBURN_ASSERT_SIZE")
-
-if(${DISABLE_TERM_HYPERLINK})
-	add_compile_definitions("DISABLE_TERM_HYPERLINK")
-endif()
 
 project(
 	BurningLibrary
@@ -14,8 +8,6 @@ project(
 	LANGUAGES C)
 
 # ##############################################################################
-add_compile_definitions(BURN_LIB_COMPILING)
-
 function(push_source_code target src_dir)
 	file(GLOB_RECURSE NEW_SOURCES "src/${src_dir}/*.c")
 
@@ -81,6 +73,17 @@ endfunction()
 add_library(canaan_burn SHARED)
 set_property(TARGET canaan_burn PROPERTY C_STANDARD 23)
 set_property(TARGET canaan_burn PROPERTY LINKER_LANGUAGE C)
+
+target_compile_definitions(canaan_burn PRIVATE "PROJECT_ROOT=\"${PROJECT_ROOT}\"" KBURN_ASSERT_SIZE BURN_LIB_COMPILING)
+if(CMAKE_BUILD_TYPE STREQUAL "Release")
+	target_compile_definitions(canaan_burn PRIVATE "IS_DEBUG=0")
+else()
+	target_compile_definitions(canaan_burn PRIVATE "IS_DEBUG=1")
+endif()
+
+if(${DISABLE_TERM_HYPERLINK})
+	target_compile_definitions(canaan_burn PRIVATE DISABLE_TERM_HYPERLINK)
+endif()
 
 load_binary(canaan_burn "usb_isp_buffer" "${CMAKE_CURRENT_LIST_DIR}/usbisp.bin")
 

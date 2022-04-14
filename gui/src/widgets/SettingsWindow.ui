@@ -6,330 +6,25 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>629</width>
-    <height>373</height>
+    <width>835</width>
+    <height>597</height>
    </rect>
   </property>
   <property name="minimumSize">
    <size>
-    <width>0</width>
-    <height>345</height>
+    <width>632</width>
+    <height>405</height>
    </size>
   </property>
-  <layout class="QGridLayout" name="gridLayout">
-   <item row="1" column="0">
-    <widget class="QGroupBox" name="groupBox_3">
-     <property name="title">
-      <string>串口设置</string>
-     </property>
-     <layout class="QFormLayout" name="formLayout">
-      <item row="0" column="0">
-       <widget class="QLabel" name="label">
-        <property name="minimumSize">
-         <size>
-          <width>75</width>
-          <height>0</height>
-         </size>
-        </property>
-        <property name="text">
-         <string>初始速率</string>
-        </property>
-       </widget>
-      </item>
-      <item row="0" column="1">
-       <widget class="QComboBox" name="inputBaudrateInit">
-        <property name="minimumSize">
-         <size>
-          <width>140</width>
-          <height>0</height>
-         </size>
-        </property>
-       </widget>
-      </item>
-      <item row="1" column="0">
-       <widget class="QLabel" name="label_3">
-        <property name="text">
-         <string>传输速率</string>
-        </property>
-       </widget>
-      </item>
-      <item row="1" column="1">
-       <widget class="QComboBox" name="inputBaudrateHigh"/>
-      </item>
-      <item row="2" column="0">
-       <widget class="QLabel" name="label_6">
-        <property name="text">
-         <string>读取超时</string>
-        </property>
-       </widget>
-      </item>
-      <item row="2" column="1">
-       <widget class="QSpinBox" name="inputSerialReadTimeout">
-        <property name="maximum">
-         <number>1000000000</number>
-        </property>
-        <property name="singleStep">
-         <number>500</number>
-        </property>
-       </widget>
-      </item>
-      <item row="3" column="0">
-       <widget class="QLabel" name="label_7">
-        <property name="text">
-         <string>写入超时</string>
-        </property>
-       </widget>
-      </item>
-      <item row="3" column="1">
-       <widget class="QSpinBox" name="inputSerialWriteTimeout">
-        <property name="maximum">
-         <number>1000000000</number>
-        </property>
-        <property name="singleStep">
-         <number>500</number>
-        </property>
-       </widget>
-      </item>
-      <item row="4" column="0">
-       <widget class="QLabel" name="label_4">
-        <property name="text">
-         <string>停止位</string>
-        </property>
-       </widget>
-      </item>
-      <item row="4" column="1">
-       <widget class="QDoubleSpinBox" name="inputStopBits">
-        <property name="correctionMode">
-         <enum>QAbstractSpinBox::CorrectToNearestValue</enum>
-        </property>
-        <property name="decimals">
-         <number>1</number>
-        </property>
-        <property name="minimum">
-         <double>1.000000000000000</double>
-        </property>
-        <property name="maximum">
-         <double>2.000000000000000</double>
-        </property>
-        <property name="singleStep">
-         <double>0.500000000000000</double>
-        </property>
-       </widget>
-      </item>
-      <item row="5" column="0">
-       <widget class="QLabel" name="label_2">
-        <property name="text">
-         <string>校验</string>
-        </property>
-       </widget>
-      </item>
-      <item row="5" column="1">
-       <widget class="QComboBox" name="inputParity">
-        <item>
-         <property name="text">
-          <string>None</string>
-         </property>
-        </item>
-        <item>
-         <property name="text">
-          <string>Even</string>
-         </property>
-        </item>
-        <item>
-         <property name="text">
-          <string>Odd</string>
-         </property>
-        </item>
-        <item>
-         <property name="text">
-          <string>Mark</string>
-         </property>
-        </item>
-        <item>
-         <property name="text">
-          <string>Space</string>
-         </property>
-        </item>
-       </widget>
-      </item>
-      <item row="6" column="0">
-       <widget class="QLabel" name="label_9">
-        <property name="text">
-         <string>数据位</string>
-        </property>
-       </widget>
-      </item>
-      <item row="6" column="1">
-       <widget class="QSpinBox" name="inputByteSize">
-        <property name="minimum">
-         <number>5</number>
-        </property>
-        <property name="maximum">
-         <number>8</number>
-        </property>
-        <property name="value">
-         <number>8</number>
-        </property>
-       </widget>
-      </item>
-      <item row="7" column="0">
-       <widget class="QLabel" name="label_5">
-        <property name="text">
-         <string>重试次数</string>
-        </property>
-       </widget>
-      </item>
-      <item row="7" column="1">
-       <widget class="QSpinBox" name="inputSerialRetry">
-        <property name="minimum">
-         <number>3</number>
-        </property>
-       </widget>
-      </item>
-     </layout>
-    </widget>
-   </item>
-   <item row="4" column="0">
-    <spacer name="verticalSpacer">
-     <property name="orientation">
-      <enum>Qt::Vertical</enum>
-     </property>
-     <property name="sizeHint" stdset="0">
+  <layout class="QVBoxLayout" name="verticalLayout">
+   <item>
+    <widget class="QGroupBox" name="groupBox_5">
+     <property name="minimumSize">
       <size>
-       <width>20</width>
-       <height>40</height>
+       <width>0</width>
+       <height>82</height>
       </size>
      </property>
-    </spacer>
-   </item>
-   <item row="1" column="1">
-    <widget class="QGroupBox" name="groupBox_4">
-     <property name="title">
-      <string>USB设置（未实现）</string>
-     </property>
-     <layout class="QFormLayout" name="formLayout_2">
-      <item row="0" column="0">
-       <widget class="QLabel" name="label_8">
-        <property name="text">
-         <string>Vendor ID</string>
-        </property>
-       </widget>
-      </item>
-      <item row="0" column="1">
-       <widget class="QSpinBox" name="inputUsbVid">
-        <property name="inputMethodHints">
-         <set>Qt::ImhDigitsOnly|Qt::ImhLatinOnly</set>
-        </property>
-        <property name="buttonSymbols">
-         <enum>QAbstractSpinBox::NoButtons</enum>
-        </property>
-        <property name="prefix">
-         <string notr="true">0x</string>
-        </property>
-        <property name="maximum">
-         <number>65535</number>
-        </property>
-        <property name="displayIntegerBase">
-         <number>16</number>
-        </property>
-       </widget>
-      </item>
-      <item row="1" column="0">
-       <widget class="QLabel" name="label_10">
-        <property name="text">
-         <string>Product ID</string>
-        </property>
-       </widget>
-      </item>
-      <item row="1" column="1">
-       <widget class="QSpinBox" name="inputUsbPid">
-        <property name="inputMethodHints">
-         <set>Qt::ImhDigitsOnly|Qt::ImhLatinOnly</set>
-        </property>
-        <property name="buttonSymbols">
-         <enum>QAbstractSpinBox::NoButtons</enum>
-        </property>
-        <property name="prefix">
-         <string notr="true">0x</string>
-        </property>
-        <property name="maximum">
-         <number>65535</number>
-        </property>
-        <property name="displayIntegerBase">
-         <number>16</number>
-        </property>
-       </widget>
-      </item>
-      <item row="2" column="0">
-       <widget class="QLabel" name="label_14">
-        <property name="text">
-         <string>启动超时</string>
-        </property>
-       </widget>
-      </item>
-      <item row="2" column="1">
-       <widget class="QSpinBox" name="inputUsbBindTimeout">
-        <property name="maximum">
-         <number>1000000000</number>
-        </property>
-        <property name="singleStep">
-         <number>500</number>
-        </property>
-       </widget>
-      </item>
-      <item row="3" column="0">
-       <widget class="QLabel" name="label_11">
-        <property name="text">
-         <string>读取超时</string>
-        </property>
-       </widget>
-      </item>
-      <item row="3" column="1">
-       <widget class="QSpinBox" name="inputUsbReadTimeout">
-        <property name="maximum">
-         <number>1000000000</number>
-        </property>
-        <property name="singleStep">
-         <number>500</number>
-        </property>
-       </widget>
-      </item>
-      <item row="4" column="0">
-       <widget class="QLabel" name="label_12">
-        <property name="text">
-         <string>写入超时</string>
-        </property>
-       </widget>
-      </item>
-      <item row="4" column="1">
-       <widget class="QSpinBox" name="inputUsbWriteTimeout">
-        <property name="maximum">
-         <number>1000000000</number>
-        </property>
-        <property name="singleStep">
-         <number>500</number>
-        </property>
-       </widget>
-      </item>
-      <item row="5" column="0">
-       <widget class="QLabel" name="label_13">
-        <property name="text">
-         <string>重试次数</string>
-        </property>
-       </widget>
-      </item>
-      <item row="5" column="1">
-       <widget class="QSpinBox" name="inputUsbRetry">
-        <property name="minimum">
-         <number>3</number>
-        </property>
-       </widget>
-      </item>
-     </layout>
-    </widget>
-   </item>
-   <item row="0" column="0" colspan="2">
-    <widget class="QGroupBox" name="groupBox_5">
      <property name="title">
       <string>镜像文件选择</string>
      </property>
@@ -340,9 +35,13 @@
          <widget class="QLineEdit" name="inputSysImage"/>
         </item>
         <item>
-         <widget class="QToolButton" name="btnSelectImage">
+         <widget class="QPushButton" name="btnSelectImage">
           <property name="text">
-           <string>打开文件</string>
+           <string>选择文件</string>
+          </property>
+          <property name="icon">
+           <iconset resource="../../resources/main.qrc">
+            <normaloff>:/folder-open-solid.svg</normaloff>:/folder-open-solid.svg</iconset>
           </property>
          </widget>
         </item>
@@ -361,22 +60,502 @@
      </layout>
     </widget>
    </item>
-   <item row="3" column="0" colspan="2">
-    <widget class="QDialogButtonBox" name="actionBar">
+   <item>
+    <layout class="QHBoxLayout" name="horizontalLayout">
+     <item>
+      <widget class="QGroupBox" name="advanceView1">
+       <property name="minimumSize">
+        <size>
+         <width>200</width>
+         <height>0</height>
+        </size>
+       </property>
+       <property name="title">
+        <string>串口设置</string>
+       </property>
+       <layout class="QFormLayout" name="formLayout">
+        <item row="0" column="0">
+         <widget class="QLabel" name="label">
+          <property name="minimumSize">
+           <size>
+            <width>75</width>
+            <height>0</height>
+           </size>
+          </property>
+          <property name="text">
+           <string>初始速率</string>
+          </property>
+         </widget>
+        </item>
+        <item row="0" column="1">
+         <widget class="QComboBox" name="inputBaudrateInit"/>
+        </item>
+        <item row="1" column="0">
+         <widget class="QLabel" name="label_3">
+          <property name="text">
+           <string>传输速率</string>
+          </property>
+         </widget>
+        </item>
+        <item row="1" column="1">
+         <widget class="QComboBox" name="inputBaudrateHigh"/>
+        </item>
+        <item row="2" column="0">
+         <widget class="QLabel" name="label_6">
+          <property name="text">
+           <string>读取超时</string>
+          </property>
+         </widget>
+        </item>
+        <item row="2" column="1">
+         <widget class="QSpinBox" name="inputSerialReadTimeout">
+          <property name="maximum">
+           <number>1000000000</number>
+          </property>
+          <property name="singleStep">
+           <number>500</number>
+          </property>
+         </widget>
+        </item>
+        <item row="3" column="0">
+         <widget class="QLabel" name="label_7">
+          <property name="text">
+           <string>写入超时</string>
+          </property>
+         </widget>
+        </item>
+        <item row="3" column="1">
+         <widget class="QSpinBox" name="inputSerialWriteTimeout">
+          <property name="maximum">
+           <number>1000000000</number>
+          </property>
+          <property name="singleStep">
+           <number>500</number>
+          </property>
+         </widget>
+        </item>
+        <item row="4" column="0">
+         <widget class="QLabel" name="label_4">
+          <property name="text">
+           <string>停止位</string>
+          </property>
+         </widget>
+        </item>
+        <item row="4" column="1">
+         <widget class="QDoubleSpinBox" name="inputStopBits">
+          <property name="correctionMode">
+           <enum>QAbstractSpinBox::CorrectToNearestValue</enum>
+          </property>
+          <property name="decimals">
+           <number>1</number>
+          </property>
+          <property name="minimum">
+           <double>1.000000000000000</double>
+          </property>
+          <property name="maximum">
+           <double>2.000000000000000</double>
+          </property>
+          <property name="singleStep">
+           <double>0.500000000000000</double>
+          </property>
+         </widget>
+        </item>
+        <item row="5" column="0">
+         <widget class="QLabel" name="label_2">
+          <property name="text">
+           <string>校验</string>
+          </property>
+         </widget>
+        </item>
+        <item row="5" column="1">
+         <widget class="QComboBox" name="inputParity">
+          <item>
+           <property name="text">
+            <string>None</string>
+           </property>
+          </item>
+          <item>
+           <property name="text">
+            <string>Even</string>
+           </property>
+          </item>
+          <item>
+           <property name="text">
+            <string>Odd</string>
+           </property>
+          </item>
+          <item>
+           <property name="text">
+            <string>Mark</string>
+           </property>
+          </item>
+          <item>
+           <property name="text">
+            <string>Space</string>
+           </property>
+          </item>
+         </widget>
+        </item>
+        <item row="6" column="0">
+         <widget class="QLabel" name="label_9">
+          <property name="text">
+           <string>数据位</string>
+          </property>
+         </widget>
+        </item>
+        <item row="6" column="1">
+         <widget class="QSpinBox" name="inputByteSize">
+          <property name="minimum">
+           <number>5</number>
+          </property>
+          <property name="maximum">
+           <number>8</number>
+          </property>
+          <property name="value">
+           <number>8</number>
+          </property>
+         </widget>
+        </item>
+        <item row="7" column="0">
+         <widget class="QLabel" name="label_5">
+          <property name="text">
+           <string>重试次数</string>
+          </property>
+         </widget>
+        </item>
+        <item row="7" column="1">
+         <widget class="QSpinBox" name="inputSerialRetry">
+          <property name="minimum">
+           <number>3</number>
+          </property>
+         </widget>
+        </item>
+       </layout>
+      </widget>
+     </item>
+     <item>
+      <widget class="QGroupBox" name="advanceView2">
+       <property name="minimumSize">
+        <size>
+         <width>200</width>
+         <height>0</height>
+        </size>
+       </property>
+       <property name="title">
+        <string>设备监视设置</string>
+       </property>
+       <layout class="QFormLayout" name="formLayout_3">
+        <item row="0" column="0">
+         <widget class="QLabel" name="label_18">
+          <property name="minimumSize">
+           <size>
+            <width>75</width>
+            <height>0</height>
+           </size>
+          </property>
+          <property name="text">
+           <string>仅限USB串口</string>
+          </property>
+         </widget>
+        </item>
+        <item row="0" column="1">
+         <widget class="QCheckBox" name="inputWatch_3">
+          <property name="text">
+           <string/>
+          </property>
+         </widget>
+        </item>
+        <item row="1" column="0">
+         <widget class="QLabel" name="label_16">
+          <property name="minimumSize">
+           <size>
+            <width>75</width>
+            <height>0</height>
+           </size>
+          </property>
+          <property name="text">
+           <string>USB串口VID</string>
+          </property>
+         </widget>
+        </item>
+        <item row="1" column="1">
+         <widget class="QSpinBox" name="inputWatch_1">
+          <property name="inputMethodHints">
+           <set>Qt::ImhDigitsOnly|Qt::ImhLatinOnly</set>
+          </property>
+          <property name="buttonSymbols">
+           <enum>QAbstractSpinBox::NoButtons</enum>
+          </property>
+          <property name="prefix">
+           <string notr="true">0x</string>
+          </property>
+          <property name="maximum">
+           <number>65535</number>
+          </property>
+          <property name="displayIntegerBase">
+           <number>16</number>
+          </property>
+         </widget>
+        </item>
+        <item row="2" column="0">
+         <widget class="QLabel" name="label_17">
+          <property name="minimumSize">
+           <size>
+            <width>75</width>
+            <height>0</height>
+           </size>
+          </property>
+          <property name="text">
+           <string>USB串口PID</string>
+          </property>
+         </widget>
+        </item>
+        <item row="2" column="1">
+         <widget class="QSpinBox" name="inputWatch_2">
+          <property name="inputMethodHints">
+           <set>Qt::ImhDigitsOnly|Qt::ImhLatinOnly</set>
+          </property>
+          <property name="buttonSymbols">
+           <enum>QAbstractSpinBox::NoButtons</enum>
+          </property>
+          <property name="prefix">
+           <string notr="true">0x</string>
+          </property>
+          <property name="maximum">
+           <number>65535</number>
+          </property>
+          <property name="displayIntegerBase">
+           <number>16</number>
+          </property>
+         </widget>
+        </item>
+       </layout>
+      </widget>
+     </item>
+     <item>
+      <widget class="QGroupBox" name="advanceView3">
+       <property name="minimumSize">
+        <size>
+         <width>200</width>
+         <height>0</height>
+        </size>
+       </property>
+       <property name="title">
+        <string>USB设置（未实现）</string>
+       </property>
+       <layout class="QFormLayout" name="formLayout_2">
+        <item row="0" column="0">
+         <widget class="QLabel" name="label_8">
+          <property name="text">
+           <string>Vendor ID</string>
+          </property>
+         </widget>
+        </item>
+        <item row="0" column="1">
+         <widget class="QSpinBox" name="inputUsbVid">
+          <property name="inputMethodHints">
+           <set>Qt::ImhDigitsOnly|Qt::ImhLatinOnly</set>
+          </property>
+          <property name="buttonSymbols">
+           <enum>QAbstractSpinBox::NoButtons</enum>
+          </property>
+          <property name="prefix">
+           <string notr="true">0x</string>
+          </property>
+          <property name="maximum">
+           <number>65535</number>
+          </property>
+          <property name="displayIntegerBase">
+           <number>16</number>
+          </property>
+         </widget>
+        </item>
+        <item row="1" column="0">
+         <widget class="QLabel" name="label_10">
+          <property name="text">
+           <string>Product ID</string>
+          </property>
+         </widget>
+        </item>
+        <item row="1" column="1">
+         <widget class="QSpinBox" name="inputUsbPid">
+          <property name="inputMethodHints">
+           <set>Qt::ImhDigitsOnly|Qt::ImhLatinOnly</set>
+          </property>
+          <property name="buttonSymbols">
+           <enum>QAbstractSpinBox::NoButtons</enum>
+          </property>
+          <property name="prefix">
+           <string notr="true">0x</string>
+          </property>
+          <property name="maximum">
+           <number>65535</number>
+          </property>
+          <property name="displayIntegerBase">
+           <number>16</number>
+          </property>
+         </widget>
+        </item>
+        <item row="2" column="0">
+         <widget class="QLabel" name="label_14">
+          <property name="text">
+           <string>启动超时</string>
+          </property>
+         </widget>
+        </item>
+        <item row="2" column="1">
+         <widget class="QSpinBox" name="inputUsbBindTimeout">
+          <property name="maximum">
+           <number>1000000000</number>
+          </property>
+          <property name="singleStep">
+           <number>500</number>
+          </property>
+         </widget>
+        </item>
+        <item row="3" column="0">
+         <widget class="QLabel" name="label_11">
+          <property name="text">
+           <string>读取超时</string>
+          </property>
+         </widget>
+        </item>
+        <item row="3" column="1">
+         <widget class="QSpinBox" name="inputUsbReadTimeout">
+          <property name="maximum">
+           <number>1000000000</number>
+          </property>
+          <property name="singleStep">
+           <number>500</number>
+          </property>
+         </widget>
+        </item>
+        <item row="4" column="0">
+         <widget class="QLabel" name="label_12">
+          <property name="text">
+           <string>写入超时</string>
+          </property>
+         </widget>
+        </item>
+        <item row="4" column="1">
+         <widget class="QSpinBox" name="inputUsbWriteTimeout">
+          <property name="maximum">
+           <number>1000000000</number>
+          </property>
+          <property name="singleStep">
+           <number>500</number>
+          </property>
+         </widget>
+        </item>
+        <item row="5" column="0">
+         <widget class="QLabel" name="label_13">
+          <property name="text">
+           <string>重试次数</string>
+          </property>
+         </widget>
+        </item>
+        <item row="5" column="1">
+         <widget class="QSpinBox" name="inputUsbRetry">
+          <property name="minimum">
+           <number>3</number>
+          </property>
+         </widget>
+        </item>
+       </layout>
+      </widget>
+     </item>
+    </layout>
+   </item>
+   <item>
+    <spacer name="verticalSpacer">
      <property name="orientation">
-      <enum>Qt::Horizontal</enum>
+      <enum>Qt::Vertical</enum>
      </property>
-     <property name="standardButtons">
-      <set>QDialogButtonBox::Discard|QDialogButtonBox::RestoreDefaults|QDialogButtonBox::Save</set>
+     <property name="sizeHint" stdset="0">
+      <size>
+       <width>20</width>
+       <height>40</height>
+      </size>
      </property>
-     <property name="centerButtons">
-      <bool>false</bool>
-     </property>
-    </widget>
+    </spacer>
+   </item>
+   <item>
+    <layout class="QHBoxLayout" name="horizontalLayout_3">
+     <item>
+      <spacer name="horizontalSpacer">
+       <property name="orientation">
+        <enum>Qt::Horizontal</enum>
+       </property>
+       <property name="sizeHint" stdset="0">
+        <size>
+         <width>40</width>
+         <height>20</height>
+        </size>
+       </property>
+      </spacer>
+     </item>
+     <item>
+      <widget class="QPushButton" name="btnAdvance">
+       <property name="text">
+        <string>高级选项</string>
+       </property>
+       <property name="checkable">
+        <bool>true</bool>
+       </property>
+       <property name="flat">
+        <bool>true</bool>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QPushButton" name="btnResetDefaults">
+       <property name="text">
+        <string>恢复默认设置</string>
+       </property>
+       <property name="icon">
+        <iconset resource="../../resources/main.qrc">
+         <normaloff>:/eraser-solid.svg</normaloff>:/eraser-solid.svg</iconset>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QPushButton" name="btnSave">
+       <property name="minimumSize">
+        <size>
+         <width>120</width>
+         <height>36</height>
+        </size>
+       </property>
+       <property name="font">
+        <font>
+         <pointsize>10</pointsize>
+        </font>
+       </property>
+       <property name="text">
+        <string>保存</string>
+       </property>
+       <property name="icon">
+        <iconset resource="../../resources/main.qrc">
+         <normaloff>:/floppy-disk-solid.svg</normaloff>:/floppy-disk-solid.svg</iconset>
+       </property>
+       <property name="iconSize">
+        <size>
+         <width>20</width>
+         <height>20</height>
+        </size>
+       </property>
+       <property name="default">
+        <bool>true</bool>
+       </property>
+      </widget>
+     </item>
+    </layout>
    </item>
   </layout>
  </widget>
- <resources/>
+ <resources>
+  <include location="../../resources/main.qrc"/>
+ </resources>
  <connections>
   <connection>
    <sender>inputBaudrateHigh</sender>
@@ -385,12 +564,12 @@
    <slot>inputChanged()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>239</x>
-     <y>170</y>
+     <x>101</x>
+     <y>152</y>
     </hint>
     <hint type="destinationlabel">
-     <x>84</x>
-     <y>163</y>
+     <x>0</x>
+     <y>200</y>
     </hint>
    </hints>
   </connection>
@@ -401,12 +580,12 @@
    <slot>inputChanged()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>239</x>
-     <y>142</y>
+     <x>101</x>
+     <y>124</y>
     </hint>
     <hint type="destinationlabel">
-     <x>83</x>
-     <y>133</y>
+     <x>0</x>
+     <y>200</y>
     </hint>
    </hints>
   </connection>
@@ -417,12 +596,12 @@
    <slot>inputChanged()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>239</x>
-     <y>251</y>
+     <x>101</x>
+     <y>234</y>
     </hint>
     <hint type="destinationlabel">
-     <x>82</x>
-     <y>242</y>
+     <x>0</x>
+     <y>200</y>
     </hint>
    </hints>
   </connection>
@@ -433,12 +612,12 @@
    <slot>inputChanged()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>239</x>
-     <y>306</y>
+     <x>101</x>
+     <y>289</y>
     </hint>
     <hint type="destinationlabel">
-     <x>84</x>
-     <y>297</y>
+     <x>0</x>
+     <y>200</y>
     </hint>
    </hints>
   </connection>
@@ -449,12 +628,12 @@
    <slot>inputChanged()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>239</x>
-     <y>279</y>
+     <x>101</x>
+     <y>261</y>
     </hint>
     <hint type="destinationlabel">
-     <x>79</x>
-     <y>267</y>
+     <x>0</x>
+     <y>200</y>
     </hint>
    </hints>
   </connection>
@@ -465,12 +644,12 @@
    <slot>inputChanged()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>239</x>
-     <y>196</y>
+     <x>101</x>
+     <y>180</y>
     </hint>
     <hint type="destinationlabel">
-     <x>84</x>
-     <y>192</y>
+     <x>0</x>
+     <y>200</y>
     </hint>
    </hints>
   </connection>
@@ -481,12 +660,12 @@
    <slot>inputChanged()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>239</x>
-     <y>218</y>
+     <x>101</x>
+     <y>207</y>
     </hint>
     <hint type="destinationlabel">
-     <x>82</x>
-     <y>221</y>
+     <x>0</x>
+     <y>200</y>
     </hint>
    </hints>
   </connection>
@@ -497,12 +676,12 @@
    <slot>inputChanged()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>239</x>
-     <y>321</y>
+     <x>101</x>
+     <y>316</y>
     </hint>
     <hint type="destinationlabel">
-     <x>86</x>
-     <y>328</y>
+     <x>0</x>
+     <y>200</y>
     </hint>
    </hints>
   </connection>
@@ -513,12 +692,12 @@
    <slot>inputChanged()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>107</x>
-     <y>378</y>
+     <x>635</x>
+     <y>124</y>
     </hint>
     <hint type="destinationlabel">
-     <x>3</x>
-     <y>387</y>
+     <x>0</x>
+     <y>200</y>
     </hint>
    </hints>
   </connection>
@@ -529,12 +708,12 @@
    <slot>inputChanged()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>148</x>
-     <y>412</y>
+     <x>635</x>
+     <y>151</y>
     </hint>
     <hint type="destinationlabel">
-     <x>3</x>
-     <y>416</y>
+     <x>0</x>
+     <y>200</y>
     </hint>
    </hints>
   </connection>
@@ -545,12 +724,12 @@
    <slot>inputChanged()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>99</x>
-     <y>436</y>
+     <x>635</x>
+     <y>178</y>
     </hint>
     <hint type="destinationlabel">
-     <x>4</x>
-     <y>442</y>
+     <x>0</x>
+     <y>200</y>
     </hint>
    </hints>
   </connection>
@@ -561,12 +740,12 @@
    <slot>inputChanged()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>103</x>
-     <y>469</y>
+     <x>635</x>
+     <y>205</y>
     </hint>
     <hint type="destinationlabel">
-     <x>5</x>
-     <y>467</y>
+     <x>0</x>
+     <y>200</y>
     </hint>
    </hints>
   </connection>
@@ -577,12 +756,12 @@
    <slot>inputChanged()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>98</x>
-     <y>493</y>
+     <x>635</x>
+     <y>232</y>
     </hint>
     <hint type="destinationlabel">
-     <x>5</x>
-     <y>492</y>
+     <x>0</x>
+     <y>200</y>
     </hint>
    </hints>
   </connection>
@@ -593,20 +772,118 @@
    <slot>inputChanged()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>99</x>
-     <y>520</y>
+     <x>635</x>
+     <y>259</y>
     </hint>
     <hint type="destinationlabel">
-     <x>5</x>
-     <y>519</y>
+     <x>0</x>
+     <y>200</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>btnSave</sender>
+   <signal>clicked()</signal>
+   <receiver>SettingsWindow</receiver>
+   <slot>acceptSave()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>764</x>
+     <y>551</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>775</x>
+     <y>491</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>btnResetDefaults</sender>
+   <signal>clicked()</signal>
+   <receiver>SettingsWindow</receiver>
+   <slot>restoreDefaults()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>609</x>
+     <y>557</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>621</x>
+     <y>506</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>inputSysImage</sender>
+   <signal>editingFinished()</signal>
+   <receiver>SettingsWindow</receiver>
+   <slot>checkSysImage()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>424</x>
+     <y>56</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>404</x>
+     <y>3</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>btnAdvance</sender>
+   <signal>toggled(bool)</signal>
+   <receiver>advanceView1</receiver>
+   <slot>setVisible(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>536</x>
+     <y>557</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>272</x>
+     <y>344</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>btnAdvance</sender>
+   <signal>toggled(bool)</signal>
+   <receiver>advanceView2</receiver>
+   <slot>setVisible(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>534</x>
+     <y>557</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>306</x>
+     <y>338</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>btnAdvance</sender>
+   <signal>toggled(bool)</signal>
+   <receiver>advanceView3</receiver>
+   <slot>setVisible(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>558</x>
+     <y>557</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>574</x>
+     <y>343</y>
     </hint>
    </hints>
   </connection>
  </connections>
  <slots>
+  <signal>settingsUnsaved(bool)</signal>
   <slot>loadSysImage()</slot>
   <slot>acceptSave()</slot>
-  <slot>reloadSettings()</slot>
+  <slot>restoreDefaults()</slot>
   <slot>inputChanged()</slot>
+  <slot>checkSysImage()</slot>
  </slots>
 </ui>

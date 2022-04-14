@@ -1,12 +1,13 @@
 #pragma once
 
+#include "main.h"
 #include <stdexcept>
 #include <canaan-burn/canaan-burn.h>
 #include <QException>
 
 class KBurnException : public QException {
   public:
-	KBurnException() : QException(), errorCode(KBurnNoErr), errorMessage("") {}
+	KBurnException() : QException(), errorCode(KBurnNoErr), errorMessage(::tr("没有发生错误")) {}
 
 	KBurnException(const KBurnException &other) : QException(), errorCode(other.errorCode), errorMessage(other.errorMessage + "") {}
 
@@ -28,5 +29,4 @@ class KBurnException : public QException {
 	QString errorMessage;
 
 	void raise() const override { throw *this; }
-	KBurnException *clone() const override { return new KBurnException{*this}; }
 };

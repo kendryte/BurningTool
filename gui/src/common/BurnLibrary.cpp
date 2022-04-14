@@ -72,19 +72,19 @@ void BurnLibrary::start() {
 		[](void *self, kburnLogType level, const char *cstr) { reinterpret_cast<BurnLibrary *>(self)->handleDebugLog(level, cstr); }, this);
 
 	previousOnConnectSerial = kburnOnSerialConnect(
-		ctx, [](void *self, const kburnDeviceNode *dev) { return reinterpret_cast<BurnLibrary *>(self)->handleConnectSerial(dev); }, this);
+		ctx, [](void *self, kburnDeviceNode *dev) { return reinterpret_cast<BurnLibrary *>(self)->handleConnectSerial(dev); }, this);
 
 	previousOnHandleSerial = kburnOnSerialConfirm(
 		ctx, [](void *self, kburnDeviceNode *dev) { reinterpret_cast<BurnLibrary *>(self)->handleHandleSerial(dev); }, this);
 
 	previousOnConnectUsb = kburnOnUsbConnect(
-		ctx, [](void *self, const kburnDeviceNode *dev) { return reinterpret_cast<BurnLibrary *>(self)->handleConnectUsb(dev); }, this);
+		ctx, [](void *self, kburnDeviceNode *dev) { return reinterpret_cast<BurnLibrary *>(self)->handleConnectUsb(dev); }, this);
 
 	previousOnHandleUsb = kburnOnUsbConfirm(
 		ctx, [](void *self, kburnDeviceNode *dev) { reinterpret_cast<BurnLibrary *>(self)->handleHandleUsb(dev); }, this);
 
 	previousOnDeviceRemove = kburnOnDeviceDisconnect(
-		ctx, [](void *self, const kburnDeviceNode *dev) { reinterpret_cast<BurnLibrary *>(self)->handleDeviceRemove(dev); }, this);
+		ctx, [](void *self, kburnDeviceNode *dev) { reinterpret_cast<BurnLibrary *>(self)->handleDeviceRemove(dev); }, this);
 
 	previousOnDeviceListChange = kburnOnDeviceListChange(
 		ctx, [](void *self, bool isUsb) { reinterpret_cast<BurnLibrary *>(self)->handleDeviceListChange(isUsb); }, this);
@@ -139,75 +139,77 @@ void BurnLibrary::reloadList() {
 	emit onSerialPortList(knownSerialPorts);
 }
 
-FlashTask *BurnLibrary::startBurn(const QString &selectedSerial) {
-	const QString &comPortPath = knownSerialPorts.value(selectedSerial, selectedSerial);
-	FlashTask *task = new FlashTask(ctx, comPortPath, imagePath);
+BurningProcess *BurnLibrary::prepareBurning(const BuringRequest *request) {
+	BurningProcess *work = BuringRequest::reqeustFactory(ctx, request);
 
-	if (runningFlash.contains(comPortPath)) {
-		runningFlash[comPortPath]->cancel();
-		deleteBurnTask(runningFlash[comPortPath]);
+	// for (auto v : jobs) {
+	// 	if (work->getIdentity() == v->getIdentity()) {
+	// 		delete work;
+	// 		return NULL;
+	// 	}
+	// }
+
+	jobs.append(work);
+
+	return work;
+}
+
+void BurnLibrary::executeBurning(BurningProcess *work) {
+	Q_ASSERT(jobs.contains(work));
+	work->schedule();
+}
+
+bool BurnLibrary::deleteBurning(BurningProcess *task) {
+	task->cancel();
+
+	bool found = jobs.removeOne(task);
+
+	if (!found) {
+		qErrnoWarning("wired state: work \"%s\" not in registry", task->getTitle());
 	}
 
-	runningFlash[comPortPath] = task;
-
-	QThreadPool::globalInstance()->start(task);
-
-	return task;
+	task->deleteLater();
+	return found;
 }
 
-bool BurnLibrary::deleteBurnTask(FlashTask *task) {
-	if (!runningFlash.values().contains(task)) {
-		return false;
-	}
-
-	runningFlash.remove(task->comPort);
-	delete task;
-
-	return true;
-}
-
-bool BurnLibrary::handleConnectSerial(const kburnDeviceNode *dev) {
-	auto run = runningFlash.value(QString::fromLatin1(dev->serial->deviceInfo.path));
-	if (run != NULL) {
-		return true;
-	}
-
-	return false;
-}
-bool BurnLibrary::handleConnectUsb(const kburnDeviceNode *dev) {
-	return true;
-}
-void BurnLibrary::handleDeviceRemove(const kburnDeviceNode *dev) {
-	if (dev && dev->serial) {
-		auto path = QString::fromLatin1(dev->serial->deviceInfo.path);
-		auto run = runningFlash.value(path);
-		if (run != NULL) {
-			qDebug() << "known device disconnect" << QChar::LineFeed;
-			run->cancel();
-			runningFlash.remove(path);
-
-			return;
+bool BurnLibrary::handleConnectSerial(kburnDeviceNode *dev) {
+	for (auto p : jobs) {
+		if (p->pollingDevice(dev, SerialAttached)) {
+			return true;
 		}
 	}
+	return false;
 }
+
+bool BurnLibrary::handleConnectUsb(kburnDeviceNode *dev) {
+	return true;
+}
+
+void BurnLibrary::handleDeviceRemove(kburnDeviceNode *dev) {
+	for (auto p : jobs) {
+		p->pollingDevice(dev, Disconnected);
+	}
+}
+
 void BurnLibrary::handleHandleSerial(kburnDeviceNode *dev) {
-	auto run = runningFlash.value(QString::fromLatin1(dev->serial->deviceInfo.path));
-	if (run != NULL) {
-		qDebug() << "wanted serial device handle: " << dev->serial->deviceInfo.path << QChar::LineFeed;
-		run->onSerialConnected(dev);
-		return;
+	for (auto p : jobs) {
+		if (p->pollingDevice(dev, SerialReady)) {
+			qDebug() << "wanted serial device handle: " << dev->serial->deviceInfo.path << QChar::LineFeed;
+			return;
+		}
 	}
 
 	qDebug() << "unknown serial device handle: " << dev->serial->deviceInfo.path << QChar::LineFeed;
 }
 void BurnLibrary::handleHandleUsb(kburnDeviceNode *dev) {
-	if (dev && (dev->serial->init || dev->serial->isUsbBound)) {
-		auto run = runningFlash.value(QString::fromLatin1(dev->serial->deviceInfo.path));
-		if (run != NULL) {
-			qDebug() << "wanted usb device handle: " << dev->serial->deviceInfo.path << QChar::LineFeed;
-			run->onUsbConnected(dev);
+	for (auto p : jobs) {
+		if (p->pollingDevice(dev, UsbReady)) {
+			qDebug() << "wanted USB device handle: " << QString::number(dev->usb->deviceInfo.idVendor, 16) << ':'
+					 << QString::number(dev->usb->deviceInfo.idProduct, 16) << QChar::LineFeed;
+			return;
 		}
 	}
 
-	qDebug() << "unknown usb device handle: " << dev->serial->deviceInfo.path << QChar::LineFeed;
+	qDebug() << "unknown USB device handle: " << QString::number(dev->usb->deviceInfo.idVendor, 16) << ':'
+			 << QString::number(dev->usb->deviceInfo.idProduct, 16) << QChar::LineFeed;
 }

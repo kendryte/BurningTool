@@ -1,6 +1,5 @@
 #include "main.h"
 #include "MainWindow.h"
-#include "widgets/SettingsWindow.h"
 #include <QApplication>
 #include <QLocale>
 #include <QScreen>

@@ -17,7 +17,7 @@
 #define SETTING_SERIAL_RETRY "serial-write-retry"
 
 static const QList<uint32_t> baudrates = {9600,    115200,  230400,  460800,  576000,  921600,  1000000,
-										  1152000, 1500000, 2000000, 2500000, 3000000, 3500000, 4000000};
+                                          1152000, 1500000, 2000000, 2500000, 3000000, 3500000, 4000000};
 
 static const QMap<uint8_t, enum KBurnSerialConfigByteSize> bsMap = {
 	{8, KBurnSerialConfigByteSize_8},
@@ -27,10 +27,10 @@ static const QMap<uint8_t, enum KBurnSerialConfigByteSize> bsMap = {
 };
 
 static const QMap<QString, enum KBurnSerialConfigParity> parMap = {
-    {"None",  KBurnSerialConfigParityNone },
+	{"None",  KBurnSerialConfigParityNone },
     {"Odd",   KBurnSerialConfigParityOdd  },
     {"Even",  KBurnSerialConfigParityEven },
-    {"Mark",  KBurnSerialConfigParityMark },
+	{"Mark",  KBurnSerialConfigParityMark },
     {"Space", KBurnSerialConfigParitySpace},
 };
 
@@ -44,9 +44,9 @@ SettingsWindow::SettingsWindow(QWidget *parent)
 	: QWidget(parent), ui(new Ui::SettingsWindow), settings(QSettings::Scope::UserScope, SETTINGS_CATEGORY, "burning") {
 	ui->setupUi(this);
 
-	ui->actionBar->button(QDialogButtonBox::RestoreDefaults)->setText(tr("恢复默认"));
-	ui->actionBar->button(QDialogButtonBox::Save)->setText(tr("保存设置"));
-	ui->actionBar->button(QDialogButtonBox::Discard)->setText(tr("取消"));
+	ui->advanceView1->setVisible(false);
+	ui->advanceView2->setVisible(false);
+	ui->advanceView3->setVisible(false);
 }
 
 SettingsWindow::~SettingsWindow() {
@@ -90,36 +90,16 @@ bool SettingsWindow::checkSysImage() {
 		ui->txtImageInfo->setText(info);
 		ui->txtImageInfo->setStyleSheet("");
 
-		inputChanged();
+		emit settingsUnsaved(true);
 		return true;
 	} else {
 		fd.setFileName("");
 		ui->txtImageInfo->setText(tr("file not found"));
 		ui->txtImageInfo->setStyleSheet("QLabel { color : red; }");
 
-		inputChanged();
+		emit settingsUnsaved(true);
 		return false;
 	}
-}
-
-void SettingsWindow::on_inputSysImage_editingFinished() {
-	checkSysImage();
-}
-
-void SettingsWindow::on_actionBar_clicked(QAbstractButton *button) {
-	if (button == (QAbstractButton *)ui->actionBar->button(QDialogButtonBox::RestoreDefaults)) {
-		restoreDefaults();
-	} else if (button == (QAbstractButton *)ui->actionBar->button(QDialogButtonBox::Save)) {
-		acceptSave();
-	} else if (button == (QAbstractButton *)ui->actionBar->button(QDialogButtonBox::Discard)) {
-		reloadSettings();
-	}
-}
-
-void SettingsWindow::inputChanged() {
-	ui->actionBar->button(QDialogButtonBox::Save)->setEnabled(true);
-	ui->actionBar->button(QDialogButtonBox::Discard)->setEnabled(true);
-	emit settingsUnsaved(true);
 }
 
 void SettingsWindow::checkAndSetInt(const QString &setting, const QString &input) {
@@ -236,9 +216,6 @@ void SettingsWindow::reloadSettings() {
 		kburnSetSerialFailRetry(context, v);
 	}
 
-	ui->actionBar->button(QDialogButtonBox::Save)->setEnabled(false);
-	ui->actionBar->button(QDialogButtonBox::Discard)->setEnabled(false);
-
-	emit settingsChanged();
+	emit settingsCommited();
 	emit settingsUnsaved(false);
 }

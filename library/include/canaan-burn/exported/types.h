@@ -52,8 +52,8 @@ typedef enum kburnLogType
 	} CONCAT(name, _t)
 
 declare_callback(void, on_device_list_change, bool isUsb);
-declare_callback(bool, on_device_connect, const kburnDeviceNode *dev);
-declare_callback(void, on_device_remove, const kburnDeviceNode *dev);
+declare_callback(bool, on_device_connect, kburnDeviceNode *dev);
+declare_callback(void, on_device_remove, kburnDeviceNode *dev);
 declare_callback(void, on_device_handle, kburnDeviceNode *dev);
 declare_callback(void, on_write_progress, const kburnDeviceNode *dev, size_t current, size_t length);
 declare_callback(void, on_debug_log, kburnLogType type, const char *message);

@@ -9,8 +9,6 @@ namespace Ui {
 class SettingsWindow;
 }
 
-#define SETTINGS_CATEGORY "kendryte"
-
 class SettingsWindow : public QWidget {
 	Q_OBJECT
 	QFile fd;
@@ -26,21 +24,19 @@ class SettingsWindow : public QWidget {
 	void showEvent(QShowEvent *event);
 
   signals:
-	void settingsChanged();
+	void settingsCommited();
 	void settingsUnsaved(bool hasUnsave);
 
-  private slots:
+  public slots:
 	bool checkSysImage();
-	void on_btnSelectImage_clicked();
-	void on_inputSysImage_editingFinished();
-	void on_actionBar_clicked(class QAbstractButton *button);
-	void acceptSave();
-	void reloadSettings();
-	void inputChanged();
 
-  private:
+  private slots:
+	void on_btnSelectImage_clicked();
+	void acceptSave();
 	void restoreDefaults();
 
+  private:
+	void reloadSettings();
 	void checkAndSetInt(const QString &setting, const QString &input);
 	template <typename keyT, typename valueT>
 	void checkAndSetMap(const QMap<keyT, valueT> &map, const char *config, keyT current);
