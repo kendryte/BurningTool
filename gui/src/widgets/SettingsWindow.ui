@@ -62,6 +62,9 @@
    </item>
    <item>
     <widget class="QGroupBox" name="groupBox">
+     <property name="enabled">
+      <bool>false</bool>
+     </property>
      <property name="sizePolicy">
       <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
        <horstretch>0</horstretch>
@@ -75,7 +78,7 @@
       </size>
      </property>
      <property name="title">
-      <string>程序选项</string>
+      <string>程序选项（未实现）</string>
      </property>
      <widget class="QLabel" name="label_15">
       <property name="geometry">
@@ -118,7 +121,7 @@
      <widget class="QLabel" name="label_20">
       <property name="geometry">
        <rect>
-        <x>240</x>
+        <x>260</x>
         <y>20</y>
         <width>201</width>
         <height>21</height>
@@ -137,7 +140,7 @@
      <widget class="QLabel" name="label_21">
       <property name="geometry">
        <rect>
-        <x>240</x>
+        <x>270</x>
         <y>40</y>
         <width>201</width>
         <height>21</height>
@@ -156,8 +159,8 @@
      <widget class="QPushButton" name="pushButton">
       <property name="geometry">
        <rect>
-        <x>630</x>
-        <y>40</y>
+        <x>590</x>
+        <y>30</y>
         <width>80</width>
         <height>18</height>
        </rect>
@@ -343,6 +346,9 @@
      </item>
      <item>
       <widget class="QGroupBox" name="advanceView2">
+       <property name="enabled">
+        <bool>false</bool>
+       </property>
        <property name="minimumSize">
         <size>
          <width>200</width>
@@ -350,7 +356,7 @@
         </size>
        </property>
        <property name="title">
-        <string>设备监视设置</string>
+        <string>设备监视设置（未实现）</string>
        </property>
        <layout class="QFormLayout" name="formLayout_3">
         <item row="0" column="0">
@@ -442,6 +448,9 @@
      </item>
      <item>
       <widget class="QGroupBox" name="advanceView3">
+       <property name="enabled">
+        <bool>false</bool>
+       </property>
        <property name="minimumSize">
         <size>
          <width>200</width>
@@ -566,6 +575,61 @@
          <widget class="QSpinBox" name="inputUsbRetry">
           <property name="minimum">
            <number>3</number>
+          </property>
+         </widget>
+        </item>
+        <item row="6" column="0">
+         <widget class="QLabel" name="label_22">
+          <property name="minimumSize">
+           <size>
+            <width>75</width>
+            <height>0</height>
+           </size>
+          </property>
+          <property name="text">
+           <string>LED 引脚</string>
+          </property>
+         </widget>
+        </item>
+        <item row="6" column="1">
+         <widget class="QSpinBox" name="inputUsbLedPin">
+          <property name="buttonSymbols">
+           <enum>QAbstractSpinBox::NoButtons</enum>
+          </property>
+          <property name="minimum">
+           <number>0</number>
+          </property>
+          <property name="maximum">
+           <number>999</number>
+          </property>
+          <property name="value">
+           <number>122</number>
+          </property>
+         </widget>
+        </item>
+        <item row="7" column="0">
+         <widget class="QLabel" name="label_23">
+          <property name="minimumSize">
+           <size>
+            <width>75</width>
+            <height>0</height>
+           </size>
+          </property>
+          <property name="text">
+           <string>LED 亮度</string>
+          </property>
+         </widget>
+        </item>
+        <item row="7" column="1">
+         <widget class="QSpinBox" name="inputUsbLedLevel">
+          <property name="maximum">
+           <number>255</number>
+          </property>
+          <property name="singleStep">
+           <number>1</number>
+          </property>
+          <property name="value">
+           <number>34</number>
           </property>
          </widget>
         </item>

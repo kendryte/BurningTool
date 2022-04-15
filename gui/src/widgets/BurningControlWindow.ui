@@ -76,7 +76,7 @@
         </size>
        </property>
        <property name="text">
-        <string>自动烧录</string>
+        <string>自动烧录（未实现）</string>
        </property>
        <property name="icon">
         <iconset resource="../../resources/main.qrc">

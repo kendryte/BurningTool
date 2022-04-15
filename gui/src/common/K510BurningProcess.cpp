@@ -72,9 +72,9 @@ void K510BurningProcess::cleanup(bool success) {
 		return;
 	}
 	if (success) {
-		kburnUsbIspLedControl(node, KBURN_BOARD_PIN_LED_K510_CRB_V12B2, kburnConvertColor(0x00ff00));
+		kburnUsbIspLedControl(node, KBURN_BOARD_PIN_LED_K510_CRB_V12B2, kburnConvertColor(0x002200));
 	} else {
-		kburnUsbIspLedControl(node, KBURN_BOARD_PIN_LED_K510_CRB_V12B2, kburnConvertColor(0xff0000));
+		kburnUsbIspLedControl(node, KBURN_BOARD_PIN_LED_K510_CRB_V12B2, kburnConvertColor(0x220000));
 	}
 }
 
@@ -95,6 +95,7 @@ bool K510BurningProcess::pollingDevice(kburnDeviceNode *node, BurnLibrary::Devic
 		inputs.set(1, node);
 	} else if (event == BurnLibrary::DeviceEvent::Disconnected) {
 		this->cancel(KBurnException(::tr("设备断开")));
+		// TODO: 中途断开，异步的 deviceStateNotify 会崩溃，因为node没了
 	}
 	emit deviceStateNotify(node);
 	return true;
