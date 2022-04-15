@@ -6,15 +6,9 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>933</width>
-    <height>720</height>
+    <width>757</width>
+    <height>402</height>
    </rect>
-  </property>
-  <property name="minimumSize">
-   <size>
-    <width>540</width>
-    <height>720</height>
-   </size>
   </property>
   <property name="windowTitle">
    <string>Kendryte buring tool</string>
@@ -24,111 +18,114 @@
     <normaloff>:/icon.png</normaloff>:/icon.png</iconset>
   </property>
   <widget class="QWidget" name="mainView">
-   <layout class="QVBoxLayout" name="verticalLayout_2">
+   <layout class="QVBoxLayout" name="verticalLayout">
     <item>
      <widget class="SettingsWindow" name="settingsWindow" native="true">
       <property name="minimumSize">
        <size>
-        <width>300</width>
-        <height>200</height>
+        <width>0</width>
+        <height>50</height>
        </size>
       </property>
      </widget>
     </item>
     <item>
      <widget class="QSplitter" name="mainSplitter">
+      <property name="lineWidth">
+       <number>5</number>
+      </property>
       <property name="orientation">
        <enum>Qt::Horizontal</enum>
       </property>
-      <widget class="QWidget" name="horizontalLayoutWidget">
-       <layout class="QHBoxLayout" name="horizontalLayout">
+      <widget class="QWidget" name="layoutWidget">
+       <layout class="QVBoxLayout" name="mainContainer">
+        <property name="rightMargin">
+         <number>3</number>
+        </property>
         <item>
-         <layout class="QVBoxLayout" name="mainContainer">
-          <item>
-           <widget class="BuringControlWindow" name="burnControlWindow" native="true">
-            <property name="minimumSize">
-             <size>
-              <width>0</width>
-              <height>112</height>
-             </size>
-            </property>
-           </widget>
-          </item>
-          <item>
-           <widget class="QScrollArea" name="scrollArea">
-            <property name="frameShape">
-             <enum>QFrame::Panel</enum>
-            </property>
-            <property name="verticalScrollBarPolicy">
-             <enum>Qt::ScrollBarAlwaysOn</enum>
-            </property>
-            <property name="horizontalScrollBarPolicy">
-             <enum>Qt::ScrollBarAlwaysOff</enum>
-            </property>
-            <property name="widgetResizable">
-             <bool>true</bool>
-            </property>
-            <property name="alignment">
-             <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignTop</set>
-            </property>
-            <widget class="QWidget" name="jobListContainer">
-             <property name="geometry">
-              <rect>
-               <x>0</x>
-               <y>0</y>
-               <width>433</width>
-               <height>213</height>
-              </rect>
-             </property>
-             <layout class="QVBoxLayout" name="burnJobListView">
-              <property name="spacing">
-               <number>3</number>
-              </property>
-              <property name="sizeConstraint">
-               <enum>QLayout::SetMinimumSize</enum>
-              </property>
-              <property name="leftMargin">
-               <number>3</number>
-              </property>
-              <property name="topMargin">
-               <number>6</number>
-              </property>
-              <property name="rightMargin">
-               <number>3</number>
-              </property>
-              <property name="bottomMargin">
-               <number>6</number>
-              </property>
-              <item>
-               <spacer name="verticalSpacer">
-                <property name="orientation">
-                 <enum>Qt::Vertical</enum>
-                </property>
-                <property name="sizeHint" stdset="0">
-                 <size>
-                  <width>20</width>
-                  <height>40</height>
-                 </size>
-                </property>
-               </spacer>
-              </item>
-             </layout>
-            </widget>
-           </widget>
-          </item>
-         </layout>
-        </item>
-        <item>
-         <widget class="LoggerWindow" name="textLog">
-          <property name="undoRedoEnabled">
-           <bool>false</bool>
-          </property>
-          <property name="readOnly">
-           <bool>true</bool>
+         <widget class="BurningControlWindow" name="burnControlWindow" native="true">
+          <property name="minimumSize">
+           <size>
+            <width>0</width>
+            <height>112</height>
+           </size>
           </property>
          </widget>
         </item>
+        <item>
+         <widget class="QScrollArea" name="scrollArea">
+          <property name="frameShape">
+           <enum>QFrame::Panel</enum>
+          </property>
+          <property name="verticalScrollBarPolicy">
+           <enum>Qt::ScrollBarAlwaysOn</enum>
+          </property>
+          <property name="horizontalScrollBarPolicy">
+           <enum>Qt::ScrollBarAlwaysOff</enum>
+          </property>
+          <property name="widgetResizable">
+           <bool>true</bool>
+          </property>
+          <property name="alignment">
+           <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignTop</set>
+          </property>
+          <widget class="QWidget" name="jobListContainer">
+           <property name="geometry">
+            <rect>
+             <x>0</x>
+             <y>0</y>
+             <width>115</width>
+             <height>72</height>
+            </rect>
+           </property>
+           <layout class="QVBoxLayout" name="burnJobListView">
+            <property name="spacing">
+             <number>3</number>
+            </property>
+            <property name="sizeConstraint">
+             <enum>QLayout::SetMinimumSize</enum>
+            </property>
+            <property name="leftMargin">
+             <number>3</number>
+            </property>
+            <property name="topMargin">
+             <number>6</number>
+            </property>
+            <property name="rightMargin">
+             <number>3</number>
+            </property>
+            <property name="bottomMargin">
+             <number>6</number>
+            </property>
+            <item>
+             <spacer name="verticalSpacer">
+              <property name="orientation">
+               <enum>Qt::Vertical</enum>
+              </property>
+              <property name="sizeHint" stdset="0">
+               <size>
+                <width>20</width>
+                <height>40</height>
+               </size>
+              </property>
+             </spacer>
+            </item>
+           </layout>
+          </widget>
+         </widget>
+        </item>
        </layout>
+      </widget>
+      <widget class="LoggerWindow" name="textLog">
+       <property name="verticalScrollBarPolicy">
+        <enum>Qt::ScrollBarAlwaysOn</enum>
+       </property>
+       <property name="lineWrapMode">
+        <enum>QTextEdit::NoWrap</enum>
+       </property>
+       <property name="readOnly">
+        <bool>true</bool>
+       </property>
       </widget>
      </widget>
     </item>
@@ -139,8 +136,8 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>933</width>
-     <height>22</height>
+     <width>757</width>
+     <height>17</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuF_ile">
@@ -160,7 +157,7 @@
     <addaction name="btnOpenRelease"/>
     <addaction name="btnOpenWebsite"/>
    </widget>
-   <widget class="QMenu" name="btnUpdate">
+   <widget class="UpdateButton" name="btnUpdate">
     <property name="enabled">
      <bool>false</bool>
     </property>
@@ -252,10 +249,15 @@
    <container>1</container>
   </customwidget>
   <customwidget>
-   <class>BuringControlWindow</class>
+   <class>BurningControlWindow</class>
    <extends>QWidget</extends>
-   <header>widgets/BuringControlWindow.h</header>
+   <header>widgets/BurningControlWindow.h</header>
    <container>1</container>
+  </customwidget>
+  <customwidget>
+   <class>UpdateButton</class>
+   <extends>QMenu</extends>
+   <header>common/UpdateChecker.h</header>
   </customwidget>
  </customwidgets>
  <resources>

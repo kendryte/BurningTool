@@ -1,4 +1,5 @@
 #include "BurningProcess.h"
+#include "BurnLibrary.h"
 #include "main.h"
 #include "MyException.h"
 #include <QByteArray>
@@ -9,7 +10,7 @@
 #include <QPromise>
 #include <QThread>
 
-BurningProcess::BurningProcess(KBCTX scope, const BuringRequest *request)
+BurningProcess::BurningProcess(KBCTX scope, const BurningRequest *request)
 	: scope(scope), imageFile(request->systemImageFile), imageSize(imageFile.size()) {
 	this->setAutoDelete(false);
 
@@ -35,7 +36,7 @@ void BurningProcess::setResult(const KBurnException &reason) {
 void BurningProcess::schedule() {
 	if (!_isStarted && !_isCanceled) {
 		_isStarted = true;
-		QThreadPool::globalInstance()->start(this);
+		BurnLibrary::instance()->getThreadPool()->start(this);
 	}
 }
 
@@ -81,19 +82,22 @@ void BurningProcess::_run() {
 void BurningProcess::run() Q_DECL_NOTHROW {
 	try {
 		_run();
+		cleanup(true);
 	} catch (KBurnException &e) {
 		setResult(e); // may get result after return
 		emit failed(_result);
+		cleanup(false);
 	} catch (...) {
 		setResult(KBurnException("未知错误"));
 		emit failed(_result);
+		cleanup(false);
 	}
 	_isCompleted = true;
 }
 
 void BurningProcess::setProgress(int value) {
 	throwIfCancel();
-	emit bytesChanged(value);
+	emit progressChanged(value);
 }
 
 void BurningProcess::setStage(const QString &title, int bytes) {
@@ -104,11 +108,13 @@ void BurningProcess::setStage(const QString &title, int bytes) {
 }
 
 void BurningProcess::cancel(const KBurnException reason) {
-	_isCanceled = true;
-	if (_result.errorCode == KBurnNoErr) {
-		setResult(reason);
+	if (!_isCanceled) {
+		_isCanceled = true;
+		if (_result.errorCode == KBurnNoErr) {
+			setResult(reason);
+		}
+		emit cancelRequested();
 	}
-	emit cancelRequested();
 }
 
 void BurningProcess::cancel() {

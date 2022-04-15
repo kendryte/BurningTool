@@ -6,7 +6,6 @@
 #include <QScrollBar>
 
 LoggerWindow::LoggerWindow(QWidget *parent) : QTextEdit(parent) {
-	autoScroll = false;
 	logfile.setFileName(QDir::currentPath() + "/burning_tool.html");
 	logfile.open(QIODeviceBase::Unbuffered | QIODeviceBase::Truncate | QIODeviceBase::WriteOnly);
 }
@@ -17,6 +16,7 @@ LoggerWindow::~LoggerWindow() {
 void LoggerWindow::scrollToBottom() {
 	if (autoScroll) {
 		verticalScrollBar()->setValue(verticalScrollBar()->maximum());
+		horizontalScrollBar()->setValue(0);
 	}
 }
 

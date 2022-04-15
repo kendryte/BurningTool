@@ -6,7 +6,7 @@
 
 #define CHUNK_SIZE 1024 * 1024
 
-K510BurningProcess::K510BurningProcess(KBCTX scope, const K510BuringRequest *request)
+K510BurningProcess::K510BurningProcess(KBCTX scope, const K510BurningRequest *request)
 	: BurningProcess(scope, request), comPort(request->comPort), inputs(2), _identity(typeid(*this).name() + comPort) {
 	this->setAutoDelete(false);
 };
@@ -27,7 +27,7 @@ void K510BurningProcess::serial_isp_progress(void *self, const kburnDeviceNode *
 qint64 K510BurningProcess::prepare() {
 	setStage(::tr("正在打开串口设备"));
 
-	const auto e = kburnOpenSerial(scope, (const char *)comPort.constData());
+	const auto e = kburnOpenSerial(scope, (const char *)comPort.toLatin1());
 	if (e != KBurnNoErr) {
 		throw KBurnException(e, ::tr("串口握手失败"));
 	}
@@ -54,6 +54,8 @@ qint64 K510BurningProcess::prepare() {
 		throw KBurnException(tr("设备超时"));
 	}
 
+	usb_ok = true;
+
 	if (!kburnUsbIspGetMemorySize(node, kburnUsbIspCommandTaget::KBURN_USB_ISP_EMMC, &devInfo)) {
 		throw KBurnException(node->error->code, node->error->errorMessage);
 	}
@@ -63,6 +65,17 @@ qint64 K510BurningProcess::prepare() {
 	}
 
 	return ((CHUNK_SIZE / devInfo.block_size) + (CHUNK_SIZE % devInfo.block_size > 0 ? 1 : 0)) * devInfo.block_size;
+}
+
+void K510BurningProcess::cleanup(bool success) {
+	if (!usb_ok) {
+		return;
+	}
+	if (success) {
+		kburnUsbIspLedControl(node, KBURN_BOARD_PIN_LED_K510_CRB_V12B2, kburnConvertColor(0x00ff00));
+	} else {
+		kburnUsbIspLedControl(node, KBURN_BOARD_PIN_LED_K510_CRB_V12B2, kburnConvertColor(0xff0000));
+	}
 }
 
 bool K510BurningProcess::step(kburn_stor_address_t address, const QByteArray &chunk) {

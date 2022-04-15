@@ -29,8 +29,10 @@ class BurnLibrary : public QObject {
 
 	void fatalAlert(kburn_err_t err);
 
+	class QThreadPool *_pool;
+
   public:
-	~BurnLibrary();
+    ~BurnLibrary();
 
 	void reloadList();
 	void start();
@@ -39,12 +41,14 @@ class BurnLibrary : public QObject {
 	static KBCTX context();
 	static BurnLibrary *instance();
 
-	class BurningProcess *prepareBurning(const class BuringRequest *request);
+	class BurningProcess *prepareBurning(const class BurningRequest *request);
 	bool deleteBurning(class BurningProcess *task);
 	void executeBurning(class BurningProcess *task);
+	class QThreadPool *getThreadPool() {
+		return _pool;
+	}
 
-	enum DeviceEvent
-	{
+	enum DeviceEvent {
 		SerialAttached,
 		SerialReady,
 		UsbAttached,
@@ -53,15 +57,15 @@ class BurnLibrary : public QObject {
 	};
 
   private:
-	bool handleConnectSerial(kburnDeviceNode *dev);
-	bool handleConnectUsb(kburnDeviceNode *dev);
-	void handleDeviceRemove(kburnDeviceNode *dev);
-	void handleHandleSerial(kburnDeviceNode *dev);
-	void handleHandleUsb(kburnDeviceNode *dev);
-	void handleDebugLog(kburnLogType type, const char *message);
-	void handleDeviceListChange(bool isUsb);
+    bool handleConnectSerial(kburnDeviceNode *dev);
+    bool handleConnectUsb(kburnDeviceNode *dev);
+    void handleDeviceRemove(kburnDeviceNode *dev);
+    void handleHandleSerial(kburnDeviceNode *dev);
+    void handleHandleUsb(kburnDeviceNode *dev);
+    void handleDebugLog(kburnLogType type, const char *message);
+    void handleDeviceListChange(bool isUsb);
 
   signals:
-	void onDebugLog(bool isTrace, QString message);
-	void onSerialPortList(const QMap<QString, QString> &portList);
+    void onDebugLog(bool isTrace, QString message);
+    void onSerialPortList(const QMap<QString, QString> &portList);
 };

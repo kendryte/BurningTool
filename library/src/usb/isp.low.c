@@ -106,7 +106,7 @@ bool usb_lowlevel_command_send(
 		return false;
 	}
 
-	debug_print(KBURN_LOG_DEBUG, "      %d bytes sent", written_size);
+	debug_print(KBURN_LOG_TRACE, "      %d bytes sent", written_size);
 
 	return true;
 }

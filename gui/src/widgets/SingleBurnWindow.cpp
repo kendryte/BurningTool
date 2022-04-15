@@ -1,11 +1,21 @@
 #include "SingleBurnWindow.h"
 #include "common/BurningProcess.h"
+#include "common/BurningRequest.h"
 #include "common/BurnLibrary.h"
 #include "common/MyException.h"
 #include "ui_SingleBurnWindow.h"
 
-SingleBurnWindow::SingleBurnWindow(QWidget *parent, BurningProcess *work) : QWidget(parent), ui(new Ui::SingleBurnWindow), work(work) {
+SingleBurnWindow::SingleBurnWindow(QWidget *parent, BurningRequest *request) : QWidget(parent), ui(new Ui::SingleBurnWindow), request(request) {
 	ui->setupUi(this);
+	hide();
+
+	work = BurnLibrary::instance()->prepareBurning(request);
+	if (!work) {
+		deleteLater();
+		return;
+	}
+
+	ui->textTitle->setText(work->getTitle());
 
 	setStartState();
 
@@ -15,8 +25,8 @@ SingleBurnWindow::SingleBurnWindow(QWidget *parent, BurningProcess *work) : QWid
 
 	stateConnections << connect(work, &BurningProcess::deviceStateNotify, this, &SingleBurnWindow::handleDeviceStateChange);
 	stateConnections << connect(work, &BurningProcess::stageChanged, this, &SingleBurnWindow::setProgressText);
-	stateConnections << connect(work, &BurningProcess::bytesChanged, ui->progressBar, &QProgressBar::setMaximum);
-	stateConnections << connect(work, &BurningProcess::progressChanged, ui->progressBar, &QProgressBar::setValue);
+	stateConnections << connect(work, &BurningProcess::bytesChanged, this, &SingleBurnWindow::bytesChanged);
+	stateConnections << connect(work, &BurningProcess::progressChanged, this, &SingleBurnWindow::progressChanged);
 
 	connect(work, &BurningProcess::completed, this, &SingleBurnWindow::setCompleteState);
 	connect(work, &BurningProcess::failed, this, &SingleBurnWindow::setErrorState);
@@ -24,14 +34,36 @@ SingleBurnWindow::SingleBurnWindow(QWidget *parent, BurningProcess *work) : QWid
 	connect(work, &BurningProcess::destroyed, this, &QWidget::deleteLater);
 }
 
+void SingleBurnWindow::showEvent(QShowEvent *event) {
+	QWidget::showEvent(event);
+	if (work) {
+		BurnLibrary::instance()->executeBurning(work);
+	}
+}
+
 SingleBurnWindow::~SingleBurnWindow() {
-	BurnLibrary::instance()->deleteBurning(work);
-	work = NULL;
+	deleteWork();
 	delete ui;
 }
 
-void SingleBurnWindow::setSize(int size) {
-	setFixedWidth(size);
+void SingleBurnWindow::bytesChanged(int maximumBytes) {
+	ui->progressBar->setMaximum(maximumBytes);
+}
+
+void SingleBurnWindow::progressChanged(int writtenBytes) {
+	ui->progressBar->setValue(writtenBytes);
+}
+
+void SingleBurnWindow::deleteWork(bool preserveRequest) {
+	if (work) {
+		work->disconnect();
+		BurnLibrary::instance()->deleteBurning(work);
+		work = nullptr;
+	}
+	if (request && !preserveRequest) {
+		delete request;
+	}
+	request = nullptr;
 }
 
 void SingleBurnWindow::setStartState() {
@@ -71,7 +103,7 @@ void SingleBurnWindow::setErrorState(const KBurnException &reason) {
 }
 
 void SingleBurnWindow::setCancellingState() {
-	for (auto conn : stateConnections) {
+	for (auto &conn : stateConnections) {
 		QObject::disconnect(conn);
 	}
 	ui->btnTerminate->setDisabled(true);
@@ -152,8 +184,11 @@ void SingleBurnWindow::handleDeviceStateChange(const kburnDeviceNode *dev) {
 }
 
 void SingleBurnWindow::on_btnRetry_clicked() {
-	emit retryRequested();
 	deleteLater();
+	bool someoneHandled = emit retryRequested(request);
+	if (someoneHandled) {
+		deleteWork(true);
+	}
 }
 
 void SingleBurnWindow::on_btnDismiss_clicked() {

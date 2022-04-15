@@ -5,27 +5,27 @@
 #include <QMap>
 
 namespace Ui {
-class BuringControlWindow;
+class BurningControlWindow;
 }
 
-class BuringControlWindow : public QGroupBox {
+class BurningControlWindow : public QGroupBox {
 	Q_OBJECT
 
-	Ui::BuringControlWindow *ui;
+	Ui::BurningControlWindow *ui;
 	QMap<QString, QString> portList;
 
   public:
-	explicit BuringControlWindow(QWidget *parent = nullptr);
-	~BuringControlWindow();
+	explicit BurningControlWindow(QWidget *parent = nullptr);
+	~BurningControlWindow();
 
   signals:
-	void newProcessRequested(class BuringRequest *partialRequest);
+	void newProcessRequested(class BurningRequest *partialRequest);
 	void showSettingRequested();
 
   private slots:
 	void on_btnStartBurn_clicked();
 	void handleSerialPortList(const QMap<QString, QString> &list);
-	void on_btnAdvance_clicked() { emit showSettingRequested(); }
+	void on_btnOpenSettings_clicked() { emit showSettingRequested(); }
 	void on_buttonStartAuto_clicked(bool checked);
 };
 

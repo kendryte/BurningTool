@@ -2,23 +2,26 @@
 
 #include "qtextedit.h"
 #include <QLabel>
+#include <QScrollArea>
 #include <QStyle>
 #include <QTimer>
 
-class StateMessage : public QLabel {
+class StateMessage : public QScrollArea {
   private:
-	using QLabel::setStyleSheet;
+    class QGraphicsOpacityEffect *opacity;
+    QLabel label;
 
 	int timer = 0;
+	bool hidden = false;
+
 	void timerEvent(QTimerEvent *event);
 	void blink(bool start);
 	void setState(const QString &status, const QString &message);
 	void resize();
 
   public:
-	void setText(const QString &){};
-	QSize minimumSizeHint() { return QSize(0, QLabel::minimumSizeHint().height()); };
-	void resizeEvent(QResizeEvent *) { resize(); }
+    void resizeEvent(QResizeEvent *) { resize(); }
+    QSize sizeHint() const override;
 
 	StateMessage(QWidget *parent);
 	void success(const QString &message);

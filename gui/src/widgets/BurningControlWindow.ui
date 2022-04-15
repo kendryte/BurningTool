@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
- <class>BuringControlWindow</class>
- <widget class="QGroupBox" name="BuringControlWindow">
+ <class>BurningControlWindow</class>
+ <widget class="QGroupBox" name="BurningControlWindow">
   <property name="geometry">
    <rect>
     <x>0</x>
@@ -94,12 +94,15 @@
       </widget>
      </item>
      <item>
-      <widget class="QPushButton" name="btnAdvance">
+      <widget class="QPushButton" name="btnOpenSettings">
        <property name="minimumSize">
         <size>
          <width>140</width>
          <height>0</height>
         </size>
+       </property>
+       <property name="cursor">
+        <cursorShape>PointingHandCursor</cursorShape>
        </property>
        <property name="text">
         <string>设置 | 选择镜像</string>

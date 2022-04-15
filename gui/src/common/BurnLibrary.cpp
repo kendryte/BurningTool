@@ -16,9 +16,14 @@ BurnLibrary::~BurnLibrary() {
 	kburnOnUsbConnect(ctx, previousOnConnectUsb.handler, previousOnConnectUsb.context);
 	kburnOnUsbConfirm(ctx, previousOnHandleUsb.handler, previousOnHandleUsb.context);
 	kburnOnDeviceDisconnect(ctx, previousOnDeviceRemove.handler, previousOnDeviceRemove.context);
+
+	_pool->waitForDone(5000);
+	delete _pool;
 }
 
 BurnLibrary::BurnLibrary(QWidget *parent) : parent(parent) {
+	_pool = new QThreadPool();
+	_pool->setMaxThreadCount(30);
 }
 
 BurnLibrary *BurnLibrary::_instance = NULL;
@@ -36,14 +41,6 @@ KBCTX BurnLibrary::context() {
 void BurnLibrary::createInstance(QWidget *parent) {
 	Q_ASSERT(BurnLibrary::_instance == NULL);
 	auto instance = new BurnLibrary(parent);
-
-	KBCTX context;
-	kburn_err_t err = kburnCreate(&context);
-	if (err != KBurnNoErr) {
-		instance->fatalAlert(err);
-	}
-
-	instance->ctx = context;
 
 	BurnLibrary::_instance = instance;
 };
@@ -71,6 +68,14 @@ void BurnLibrary::start() {
 	previousOnDebugLog = kburnSetLogCallback(
 		[](void *self, kburnLogType level, const char *cstr) { reinterpret_cast<BurnLibrary *>(self)->handleDebugLog(level, cstr); }, this);
 
+	KBCTX context;
+	kburn_err_t err = kburnCreate(&context);
+	if (err != KBurnNoErr) {
+		fatalAlert(err);
+	}
+
+	ctx = context;
+
 	previousOnConnectSerial = kburnOnSerialConnect(
 		ctx, [](void *self, kburnDeviceNode *dev) { return reinterpret_cast<BurnLibrary *>(self)->handleConnectSerial(dev); }, this);
 
@@ -91,7 +96,7 @@ void BurnLibrary::start() {
 
 #pragma GCC diagnostic pop
 
-	auto err = kburnStartWaitingDevices(ctx);
+	err = kburnStartWaitingDevices(ctx);
 	if (err != KBurnNoErr) {
 		fatalAlert(err);
 	}
@@ -126,7 +131,7 @@ void BurnLibrary::reloadList() {
 	for (auto i = 0; i < list.size; i++) {
 		QString r;
 		r += QString::fromLatin1(list.list[i].path) + " - [" + QString::number(list.list[i].usbIdVendor, 16).leftJustified(4, '0') + ":" +
-		     QString::number(list.list[i].usbIdProduct, 16).leftJustified(4, '0') + "] ";
+			 QString::number(list.list[i].usbIdProduct, 16).leftJustified(4, '0') + "] ";
 #if WIN32
 		r += QString::fromUtf8(list.list[i].title) + " (" + QString::fromUtf8(list.list[i].hwid) + ")";
 #elif __linux__
@@ -139,15 +144,15 @@ void BurnLibrary::reloadList() {
 	emit onSerialPortList(knownSerialPorts);
 }
 
-BurningProcess *BurnLibrary::prepareBurning(const BuringRequest *request) {
-	BurningProcess *work = BuringRequest::reqeustFactory(ctx, request);
+BurningProcess *BurnLibrary::prepareBurning(const BurningRequest *request) {
+	BurningProcess *work = BurningRequest::reqeustFactory(ctx, request);
 
-	// for (auto v : jobs) {
-	// 	if (work->getIdentity() == v->getIdentity()) {
-	// 		delete work;
-	// 		return NULL;
-	// 	}
-	// }
+	for (auto v : jobs) {
+		if (work->getIdentity() == v->getIdentity()) {
+			delete work;
+			return NULL;
+		}
+	}
 
 	jobs.append(work);
 
@@ -160,16 +165,16 @@ void BurnLibrary::executeBurning(BurningProcess *work) {
 }
 
 bool BurnLibrary::deleteBurning(BurningProcess *task) {
-	task->cancel();
-
 	bool found = jobs.removeOne(task);
 
 	if (!found) {
-		qErrnoWarning("wired state: work \"%s\" not in registry", task->getTitle());
+		qErrnoWarning("wired state: work \"%.10s\" not in registry", task->getTitle());
+		return false;
 	}
 
+	task->cancel();
 	task->deleteLater();
-	return found;
+	return true;
 }
 
 bool BurnLibrary::handleConnectSerial(kburnDeviceNode *dev) {

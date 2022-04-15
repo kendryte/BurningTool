@@ -37,7 +37,7 @@ class MainWindow : public QMainWindow {
 	void on_btnOpenWebsite_triggered();
 	void on_btnSaveLog_triggered();
 	void on_btnOpenRelease_triggered();
-	void startNewBurnJob(class BuringRequest *partialRequest);
+	void startNewBurnJob(class BurningRequest *partialRequest);
 	void onResized();
 
   private:

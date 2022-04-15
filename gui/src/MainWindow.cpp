@@ -1,6 +1,6 @@
 #include "MainWindow.h"
-#include "common/BuringRequest.h"
 #include "common/BurningProcess.h"
+#include "common/BurningRequest.h"
 #include "common/BurnLibrary.h"
 #include "common/UpdateChecker.h"
 #include "config.h"
@@ -11,6 +11,8 @@
 #include <QDesktopServices>
 #include <QFileDialog>
 #include <QList>
+#include <QScrollBar>
+#include <QTimer>
 #include <QUrl>
 
 #define SETTING_SPLIT_STATE "splitter-sizes"
@@ -24,8 +26,6 @@ MainWindow::MainWindow(QWidget *parent)
 	BurnLibrary::createInstance(this);
 
 	ui->setupUi(this);
-
-	updateChecker = new UpdateChecker(ui->btnUpdate);
 
 	QString getTitleVersion(void);
 	setWindowTitle(windowTitle() + getTitleVersion());
@@ -50,8 +50,8 @@ MainWindow::MainWindow(QWidget *parent)
 	connect(ui->settingsWindow, &SettingsWindow::settingsCommited, ui->mainSplitter, &QSplitter::show);
 	connect(ui->settingsWindow, &SettingsWindow::settingsCommited, ui->settingsWindow, &SettingsWindow::hide);
 
-	connect(ui->burnControlWindow, &BuringControlWindow::showSettingRequested, ui->mainSplitter, &QSplitter::hide);
-	connect(ui->burnControlWindow, &BuringControlWindow::showSettingRequested, ui->settingsWindow, &SettingsWindow::show);
+	connect(ui->burnControlWindow, &BurningControlWindow::showSettingRequested, ui->mainSplitter, &QSplitter::hide);
+	connect(ui->burnControlWindow, &BurningControlWindow::showSettingRequested, ui->settingsWindow, &SettingsWindow::show);
 	/* setting send */
 
 	connect(&traceSetting, &SettingsBool::changed, this->ui->textLog, &LoggerWindow::setTraceLevelVisible);
@@ -62,19 +62,18 @@ MainWindow::MainWindow(QWidget *parent)
 
 	connect(BurnLibrary::instance(), &BurnLibrary::onDebugLog, ui->textLog, &LoggerWindow::append);
 
-	connect(ui->burnControlWindow, &BuringControlWindow::newProcessRequested, this, &MainWindow::startNewBurnJob);
+	connect(ui->burnControlWindow, &BurningControlWindow::newProcessRequested, this, &MainWindow::startNewBurnJob);
+	connect(ui->burnControlWindow, &BurningControlWindow::newProcessRequested, this, &MainWindow::onResized);
 
 	BurnLibrary::instance()->start();
+
+	updateChecker = new UpdateChecker(ui->btnUpdate);
 }
 
 void MainWindow::onResized() {
-	auto width = ui->mainContainer->geometry().width();
+	auto width = ui->mainContainer->geometry().width() - ui->scrollArea->verticalScrollBar()->width();
 	ui->jobListContainer->setMaximumWidth(width);
-	// auto width = ui->jobListContainer->width();
-	auto list = ui->jobListContainer->findChildren<SingleBurnWindow *>();
-	for (auto p : list) {
-		p->setSize(width);
-	}
+	ui->jobListContainer->setMinimumWidth(width);
 }
 
 void MainWindow::closeEvent(QCloseEvent *ev) {
@@ -114,26 +113,20 @@ void MainWindow::on_btnOpenRelease_triggered() {
 	QDesktopServices::openUrl(QUrl("https://github.com/kendryte/BurningTool/releases/tag/latest"));
 }
 
-void MainWindow::startNewBurnJob(BuringRequest *partialRequest) {
+void MainWindow::startNewBurnJob(BurningRequest *partialRequest) {
 	partialRequest->systemImageFile = ui->settingsWindow->getFile();
 
-	BuringRequest *request = partialRequest;
-
-	auto instance = BurnLibrary::instance();
-	auto work = instance->prepareBurning(request);
-	if (!work) {
-		// TODO: alert?
-		return;
-	}
-
-	auto display = new SingleBurnWindow(this, work);
+	auto display = new SingleBurnWindow(this, partialRequest);
 	ui->burnJobListView->insertWidget(ui->burnJobListView->count() - 1, display, 0, Qt::AlignTop);
 
-	connect(display, &SingleBurnWindow::destroyed, [=]() {
-		instance->deleteBurning(work);
-		delete request;
-	});
-	connect(display, &SingleBurnWindow::retryRequested, [=]() { startNewBurnJob(request); });
+	connect(display, &SingleBurnWindow::retryRequested, this, [=](BurningRequest *request) {
+		QTimer::singleShot(0, this, [=] {
+			// xxx
+			startNewBurnJob(request);
+		});
 
-	instance->executeBurning(work);
+		return true;
+	});
+
+	display->show();
 }

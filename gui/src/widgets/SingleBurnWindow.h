@@ -17,32 +17,34 @@ class SingleBurnWindow : public QWidget {
 	QList<QMetaObject::Connection> stateConnections;
 	bool isDone = false;
 	bool autoDismiss = false;
+	class BurningRequest *request;
 
-	void attach(BurningProcess *work);
 	void setStartState();
+	void deleteWork(bool preserveRequest = false);
 
   public:
-	explicit SingleBurnWindow(QWidget *parent, class BurningProcess *work);
-	~SingleBurnWindow();
-	void setProgressInfinit();
-	void setAutoDismiss(bool autodis);
+    explicit SingleBurnWindow(QWidget *parent, class BurningRequest *request);
+    ~SingleBurnWindow();
+    void setProgressInfinit();
+    void setAutoDismiss(bool autodis);
 
 	auto getWork() const { return work; }
-
-	void setSize(int size);
+	void showEvent(QShowEvent *event);
 
   private slots:
-	void setCompleteState();
-	void setErrorState(const class KBurnException &reason);
-	void setCancellingState();
+    void setCompleteState();
+    void setErrorState(const class KBurnException &reason);
+    void setCancellingState();
 
 	void setProgressText(const QString &tip);
 	void handleDeviceStateChange(const struct kburnDeviceNode *dev);
+	void bytesChanged(int maximumBytes);
+	void progressChanged(int writtenBytes);
 
 	void on_btnRetry_clicked();
 	void on_btnDismiss_clicked();
 	void on_btnTerminate_clicked();
 
   signals:
-	void retryRequested();
+    bool retryRequested(class BurningRequest *request);
 };

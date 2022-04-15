@@ -1,6 +1,6 @@
 #pragma once
 
-#include "BuringRequest.h"
+#include "BurningRequest.h"
 #include "BurnLibrary.h"
 #include "MyException.h"
 #include <canaan-burn/canaan-burn.h>
@@ -20,7 +20,7 @@ class BurningProcess : public QObject, public QRunnable {
 	KBurnException _result;
 
   protected:
-	BurningProcess(KBCTX scope, const BuringRequest *request);
+    BurningProcess(KBCTX scope, const BurningRequest *request);
 
 	KBCTX scope;
 	class QDataStream *imageStream = NULL;
@@ -33,10 +33,11 @@ class BurningProcess : public QObject, public QRunnable {
 
 	virtual qint64 prepare() = 0;
 	virtual bool step(kburn_stor_address_t address, const QByteArray &chunk) = 0;
+	virtual void cleanup(bool success){};
 
   public:
-	const qint64 imageSize;
-	~BurningProcess();
+    const qint64 imageSize;
+    ~BurningProcess();
 
 	void run() Q_DECL_NOTHROW;
 	void _run();
@@ -51,17 +52,16 @@ class BurningProcess : public QObject, public QRunnable {
 	bool isStarted() { return _isStarted; }
 	bool isCompleted() { return _isCompleted; }
 
-	void cancel(const KBurnException reason);
-	void cancel();
+	virtual void cancel(const KBurnException reason);
+	virtual void cancel();
 
-	enum BurnStage
-	{
+	enum BurnStage {
 		Starting,
 		Serial,
 		Usb,
 	};
   signals:
-	void deviceStateNotify(kburnDeviceNode *node);
+    void deviceStateNotify(kburnDeviceNode *node);
 
 	void stageChanged(const QString &title);
 	void bytesChanged(int maximumBytes);

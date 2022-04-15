@@ -1,19 +1,19 @@
-#include "BuringControlWindow.h"
-#include "common/BuringRequest.h"
+#include "BurningControlWindow.h"
+#include "common/BurningRequest.h"
 #include "common/BurnLibrary.h"
-#include "ui_BuringControlWindow.h"
+#include "ui_BurningControlWindow.h"
 
-BuringControlWindow::BuringControlWindow(QWidget *parent) : QGroupBox(parent), ui(new Ui::BuringControlWindow) {
+BurningControlWindow::BurningControlWindow(QWidget *parent) : QGroupBox(parent), ui(new Ui::BurningControlWindow) {
 	ui->setupUi(this);
 
-	connect(BurnLibrary::instance(), &BurnLibrary::onSerialPortList, this, &BuringControlWindow::handleSerialPortList);
+	connect(BurnLibrary::instance(), &BurnLibrary::onSerialPortList, this, &BurningControlWindow::handleSerialPortList);
 }
 
-BuringControlWindow::~BuringControlWindow() {
+BurningControlWindow::~BurningControlWindow() {
 	delete ui;
 }
 
-void BuringControlWindow::handleSerialPortList(const QMap<QString, QString> &list) {
+void BurningControlWindow::handleSerialPortList(const QMap<QString, QString> &list) {
 	portList = list;
 
 	QString save(ui->inputComPortList->currentText());
@@ -43,17 +43,21 @@ void BuringControlWindow::handleSerialPortList(const QMap<QString, QString> &lis
 	}
 }
 
-void BuringControlWindow::on_buttonStartAuto_clicked(bool checked) {
+void BurningControlWindow::on_buttonStartAuto_clicked(bool checked) {
 	// TODO
+	ui->btnOpenSettings->setEnabled(!checked);
 }
 
-void BuringControlWindow::on_btnStartBurn_clicked() {
+void BurningControlWindow::on_btnStartBurn_clicked() {
 	QString comPort = ui->inputComPortList->currentText();
 	if (portList.contains(comPort)) {
 		comPort = portList[comPort];
 	}
+	if (comPort.isEmpty()) {
+		return;
+	}
 
-	auto request = new K510BuringRequest();
+	auto request = new K510BurningRequest();
 
 	request->comPort = comPort;
 
