@@ -146,6 +146,7 @@
     </property>
     <addaction name="btnToggleLogTrace"/>
     <addaction name="btnDumpBuffer"/>
+    <addaction name="action"/>
     <addaction name="btnSaveLog"/>
     <addaction name="separator"/>
     <addaction name="btnQuitMenu"/>
@@ -233,6 +234,11 @@
   <action name="btnOpenRelease">
    <property name="text">
     <string>下载最新版本</string>
+   </property>
+  </action>
+  <action name="action">
+   <property name="text">
+    <string>展开日志窗口</string>
    </property>
   </action>
  </widget>

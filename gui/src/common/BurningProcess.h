@@ -44,7 +44,7 @@ class BurningProcess : public QObject, public QRunnable {
 	void schedule();
 
 	virtual QString getTitle() const { return "UNKNOWN JOB"; }
-	virtual const QString &getIdentity() const = 0;
+	virtual const QString &getDetailInfo() const = 0;
 	virtual bool pollingDevice(kburnDeviceNode *node, BurnLibrary::DeviceEvent event) = 0;
 	const KBurnException &getReason() { return _result; }
 
@@ -61,7 +61,7 @@ class BurningProcess : public QObject, public QRunnable {
 		Usb,
 	};
   signals:
-    void deviceStateNotify(kburnDeviceNode *node);
+    void deviceStateNotify();
 
 	void stageChanged(const QString &title);
 	void bytesChanged(int maximumBytes);

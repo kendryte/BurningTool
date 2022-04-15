@@ -7,7 +7,7 @@
 #define CHUNK_SIZE 1024 * 1024
 
 K510BurningProcess::K510BurningProcess(KBCTX scope, const K510BurningRequest *request)
-	: BurningProcess(scope, request), comPort(request->comPort), inputs(2), _identity(typeid(*this).name() + comPort) {
+	: BurningProcess(scope, request), comPort(request->comPort), inputs(2) {
 	this->setAutoDelete(false);
 };
 
@@ -25,6 +25,8 @@ void K510BurningProcess::serial_isp_progress(void *self, const kburnDeviceNode *
 }
 
 qint64 K510BurningProcess::prepare() {
+	// FIXME 串口打开过程中（没开始写isp）断开链接会崩溃
+
 	setStage(::tr("正在打开串口设备"));
 
 	const auto e = kburnOpenSerial(scope, (const char *)comPort.toLatin1());
@@ -67,15 +69,18 @@ qint64 K510BurningProcess::prepare() {
 	return ((CHUNK_SIZE / devInfo.block_size) + (CHUNK_SIZE % devInfo.block_size > 0 ? 1 : 0)) * devInfo.block_size;
 }
 
+#include "AppGlobalSetting.h"
 void K510BurningProcess::cleanup(bool success) {
 	if (!usb_ok) {
 		return;
 	}
+	uint32_t color = GlobalSetting::usbLedLevel.getValue();
 	if (success) {
-		kburnUsbIspLedControl(node, KBURN_BOARD_PIN_LED_K510_CRB_V12B2, kburnConvertColor(0x002200));
+		color = color << 8;
 	} else {
-		kburnUsbIspLedControl(node, KBURN_BOARD_PIN_LED_K510_CRB_V12B2, kburnConvertColor(0x220000));
+		color = color << 16;
 	}
+	kburnUsbIspLedControl(node, GlobalSetting::usbLedPin.getValue(), kburnConvertColor(color));
 }
 
 bool K510BurningProcess::step(kburn_stor_address_t address, const QByteArray &chunk) {
@@ -95,8 +100,57 @@ bool K510BurningProcess::pollingDevice(kburnDeviceNode *node, BurnLibrary::Devic
 		inputs.set(1, node);
 	} else if (event == BurnLibrary::DeviceEvent::Disconnected) {
 		this->cancel(KBurnException(::tr("设备断开")));
-		// TODO: 中途断开，异步的 deviceStateNotify 会崩溃，因为node没了
 	}
-	emit deviceStateNotify(node);
+	emit deviceStateNotify();
 	return true;
+}
+
+void K510BurningProcess::recreateDeviceStatus(const kburnDeviceNode *dev) {
+	QString &val = _detailInfo;
+	val += tr("Serial Device: ");
+	if (dev->serial->init || dev->serial->isUsbBound) {
+		val += dev->serial->deviceInfo.path;
+		val += '\n';
+		val += tr("  * init: ");
+		val += dev->serial->init ? tr("yes") : tr("no");
+		val += '\n';
+		val += tr("  * isOpen: ");
+		val += dev->serial->isOpen ? tr("yes") : tr("no");
+		val += '\n';
+		val += tr("  * isConfirm: ");
+		val += dev->serial->isConfirm ? tr("yes") : tr("no");
+		val += '\n';
+		val += tr("  * isUsbBound: ");
+		val += dev->serial->isUsbBound ? tr("yes") : tr("no");
+	} else {
+		val += tr("not connected");
+	}
+	val += '\n';
+
+	val += tr("Usb Device: ");
+	if (dev->usb->init) {
+		for (auto i = 0; i < MAX_USB_PATH_LENGTH - 1; i++) {
+			val += QString::number(dev->usb->deviceInfo.path[i], 16) + QChar(':');
+		}
+		val.chop(1);
+		val += '\n';
+
+		val += "  * VID: " + QString::number(dev->usb->deviceInfo.idVendor, 16) + '\n';
+		val += "  * PID: " + QString::number(dev->usb->deviceInfo.idProduct, 16) + '\n';
+	} else {
+		val += tr("not connected");
+	}
+	val += '\n';
+
+	if (dev->error->code) {
+		val += tr("  * error status: ");
+		auto errs = kburnSplitErrorCode(dev->error->code);
+		val += tr("kind: ");
+		val += QString::number(errs.kind >> 32);
+		val += ", ";
+		val += tr("code: ");
+		val += QString::number(errs.code);
+		val += ", ";
+		val += QString::fromLatin1(dev->error->errorMessage);
+	}
 }

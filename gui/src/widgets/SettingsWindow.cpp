@@ -1,5 +1,6 @@
 #include "SettingsWindow.h"
 #include "../common/BurnLibrary.h"
+#include "common/AppGlobalSetting.h"
 #include "ui_SettingsWindow.h"
 #include <canaan-burn/canaan-burn.h>
 #include <QDir>
@@ -47,6 +48,21 @@ SettingsWindow::SettingsWindow(QWidget *parent)
 	ui->advanceView1->setVisible(false);
 	ui->advanceView2->setVisible(false);
 	ui->advanceView3->setVisible(false);
+
+	GlobalSetting::autoConfirm.connectCheckBox(ui->inputAutoConfirm);
+	GlobalSetting::autoConfirmManualJob.connectCheckBox(ui->inputAutoConfirmManualJob);
+	GlobalSetting::autoConfirmEvenError.connectCheckBox(ui->inputAutoConfirmEvenError);
+	GlobalSetting::disableUpdate.connectCheckBox(ui->inputDisableUpdate);
+	GlobalSetting::watchVid.connectSpinBox(ui->inputWatchVid);
+	GlobalSetting::watchPid.connectSpinBox(ui->inputWatchPid);
+	GlobalSetting::appBurnThread.connectSpinBox(ui->inputAppBurnThread);
+	GlobalSetting::usbLedPin.connectSpinBox(ui->inputUsbLedPin);
+	GlobalSetting::usbLedLevel.connectSpinBox(ui->inputUsbLedLevel);
+
+	if (!GlobalSetting::autoConfirm.getValue()) {
+		ui->inputAutoConfirmManualJob->setEnabled(false);
+		ui->inputAutoConfirmEvenError->setEnabled(false);
+	}
 }
 
 SettingsWindow::~SettingsWindow() {
@@ -141,6 +157,8 @@ void SettingsWindow::acceptSave() {
 }
 
 void SettingsWindow::restoreDefaults() {
+	GlobalSetting::restoreDefaults();
+
 	settings.clear();
 	reloadSettings();
 }

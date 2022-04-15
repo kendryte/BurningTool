@@ -7,6 +7,7 @@ static const QString standbyStyle = "font-weight: bold;";
 static const QString normalStyle = "font-size: 20px;";
 
 StateMessage::StateMessage(QWidget *parent) : QScrollArea(parent) {
+	// TODO: 较长消息想办法显示全
 	setAlignment(Qt::AlignRight | Qt::AlignVCenter);
 
 	opacity = new QGraphicsOpacityEffect(this);

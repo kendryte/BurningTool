@@ -62,7 +62,7 @@
       <number>18</number>
      </property>
      <item>
-      <widget class="QPushButton" name="buttonStartAuto">
+      <widget class="AnimatedButton" name="buttonStartAuto">
        <property name="sizePolicy">
         <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
          <horstretch>0</horstretch>
@@ -76,7 +76,7 @@
         </size>
        </property>
        <property name="text">
-        <string>自动烧录（未实现）</string>
+        <string>自动烧录</string>
        </property>
        <property name="icon">
         <iconset resource="../../resources/main.qrc">
@@ -175,6 +175,13 @@
    </item>
   </layout>
  </widget>
+ <customwidgets>
+  <customwidget>
+   <class>AnimatedButton</class>
+   <extends>QPushButton</extends>
+   <header>widgets/AnimatedButton.h</header>
+  </customwidget>
+ </customwidgets>
  <resources>
   <include location="../../resources/main.qrc"/>
  </resources>

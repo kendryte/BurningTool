@@ -7,12 +7,12 @@
 #define KBURN_VIDPID_FILTER_ANY -1 // NO USE
 
 struct kburnUsbDeviceInfoSlice {
-	PCONST uint16_t idVendor;
-	PCONST uint16_t idProduct;
-	PCONST uint8_t path[MAX_USB_PATH_LENGTH];
+	uint16_t idVendor;
+	uint16_t idProduct;
+	uint8_t path[MAX_USB_PATH_LENGTH];
 	// #ifdef __linux__
-	// 	PCONST uint32_t major;
-	// 	PCONST uint32_t minor;
+	//  uint32_t major;
+	//  uint32_t minor;
 	// #endif
 };
 

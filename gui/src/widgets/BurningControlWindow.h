@@ -12,7 +12,8 @@ class BurningControlWindow : public QGroupBox {
 	Q_OBJECT
 
 	Ui::BurningControlWindow *ui;
-	QMap<QString, QString> portList;
+	QList<struct m_portInfo> *portList;
+	bool autoBurningEnabled = false;
 
   public:
 	explicit BurningControlWindow(QWidget *parent = nullptr);
@@ -23,8 +24,9 @@ class BurningControlWindow : public QGroupBox {
 	void showSettingRequested();
 
   private slots:
+	void handleSettingsWindowButtonState();
 	void on_btnStartBurn_clicked();
-	void handleSerialPortList(const QMap<QString, QString> &list);
+	void handleSerialPortList(const QList<struct kburnSerialDeviceInfoSlice> &list);
 	void on_btnOpenSettings_clicked() { emit showSettingRequested(); }
 	void on_buttonStartAuto_clicked(bool checked);
 };

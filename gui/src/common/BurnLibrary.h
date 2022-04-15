@@ -22,8 +22,8 @@ class BurnLibrary : public QObject {
 	kburnDebugColors previousColors;
 
 	kburnSerialDeviceList list = {0, NULL};
-	QMap<QString, QString> knownSerialPorts;
-	QList<class BurningProcess *> jobs; // TODO: need mutex
+	QList<kburnSerialDeviceInfoSlice> knownSerialPorts;
+	QMap<QString, class BurningProcess *> jobs; // FIXME: need mutex
 
 	BurnLibrary(QWidget *parent);
 
@@ -38,15 +38,17 @@ class BurnLibrary : public QObject {
 	void start();
 
 	static void createInstance(QWidget *parent);
+	static void deleteInstance();
 	static KBCTX context();
 	static BurnLibrary *instance();
 
 	class BurningProcess *prepareBurning(const class BurningRequest *request);
 	bool deleteBurning(class BurningProcess *task);
 	void executeBurning(class BurningProcess *task);
-	class QThreadPool *getThreadPool() {
-		return _pool;
-	}
+	bool hasBurning(const BurningRequest *req);
+	uint getBurningJobCount() { return jobs.size(); }
+
+	QThreadPool *getThreadPool() { return _pool; }
 
 	enum DeviceEvent {
 		SerialAttached,
@@ -66,6 +68,7 @@ class BurnLibrary : public QObject {
     void handleDeviceListChange(bool isUsb);
 
   signals:
+    void jobListChanged();
     void onDebugLog(bool isTrace, QString message);
-    void onSerialPortList(const QMap<QString, QString> &portList);
+    void onSerialPortList(const QList<kburnSerialDeviceInfoSlice> &portList);
 };

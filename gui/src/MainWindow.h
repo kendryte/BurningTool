@@ -28,19 +28,21 @@ class MainWindow : public QMainWindow {
 
   protected:
   public:
-	MainWindow(QWidget *parent = nullptr);
-	~MainWindow();
+    MainWindow(QWidget *parent = nullptr);
+    ~MainWindow();
 
-	void resizeEvent(QResizeEvent *event) { onResized(); }
+    void resizeEvent(QResizeEvent *event) { onResized(); }
 
   private slots:
-	void on_btnOpenWebsite_triggered();
-	void on_btnSaveLog_triggered();
-	void on_btnOpenRelease_triggered();
-	void startNewBurnJob(class BurningRequest *partialRequest);
-	void onResized();
+    void on_btnOpenWebsite_triggered();
+    void on_btnSaveLog_triggered();
+    void on_btnOpenRelease_triggered();
+    void startNewBurnJob(class BurningRequest *partialRequest);
+    void onResized();
+
+    void on_action_triggered();
 
   private:
-	void closeEvent(QCloseEvent *ev);
-	Ui::MainWindow *ui;
+    void closeEvent(QCloseEvent *ev);
+    Ui::MainWindow *ui;
 };

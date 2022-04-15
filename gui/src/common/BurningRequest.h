@@ -8,10 +8,12 @@ class BurningRequest {
 	virtual ~BurningRequest(){};
 
 	QString systemImageFile;
+	bool isAutoCreate = false;
 
 	enum DeviceKind
 	{ K510, };
 
+	virtual QString getIdentity() const = 0;
 	static class BurningProcess *reqeustFactory(KBCTX scope, const BurningRequest *request);
 
   protected:
@@ -24,4 +26,5 @@ class K510BurningRequest : public BurningRequest {
 
   public:
 	QString comPort;
+	QString getIdentity() const { return comPort + "!" + typeid(*this).name(); }
 };

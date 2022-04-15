@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>835</width>
-    <height>597</height>
+    <width>814</width>
+    <height>620</height>
    </rect>
   </property>
   <property name="minimumSize">
@@ -62,9 +62,6 @@
    </item>
    <item>
     <widget class="QGroupBox" name="groupBox">
-     <property name="enabled">
-      <bool>false</bool>
-     </property>
      <property name="sizePolicy">
       <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
        <horstretch>0</horstretch>
@@ -78,97 +75,68 @@
       </size>
      </property>
      <property name="title">
-      <string>程序选项（未实现）</string>
+      <string>程序选项</string>
      </property>
-     <widget class="QLabel" name="label_15">
-      <property name="geometry">
-       <rect>
-        <x>10</x>
-        <y>20</y>
-        <width>111</width>
-        <height>21</height>
-       </rect>
-      </property>
-      <property name="minimumSize">
-       <size>
-        <width>75</width>
-        <height>0</height>
-       </size>
-      </property>
-      <property name="text">
-       <string>成功完成后自动确认</string>
-      </property>
-     </widget>
-     <widget class="QLabel" name="label_19">
-      <property name="geometry">
-       <rect>
-        <x>10</x>
-        <y>40</y>
-        <width>201</width>
-        <height>21</height>
-       </rect>
-      </property>
-      <property name="minimumSize">
-       <size>
-        <width>75</width>
-        <height>0</height>
-       </size>
-      </property>
-      <property name="text">
-       <string>失败后也自动确认（无错误提示）</string>
-      </property>
-     </widget>
-     <widget class="QLabel" name="label_20">
-      <property name="geometry">
-       <rect>
-        <x>260</x>
-        <y>20</y>
-        <width>201</width>
-        <height>21</height>
-       </rect>
-      </property>
-      <property name="minimumSize">
-       <size>
-        <width>75</width>
-        <height>0</height>
-       </size>
-      </property>
-      <property name="text">
-       <string>线程数量上限</string>
-      </property>
-     </widget>
-     <widget class="QLabel" name="label_21">
-      <property name="geometry">
-       <rect>
-        <x>270</x>
-        <y>40</y>
-        <width>201</width>
-        <height>21</height>
-       </rect>
-      </property>
-      <property name="minimumSize">
-       <size>
-        <width>75</width>
-        <height>0</height>
-       </size>
-      </property>
-      <property name="text">
-       <string>禁止联网（无更新提示）</string>
-      </property>
-     </widget>
-     <widget class="QPushButton" name="pushButton">
-      <property name="geometry">
-       <rect>
-        <x>590</x>
-        <y>30</y>
-        <width>80</width>
-        <height>18</height>
-       </rect>
-      </property>
-      <property name="text">
-       <string>安装驱动</string>
-      </property>
-     </widget>
+     <layout class="QGridLayout" name="gridLayout">
+      <item row="2" column="0">
+       <widget class="QCheckBox" name="inputAutoConfirmEvenError">
+        <property name="text">
+         <string>失败后也自动确认（无错误提示）</string>
+        </property>
+       </widget>
+      </item>
+      <item row="0" column="1">
+       <layout class="QHBoxLayout" name="horizontalLayout_5">
+        <item>
+         <widget class="QLabel" name="label_20">
+          <property name="minimumSize">
+           <size>
+            <width>75</width>
+            <height>0</height>
+           </size>
+          </property>
+          <property name="text">
+           <string>线程数量上限</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QSpinBox" name="inputAppBurnThread">
+          <property name="minimum">
+           <number>1</number>
+          </property>
+          <property name="maximum">
+           <number>50</number>
+          </property>
+         </widget>
+        </item>
+       </layout>
+      </item>
+      <item row="0" column="0">
+       <widget class="QCheckBox" name="inputAutoConfirm">
+        <property name="text">
+         <string>成功完成后自动确认</string>
+        </property>
+       </widget>
+      </item>
+      <item row="1" column="0">
+       <widget class="QCheckBox" name="inputAutoConfirmManualJob">
+        <property name="text">
+         <string>自动确认手动添加的任务</string>
+        </property>
+       </widget>
+      </item>
+      <item row="1" column="1">
+       <widget class="QCheckBox" name="inputDisableUpdate">
+        <property name="enabled">
+         <bool>false</bool>
+        </property>
+        <property name="text">
+         <string>禁止联网（无更新提示）</string>
+        </property>
+       </widget>
+      </item>
+     </layout>
     </widget>
    </item>
    <item>
@@ -346,9 +314,6 @@
      </item>
      <item>
       <widget class="QGroupBox" name="advanceView2">
-       <property name="enabled">
-        <bool>false</bool>
-       </property>
        <property name="minimumSize">
         <size>
          <width>200</width>
@@ -356,30 +321,10 @@
         </size>
        </property>
        <property name="title">
-        <string>设备监视设置（未实现）</string>
+        <string>设备监视设置</string>
        </property>
        <layout class="QFormLayout" name="formLayout_3">
         <item row="0" column="0">
-         <widget class="QLabel" name="label_18">
-          <property name="minimumSize">
-           <size>
-            <width>75</width>
-            <height>0</height>
-           </size>
-          </property>
-          <property name="text">
-           <string>仅限USB串口</string>
-          </property>
-         </widget>
-        </item>
-        <item row="0" column="1">
-         <widget class="QCheckBox" name="inputWatch_3">
-          <property name="text">
-           <string/>
-          </property>
-         </widget>
-        </item>
-        <item row="1" column="0">
          <widget class="QLabel" name="label_16">
           <property name="minimumSize">
            <size>
@@ -392,8 +337,8 @@
           </property>
          </widget>
         </item>
-        <item row="1" column="1">
-         <widget class="QSpinBox" name="inputWatch_1">
+        <item row="0" column="1">
+         <widget class="QSpinBox" name="inputWatchVid">
           <property name="inputMethodHints">
            <set>Qt::ImhDigitsOnly|Qt::ImhLatinOnly</set>
           </property>
@@ -411,7 +356,7 @@
           </property>
          </widget>
         </item>
-        <item row="2" column="0">
+        <item row="1" column="0">
          <widget class="QLabel" name="label_17">
           <property name="minimumSize">
            <size>
@@ -424,8 +369,8 @@
           </property>
          </widget>
         </item>
-        <item row="2" column="1">
-         <widget class="QSpinBox" name="inputWatch_2">
+        <item row="1" column="1">
+         <widget class="QSpinBox" name="inputWatchPid">
           <property name="inputMethodHints">
            <set>Qt::ImhDigitsOnly|Qt::ImhLatinOnly</set>
           </property>
@@ -448,9 +393,6 @@
      </item>
      <item>
       <widget class="QGroupBox" name="advanceView3">
-       <property name="enabled">
-        <bool>false</bool>
-       </property>
        <property name="minimumSize">
         <size>
          <width>200</width>
@@ -470,6 +412,9 @@
         </item>
         <item row="0" column="1">
          <widget class="QSpinBox" name="inputUsbVid">
+          <property name="enabled">
+           <bool>false</bool>
+          </property>
           <property name="inputMethodHints">
            <set>Qt::ImhDigitsOnly|Qt::ImhLatinOnly</set>
           </property>
@@ -496,6 +441,9 @@
         </item>
         <item row="1" column="1">
          <widget class="QSpinBox" name="inputUsbPid">
+          <property name="enabled">
+           <bool>false</bool>
+          </property>
           <property name="inputMethodHints">
            <set>Qt::ImhDigitsOnly|Qt::ImhLatinOnly</set>
           </property>
@@ -522,6 +470,9 @@
         </item>
         <item row="2" column="1">
          <widget class="QSpinBox" name="inputUsbBindTimeout">
+          <property name="enabled">
+           <bool>false</bool>
+          </property>
           <property name="maximum">
            <number>1000000000</number>
           </property>
@@ -539,6 +490,9 @@
         </item>
         <item row="3" column="1">
          <widget class="QSpinBox" name="inputUsbReadTimeout">
+          <property name="enabled">
+           <bool>false</bool>
+          </property>
           <property name="maximum">
            <number>1000000000</number>
           </property>
@@ -556,6 +510,9 @@
         </item>
         <item row="4" column="1">
          <widget class="QSpinBox" name="inputUsbWriteTimeout">
+          <property name="enabled">
+           <bool>false</bool>
+          </property>
           <property name="maximum">
            <number>1000000000</number>
           </property>
@@ -573,6 +530,9 @@
         </item>
         <item row="5" column="1">
          <widget class="QSpinBox" name="inputUsbRetry">
+          <property name="enabled">
+           <bool>false</bool>
+          </property>
           <property name="minimum">
            <number>3</number>
           </property>
@@ -639,20 +599,44 @@
     </layout>
    </item>
    <item>
-    <spacer name="verticalSpacer">
-     <property name="orientation">
-      <enum>Qt::Vertical</enum>
-     </property>
-     <property name="sizeHint" stdset="0">
-      <size>
-       <width>20</width>
-       <height>40</height>
-      </size>
-     </property>
-    </spacer>
+    <layout class="QHBoxLayout" name="horizontalLayout_4">
+     <item>
+      <widget class="QWidget" name="widget" native="true">
+       <property name="sizePolicy">
+        <sizepolicy hsizetype="Expanding" vsizetype="Preferred">
+         <horstretch>0</horstretch>
+         <verstretch>0</verstretch>
+        </sizepolicy>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <spacer name="verticalSpacer">
+       <property name="orientation">
+        <enum>Qt::Vertical</enum>
+       </property>
+       <property name="sizeHint" stdset="0">
+        <size>
+         <width>20</width>
+         <height>40</height>
+        </size>
+       </property>
+      </spacer>
+     </item>
+    </layout>
    </item>
    <item>
     <layout class="QHBoxLayout" name="horizontalLayout_3">
+     <item>
+      <widget class="QPushButton" name="pushButton">
+       <property name="enabled">
+        <bool>false</bool>
+       </property>
+       <property name="text">
+        <string>安装驱动（未实现）</string>
+       </property>
+      </widget>
+     </item>
      <item>
       <spacer name="horizontalSpacer">
        <property name="orientation">
@@ -739,8 +723,8 @@
    <slot>acceptSave()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>764</x>
-     <y>551</y>
+     <x>806</x>
+     <y>612</y>
     </hint>
     <hint type="destinationlabel">
      <x>775</x>
@@ -755,8 +739,8 @@
    <slot>restoreDefaults()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>609</x>
-     <y>557</y>
+     <x>682</x>
+     <y>603</y>
     </hint>
     <hint type="destinationlabel">
      <x>621</x>
@@ -771,8 +755,8 @@
    <slot>checkSysImage()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>424</x>
-     <y>56</y>
+     <x>440</x>
+     <y>51</y>
     </hint>
     <hint type="destinationlabel">
      <x>404</x>
@@ -787,12 +771,12 @@
    <slot>setVisible(bool)</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>536</x>
-     <y>557</y>
+     <x>598</x>
+     <y>603</y>
     </hint>
     <hint type="destinationlabel">
-     <x>272</x>
-     <y>344</y>
+     <x>270</x>
+     <y>427</y>
     </hint>
    </hints>
   </connection>
@@ -803,8 +787,8 @@
    <slot>setVisible(bool)</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>534</x>
-     <y>557</y>
+     <x>598</x>
+     <y>603</y>
     </hint>
     <hint type="destinationlabel">
      <x>306</x>
@@ -819,12 +803,44 @@
    <slot>setVisible(bool)</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>558</x>
-     <y>557</y>
+     <x>598</x>
+     <y>603</y>
     </hint>
     <hint type="destinationlabel">
      <x>574</x>
      <y>343</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>inputAutoConfirm</sender>
+   <signal>clicked(bool)</signal>
+   <receiver>inputAutoConfirmEvenError</receiver>
+   <slot>setEnabled(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>76</x>
+     <y>129</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>77</x>
+     <y>164</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>inputAutoConfirm</sender>
+   <signal>clicked(bool)</signal>
+   <receiver>inputAutoConfirmManualJob</receiver>
+   <slot>setEnabled(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>123</x>
+     <y>126</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>123</x>
+     <y>143</y>
     </hint>
    </hints>
   </connection>

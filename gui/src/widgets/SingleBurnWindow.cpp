@@ -1,11 +1,13 @@
 #include "SingleBurnWindow.h"
+#include "common/AppGlobalSetting.h"
 #include "common/BurningProcess.h"
 #include "common/BurningRequest.h"
 #include "common/BurnLibrary.h"
 #include "common/MyException.h"
 #include "ui_SingleBurnWindow.h"
 
-SingleBurnWindow::SingleBurnWindow(QWidget *parent, BurningRequest *request) : QWidget(parent), ui(new Ui::SingleBurnWindow), request(request) {
+SingleBurnWindow::SingleBurnWindow(QWidget *parent, BurningRequest *request)
+	: QWidget(parent), ui(new Ui::SingleBurnWindow), request(request), isAutoCreate(request->isAutoCreate) {
 	ui->setupUi(this);
 	hide();
 
@@ -57,7 +59,10 @@ void SingleBurnWindow::progressChanged(int writtenBytes) {
 void SingleBurnWindow::deleteWork(bool preserveRequest) {
 	if (work) {
 		work->disconnect();
-		BurnLibrary::instance()->deleteBurning(work);
+		auto instance = BurnLibrary::instance();
+		if (instance) { // 为了退出时主窗口不消失，library析构更早
+			instance->deleteBurning(work);
+		}
 		work = nullptr;
 	}
 	if (request && !preserveRequest) {
@@ -86,9 +91,7 @@ void SingleBurnWindow::setCompleteState() {
 	ui->btnRetry->hide();
 	ui->btnTerminate->hide();
 
-	if (autoDismiss) {
-		deleteLater();
-	}
+	autoDismiss(true);
 }
 
 void SingleBurnWindow::setErrorState(const KBurnException &reason) {
@@ -100,6 +103,8 @@ void SingleBurnWindow::setErrorState(const KBurnException &reason) {
 	ui->btnDismiss->show();
 	ui->btnRetry->show();
 	ui->btnTerminate->hide();
+
+	autoDismiss(false);
 }
 
 void SingleBurnWindow::setCancellingState() {
@@ -124,63 +129,9 @@ void SingleBurnWindow::setProgressInfinit() {
 	ui->progressBar->setValue(0);
 }
 
-void SingleBurnWindow::setAutoDismiss(bool autodis) {
-	autoDismiss = autodis;
-	if (isDone) {
-		deleteLater();
-	}
-}
-
-void SingleBurnWindow::handleDeviceStateChange(const kburnDeviceNode *dev) {
+void SingleBurnWindow::handleDeviceStateChange() {
 	QString val;
-	val += tr("Serial Device: ");
-	if (dev->serial->init || dev->serial->isUsbBound) {
-		val += dev->serial->deviceInfo.path;
-		val += '\n';
-		val += tr("  * init: ");
-		val += dev->serial->init ? tr("yes") : tr("no");
-		val += '\n';
-		val += tr("  * isOpen: ");
-		val += dev->serial->isOpen ? tr("yes") : tr("no");
-		val += '\n';
-		val += tr("  * isConfirm: ");
-		val += dev->serial->isConfirm ? tr("yes") : tr("no");
-		val += '\n';
-		val += tr("  * isUsbBound: ");
-		val += dev->serial->isUsbBound ? tr("yes") : tr("no");
-	} else {
-		val += tr("not connected");
-	}
-	val += '\n';
-
-	val += tr("Usb Device: ");
-	if (dev->usb->init) {
-		for (auto i = 0; i < MAX_USB_PATH_LENGTH - 1; i++) {
-			val += QString::number(dev->usb->deviceInfo.path[i], 16) + QChar(':');
-		}
-		val.chop(1);
-		val += '\n';
-
-		val += "  * VID: " + QString::number(dev->usb->deviceInfo.idVendor, 16) + '\n';
-		val += "  * PID: " + QString::number(dev->usb->deviceInfo.idProduct, 16) + '\n';
-	} else {
-		val += tr("not connected");
-	}
-	val += '\n';
-
-	if (dev->error->code) {
-		val += tr("  * error status: ");
-		auto errs = kburnSplitErrorCode(dev->error->code);
-		val += tr("kind: ");
-		val += QString::number(errs.kind >> 32);
-		val += ", ";
-		val += tr("code: ");
-		val += QString::number(errs.code);
-		val += ", ";
-		val += QString::fromLatin1(dev->error->errorMessage);
-	}
-
-	setToolTip(val);
+	setToolTip(work->getDetailInfo());
 }
 
 void SingleBurnWindow::on_btnRetry_clicked() {
@@ -198,4 +149,38 @@ void SingleBurnWindow::on_btnDismiss_clicked() {
 void SingleBurnWindow::on_btnTerminate_clicked() {
 	ui->btnTerminate->setDisabled(true);
 	work->cancel();
+}
+
+void SingleBurnWindow::autoDismiss(bool success) {
+	if (!GlobalSetting::autoConfirm.getValue()) {
+		return;
+	}
+	if (!isAutoCreate && !GlobalSetting::autoConfirmManualJob.getValue()) {
+		return;
+	}
+	if (!success && !GlobalSetting::autoConfirmEvenError.getValue()) {
+		return;
+	}
+
+	ui->btnDismiss->show();
+	ui->btnDismiss->setDisabled(true);
+	ui->btnRetry->hide();
+
+	auto tmr = new QTimer(this);
+	tmr->setInterval(1000);
+	int *i = new int(5);
+	auto cb = [=] {
+		ui->btnDismiss->setText(tr("确认") + " (" + QString::number(*i) + ")");
+		if (*i == 0) {
+			tmr->stop();
+			deleteLater();
+		}
+		(*i)--;
+	};
+	connect(tmr, &QTimer::timeout, this, cb);
+	cb();
+	tmr->start();
+
+	connect(tmr, &QTimer::destroyed, [=] { delete i; });
+	connect(this, &SingleBurnWindow::destroyed, tmr, &QTimer::deleteLater);
 }

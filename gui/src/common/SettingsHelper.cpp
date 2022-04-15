@@ -1,21 +1,30 @@
 #include "SettingsHelper.h"
 #include <QAction>
+#include <QCheckBox>
+#include <QMap>
+#include <QSpinBox>
 
-SettingsBool::SettingsBool(const QString &category, const QString &field, const bool defaultValue)
-	: settings(QSettings::Scope::UserScope, SETTINGS_CATEGORY, category), field(field), defaultValue(defaultValue) {
-}
-
-bool SettingsBool::getValue() const {
-	return settings.value(field, defaultValue).toBool();
-}
-
-void SettingsBool::setValue(bool val) {
-	emit changed(val);
-	return settings.setValue(field, val);
-}
-
-void SettingsBool::connectAction(class QAction *action) {
-	action->setChecked(getValue());
-	emit changed(getValue());
+void SettingsBool::connectAction(QAction *action) {
+	auto v = getValue();
+	action->setChecked(v);
+	emit changed(v);
 	action->connect(action, &QAction::toggled, this, &SettingsBool::setValue);
+}
+
+void SettingsBool::connectCheckBox(QCheckBox *input) {
+	auto v = getValue();
+	input->setChecked(v);
+	emit changed(v);
+	input->connect(input, &QCheckBox::toggled, this, &SettingsBool::setValue);
+}
+
+void SettingsUInt::connectSpinBox(QSpinBox *input) {
+	auto v = getValue();
+	input->setValue(v);
+	if (input->value() != v) {
+		v = input->value();
+		setValue(v);
+	}
+	emit changed(v);
+	input->connect(input, &QSpinBox::valueChanged, this, &SettingsUInt::setValue);
 }

@@ -18,7 +18,9 @@
 #define SETTING_SPLIT_STATE "splitter-sizes"
 
 MainWindow::~MainWindow() {
+	settings.setValue(SETTING_SPLIT_STATE, ui->mainSplitter->saveState());
 	delete updateChecker;
+	delete ui;
 }
 
 MainWindow::MainWindow(QWidget *parent)
@@ -89,7 +91,7 @@ void MainWindow::closeEvent(QCloseEvent *ev) {
 	QSettings settings(QSettings::Scope::UserScope, SETTINGS_CATEGORY, "ui");
 	settings.setValue("splitterSizes", ui->mainSplitter->saveState());
 
-	delete BurnLibrary::instance();
+	BurnLibrary::deleteInstance();
 	kburnGlobalDestroy();
 
 	ev->accept();
@@ -129,4 +131,8 @@ void MainWindow::startNewBurnJob(BurningRequest *partialRequest) {
 	});
 
 	display->show();
+}
+
+void MainWindow::on_action_triggered() {
+	ui->mainSplitter->setSizes(QList<int>() << 0 << 100);
 }

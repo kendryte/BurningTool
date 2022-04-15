@@ -1,4 +1,5 @@
 #include "BurnLibrary.h"
+#include "AppGlobalSetting.h"
 #include "BurningProcess.h"
 #include "main.h"
 #include <canaan-burn/canaan-burn.h>
@@ -23,7 +24,7 @@ BurnLibrary::~BurnLibrary() {
 
 BurnLibrary::BurnLibrary(QWidget *parent) : parent(parent) {
 	_pool = new QThreadPool();
-	_pool->setMaxThreadCount(30);
+	_pool->setMaxThreadCount(qMax(GlobalSetting::appBurnThread.getValue(), (uint)50));
 }
 
 BurnLibrary *BurnLibrary::_instance = NULL;
@@ -44,6 +45,11 @@ void BurnLibrary::createInstance(QWidget *parent) {
 
 	BurnLibrary::_instance = instance;
 };
+
+void BurnLibrary::deleteInstance() {
+	delete BurnLibrary::_instance;
+	BurnLibrary::_instance = NULL;
+}
 
 void BurnLibrary::fatalAlert(kburn_err_t err) {
 	auto e = kburnSplitErrorCode(err);
@@ -129,51 +135,56 @@ void BurnLibrary::reloadList() {
 
 	knownSerialPorts.clear();
 	for (auto i = 0; i < list.size; i++) {
-		QString r;
-		r += QString::fromLatin1(list.list[i].path) + " - [" + QString::number(list.list[i].usbIdVendor, 16).leftJustified(4, '0') + ":" +
-			 QString::number(list.list[i].usbIdProduct, 16).leftJustified(4, '0') + "] ";
-#if WIN32
-		r += QString::fromUtf8(list.list[i].title) + " (" + QString::fromUtf8(list.list[i].hwid) + ")";
-#elif __linux__
-		r += QString::fromLatin1(list.list[i].usbDriver);
-#endif
-
-		knownSerialPorts[r] = QString::fromLatin1(list.list[i].path);
+		knownSerialPorts.append(list.list[i]);
 	}
 
 	emit onSerialPortList(knownSerialPorts);
 }
 
 BurningProcess *BurnLibrary::prepareBurning(const BurningRequest *request) {
+	if (hasBurning(request)) {
+		return NULL;
+	}
 	BurningProcess *work = BurningRequest::reqeustFactory(ctx, request);
 
-	for (auto v : jobs) {
-		if (work->getIdentity() == v->getIdentity()) {
-			delete work;
-			return NULL;
-		}
-	}
-
-	jobs.append(work);
+	jobs[request->getIdentity()] = work;
 
 	return work;
 }
 
 void BurnLibrary::executeBurning(BurningProcess *work) {
-	Q_ASSERT(jobs.contains(work));
+	Q_ASSERT(jobs.values().contains(work));
 	work->schedule();
+	emit jobListChanged();
+}
+
+bool BurnLibrary::hasBurning(const BurningRequest *request) {
+	return jobs.contains(request->getIdentity());
 }
 
 bool BurnLibrary::deleteBurning(BurningProcess *task) {
-	bool found = jobs.removeOne(task);
+	bool found = false;
+
+	for (auto it = jobs.begin(); it != jobs.end(); it++) {
+		if (it.value() == task) {
+			jobs.erase(it);
+			found = true;
+			break;
+		}
+	}
 
 	if (!found) {
-		qErrnoWarning("wired state: work \"%.10s\" not in registry", task->getTitle());
+		qErrnoWarning("wired state: work \"%.10s\" not in registry", task->getTitle().toLatin1().constData());
 		return false;
 	}
 
-	task->cancel();
-	task->deleteLater();
+	emit jobListChanged();
+	if (task->isStarted() && !task->isCompleted()) {
+		// TODO: 有些情况需要cancel()而不是等结束
+		connect(task, &BurningProcess::completed, task, &BurningProcess::deleteLater);
+	} else {
+		task->deleteLater();
+	}
 	return true;
 }
 

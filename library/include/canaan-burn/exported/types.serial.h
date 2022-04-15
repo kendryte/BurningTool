@@ -35,22 +35,22 @@ enum KBurnSerialConfigStopBits
 #define MAX_WIN32_PATH_SIZE 256
 
 struct kburnSerialDeviceInfoSlice {
-	PCONST bool isUSB;
-	PCONST bool isTTY;
-	PCONST char path[MAX_SERIAL_PATH_SIZE];
+	bool isUSB;
+	bool isTTY;
+	char path[MAX_SERIAL_PATH_SIZE];
 
-	PCONST uint16_t usbIdVendor;
-	PCONST uint16_t usbIdProduct;
-	PCONST uint16_t usbIdRevision;
+	uint16_t usbIdVendor;
+	uint16_t usbIdProduct;
+	uint16_t usbIdRevision;
 
 #ifdef __linux__
-	PCONST char usbDriver[MAX_DRIVER_NAME_SIZE];
-	PCONST uint32_t deviceMajor;
-	PCONST uint32_t deviceMinor;
+	char usbDriver[MAX_DRIVER_NAME_SIZE];
+	uint32_t deviceMajor;
+	uint32_t deviceMinor;
 #endif
 #ifdef WIN32
-	PCONST char title[MAX_TITTLE_SIZE];
-	PCONST char hwid[MAX_TITTLE_SIZE];
+	char title[MAX_TITTLE_SIZE];
+	char hwid[MAX_TITTLE_SIZE];
 #endif
 };
 

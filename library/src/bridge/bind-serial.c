@@ -107,7 +107,7 @@ static inline bool t(kburnDeviceNode *serial_node) {
 	use_device(serial_node);
 
 	kburnSerialDeviceNode *dev = serial_node->serial;
-	if (!dev->init) { // TODO: need lock with deinit
+	if (!dev->init) { // FIXME: need lock with deinit
 		return true;
 	}
 

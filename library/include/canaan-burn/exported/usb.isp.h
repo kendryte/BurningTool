@@ -5,8 +5,6 @@
 
 DEFINE_START
 
-#define KBURN_BOARD_PIN_LED_K510_CRB_V12B2 122
-
 typedef enum kburnUsbIspCommandTaget
 {
 	KBURN_USB_ISP_EMMC = 0x00,
