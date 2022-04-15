@@ -8,9 +8,8 @@
 		"editorconfig.editorconfig",
 		"ms-vscode.hexeditor",
 		"yzhang.markdown-all-in-one",
-		"tonka3000.qtvsctools",
 		"visualstudioexptteam.vscodeintellicode",
 		"josetr.cmake-language-support-vscode",
-		"ms-vscode.powershell-preview",
+		"ms-vscode.powershell-preview"
 	]
 }
