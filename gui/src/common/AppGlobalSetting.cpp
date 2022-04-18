@@ -1,8 +1,19 @@
 #include "AppGlobalSetting.h"
+#include <canaan-burn/canaan-burn.h>
 #include <QList>
 #include <QSettings>
 
 namespace GlobalSetting {
+namespace Private {
+
+static const QMap<uint, QString> flashTargetMap = {
+	{kburnUsbIspCommandTaget::KBURN_USB_ISP_EMMC,   "EMMC"   },
+	{kburnUsbIspCommandTaget::KBURN_USB_ISP_OTP,    "OTP"    },
+	{kburnUsbIspCommandTaget::KBURN_USB_ISP_NAND,   "NAND"   },
+	{kburnUsbIspCommandTaget::KBURN_USB_ISP_SDCARD, "SD Card"},
+};
+}
+
 QList<QString> knownCategory;
 
 SettingsBool autoConfirm{"global", "auto-confirm", false};
@@ -14,6 +25,7 @@ SettingsUInt watchPid{"global", "watch-serial-pid", 0x7523};
 SettingsUInt appBurnThread{"global", "max-burn-thread", 30};
 SettingsUInt usbLedPin{"global", "led-pin", 122};
 SettingsUInt usbLedLevel{"global", "led-level", 24};
+SettingsSelection flashTarget{"burning", "flash-target", kburnUsbIspCommandTaget::KBURN_USB_ISP_EMMC, Private::flashTargetMap};
 
 void restoreDefaults() {
 	for (auto category : knownCategory) {

@@ -1,6 +1,7 @@
 #include "SettingsHelper.h"
 #include <QAction>
 #include <QCheckBox>
+#include <QComboBox>
 #include <QMap>
 #include <QSpinBox>
 
@@ -27,4 +28,19 @@ void SettingsUInt::connectSpinBox(QSpinBox *input) {
 	}
 	emit changed(v);
 	input->connect(input, &QSpinBox::valueChanged, this, &SettingsUInt::setValue);
+}
+
+void SettingsSelection::connectCombobox(QComboBox *input) {
+	for (auto k : mapper.keys()) {
+		input->addItem(mapper.value(k), k);
+	}
+
+	auto v = getValue();
+	input->setCurrentText(mapper.value(v));
+	emit changed(v);
+	input->connect(input, &QComboBox::currentIndexChanged, this, [=]() {
+		auto v = input->currentData().toUInt();
+		Q_ASSERT(mapper.contains(v));
+		setValue(v);
+	});
 }

@@ -1,4 +1,5 @@
 #include "K510BurningProcess.h"
+#include "AppGlobalSetting.h"
 #include "main.h"
 #include "MyException.h"
 #include <canaan-burn/canaan-burn.h>
@@ -58,7 +59,7 @@ qint64 K510BurningProcess::prepare() {
 
 	usb_ok = true;
 
-	if (!kburnUsbIspGetMemorySize(node, kburnUsbIspCommandTaget::KBURN_USB_ISP_EMMC, &devInfo)) {
+	if (!kburnUsbIspGetMemorySize(node, (kburnUsbIspCommandTaget)GlobalSetting::flashTarget.getValue(), &devInfo)) {
 		throw KBurnException(node->error->code, node->error->errorMessage);
 	}
 

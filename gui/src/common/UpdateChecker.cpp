@@ -48,11 +48,10 @@ void UpdateChecker::_run() {
 
 	QJsonDocument jsonResponse = QJsonDocument::fromJson(reply->readAll());
 	QString sha = jsonResponse.object().value("target_commitish").toString();
-	qDebug() << "newest version is: " << sha;
+	BurnLibrary::instance()->localLog(QStringLiteral("newest version is: ") + sha);
+	BurnLibrary::instance()->localLog(QStringLiteral("my     version is: ") + QString::fromLatin1(VERSION_HASH));
 
 	if (sha != VERSION_HASH) {
-		qDebug() << "my version is: " VERSION_HASH;
-
 		emit giveTip(::tr("←发现更新"));
 	} else {
 		emit giveTip(::tr("没有更新"));

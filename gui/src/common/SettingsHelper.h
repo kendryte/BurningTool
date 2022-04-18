@@ -21,10 +21,10 @@ extern QList<QString> knownCategory;
 template <class Type>
 class SettingsBase {
 	const QString field;
-	const Type defaultValue;
 	Type _cache_val;
 
   protected:
+	const Type defaultValue;
 	QSettings settings;
 
   public:
@@ -66,4 +66,26 @@ class SettingsUInt : public QObject, public SettingsBase<uint> {
   public:
 	using SettingsBase::SettingsBase;
 	void connectSpinBox(class QSpinBox *input);
+};
+
+class SettingsSelection : public QObject, public SettingsBase<uint> {
+	SETTINGS_BASE(SettingsSelection, uint)
+	Q_OBJECT
+
+	const QMap<uint, QString> mapper = {};
+
+  public:
+	explicit SettingsSelection(const QString &category, const QString &field, const uint defaultValue, QMap<uint, QString> mapper)
+		: SettingsBase(category, field, defaultValue), mapper(mapper) {
+		Q_ASSERT(mapper.contains(defaultValue));
+		if (settings.value(field + "_count").toUInt() != mapper.size()) {
+			reset();
+			settings.setValue(field + "_count", mapper.size());
+		}
+		if (!mapper.contains(getValue())) {
+			reset();
+		}
+	}
+
+	void connectCombobox(class QComboBox *input);
 };

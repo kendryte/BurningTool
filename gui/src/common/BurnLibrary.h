@@ -58,6 +58,8 @@ class BurnLibrary : public QObject {
 		Disconnected,
 	};
 
+	void localLog(const QString &line);
+
   private:
     bool handleConnectSerial(kburnDeviceNode *dev);
     bool handleConnectUsb(kburnDeviceNode *dev);

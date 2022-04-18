@@ -115,6 +115,11 @@ void BurnLibrary::handleDebugLog(kburnLogType level, const char *cstr) {
 	emit onDebugLog(level == KBURN_LOG_TRACE, line);
 }
 
+void BurnLibrary::localLog(const QString &line) {
+	qDebug() << line;
+	emit onDebugLog(false, line);
+}
+
 void BurnLibrary::handleDeviceListChange(bool isUsb) {
 	if (!isUsb) {
 		reloadList();

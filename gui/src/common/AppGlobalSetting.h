@@ -13,6 +13,7 @@ extern SettingsUInt watchPid;
 extern SettingsUInt appBurnThread;
 extern SettingsUInt usbLedPin;
 extern SettingsUInt usbLedLevel;
+extern SettingsSelection flashTarget;
 
 void restoreDefaults();
 

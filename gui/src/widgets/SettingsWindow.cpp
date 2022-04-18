@@ -58,6 +58,7 @@ SettingsWindow::SettingsWindow(QWidget *parent)
 	GlobalSetting::appBurnThread.connectSpinBox(ui->inputAppBurnThread);
 	GlobalSetting::usbLedPin.connectSpinBox(ui->inputUsbLedPin);
 	GlobalSetting::usbLedLevel.connectSpinBox(ui->inputUsbLedLevel);
+	GlobalSetting::flashTarget.connectCombobox(ui->inputTarget);
 
 	if (!GlobalSetting::autoConfirm.getValue()) {
 		ui->inputAutoConfirmManualJob->setEnabled(false);
