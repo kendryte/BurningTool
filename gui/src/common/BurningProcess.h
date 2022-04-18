@@ -48,9 +48,9 @@ class BurningProcess : public QObject, public QRunnable {
 	virtual bool pollingDevice(kburnDeviceNode *node, BurnLibrary::DeviceEvent event) = 0;
 	const KBurnException &getReason() { return _result; }
 
-	bool isCanceled() { return _isCanceled; }
-	bool isStarted() { return _isStarted; }
-	bool isCompleted() { return _isCompleted; }
+	bool isCanceled() const { return _isCanceled; }
+	bool isStarted() const { return _isStarted; }
+	bool isCompleted() const { return _isCompleted; }
 
 	virtual void cancel(const KBurnException reason);
 	virtual void cancel();

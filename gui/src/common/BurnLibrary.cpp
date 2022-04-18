@@ -30,7 +30,6 @@ BurnLibrary::BurnLibrary(QWidget *parent) : parent(parent) {
 BurnLibrary *BurnLibrary::_instance = NULL;
 
 BurnLibrary *BurnLibrary::instance() {
-	Q_ASSERT(BurnLibrary::_instance != NULL);
 	return BurnLibrary::_instance;
 }
 
@@ -188,8 +187,15 @@ bool BurnLibrary::deleteBurning(BurningProcess *task) {
 	return true;
 }
 
+static bool should_skip_job(const BurningProcess *p) {
+	return !p->isStarted() || p->isCompleted() || p->isCanceled();
+}
+
 bool BurnLibrary::handleConnectSerial(kburnDeviceNode *dev) {
 	for (auto p : jobs) {
+		if (should_skip_job(p)) {
+			continue;
+		}
 		if (p->pollingDevice(dev, SerialAttached)) {
 			return true;
 		}
@@ -203,12 +209,18 @@ bool BurnLibrary::handleConnectUsb(kburnDeviceNode *dev) {
 
 void BurnLibrary::handleDeviceRemove(kburnDeviceNode *dev) {
 	for (auto p : jobs) {
+		if (should_skip_job(p)) {
+			continue;
+		}
 		p->pollingDevice(dev, Disconnected);
 	}
 }
 
 void BurnLibrary::handleHandleSerial(kburnDeviceNode *dev) {
 	for (auto p : jobs) {
+		if (should_skip_job(p)) {
+			continue;
+		}
 		if (p->pollingDevice(dev, SerialReady)) {
 			qDebug() << "wanted serial device handle: " << dev->serial->deviceInfo.path << QChar::LineFeed;
 			return;
@@ -219,6 +231,9 @@ void BurnLibrary::handleHandleSerial(kburnDeviceNode *dev) {
 }
 void BurnLibrary::handleHandleUsb(kburnDeviceNode *dev) {
 	for (auto p : jobs) {
+		if (should_skip_job(p)) {
+			continue;
+		}
 		if (p->pollingDevice(dev, UsbReady)) {
 			qDebug() << "wanted USB device handle: " << QString::number(dev->usb->deviceInfo.idVendor, 16) << ':'
 					 << QString::number(dev->usb->deviceInfo.idProduct, 16) << QChar::LineFeed;

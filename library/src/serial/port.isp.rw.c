@@ -75,7 +75,9 @@ slip_error_t _serial_isp_slip_send_request(kburnSerialDeviceNode *node, isp_requ
 }
 
 static isp_response_t *serial_isp_command_send_low(kburnSerialDeviceNode *node, isp_request_t *command) {
-	use_device(node);
+	if (!use_device(node)) {
+		return NULL;
+	}
 
 	size_t input_buffer_size = 256;
 	uint8_t *input_buffer = calloc(input_buffer_size, sizeof(uint8_t));

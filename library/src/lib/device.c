@@ -7,6 +7,7 @@ DEFINE_REGISTER_SWAPPER(kburnOnDeviceDisconnect, scope->on_disconnect, on_device
 DEFINE_REGISTER_SWAPPER(kburnOnDeviceListChange, scope->on_list_change, on_device_list_change)
 
 static void destroy_device(void *UNUSED(ctx), kburnDeviceNode *context) {
+	debug_trace_function();
 	recreate_waitting_list(context->_scope);
 
 	if (context->disconnect_should_call && context->_scope->on_disconnect.handler) {
@@ -26,12 +27,14 @@ static DECALRE_DISPOSE(dispose_device, kburnDeviceNode) {
 DECALRE_DISPOSE_END()
 
 void device_instance_collect(kburnDeviceNode *instance) {
+	debug_trace_function();
 	if (!instance->serial->init && !instance->usb->init) {
 		mark_destroy_device_node(instance);
 	}
 }
 
 void mark_destroy_device_node(kburnDeviceNode *instance) {
+	debug_trace_function();
 	instance->destroy_in_progress = true;
 	lock_deinit(instance->reference_lock);
 }

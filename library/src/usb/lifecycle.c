@@ -62,7 +62,9 @@ _quit:
 
 DECALRE_DISPOSE(destroy_usb_port, kburnUsbDeviceNode) {
 	debug_trace_function("USB[0x%p: %s]", (void *)context->device, usb_debug_path_string(context->deviceInfo.path));
-	use_device(context);
+	if (!use_device(context)) {
+		return;
+	}
 
 	if (context->isClaim) {
 		context->isClaim = false;

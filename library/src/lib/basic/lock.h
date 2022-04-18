@@ -33,14 +33,14 @@ pthread_mutex_t *raw_lock(kb_mutex_t l);
 static inline void _kb__unlock_ptr(kb_mutex_t *pl) {
 	unlock(*pl);
 }
-#define autolock(pl)                                                                      \
-	__extension__({                                                                       \
-		bool _auto_lock_result = lock(pl);                                                \
-		if (_auto_lock_result) {                                                          \
-			kb_mutex_t __attribute__((cleanup(_kb__unlock_ptr))) __auto_lock_holder = pl; \
-		} else {                                                                          \
-			debugger;                                                                     \
-			debug_print(KBURN_LOG_ERROR, "autolock failed");                              \
-		}                                                                                 \
-		_auto_lock_result;                                                                \
+#define autolock(pl)                                                                                  \
+	__extension__({                                                                                   \
+		bool _auto_lock_result = lock(pl);                                                            \
+		if (_auto_lock_result) {                                                                      \
+			kb_mutex_t __auto_lock_holder __attribute__((cleanup(_kb__unlock_ptr), __unused__)) = pl; \
+		} else {                                                                                      \
+			debugger;                                                                                 \
+			debug_print(KBURN_LOG_ERROR, "autolock failed");                                          \
+		}                                                                                             \
+		_auto_lock_result;                                                                            \
 	})

@@ -55,14 +55,17 @@ static bool greeting(kburnSerialDeviceNode *node, bool auto_switch) {
 }
 
 bool kburnSerialIspGreeting(kburnSerialDeviceNode *node) {
+	ifNotReturnFalse(use_device(node));
 	return greeting(node, true);
 }
 
 bool kburnSerialIspSetBaudrateHigh(kburnSerialDeviceNode *node) {
+	ifNotReturnFalse(use_device(node));
 	return kburnSerialIspSetBaudrate(node, baudrateHighValue);
 }
 
 bool kburnSerialIspSetBaudrate(kburnSerialDeviceNode *node, uint32_t want_br) {
+	ifNotReturnFalse(use_device(node));
 	debug_trace_function("baudrate=%d", want_br);
 	if (want_br == node->baudRate) {
 		debug_print(KBURN_LOG_DEBUG, "  - not change");

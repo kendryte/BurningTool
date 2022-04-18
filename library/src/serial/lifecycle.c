@@ -25,25 +25,16 @@ static inline void free_handle(void *handle) {
 
 DECALRE_DISPOSE(destroy_serial_port, kburnSerialDeviceNode) {
 	debug_trace_function("%p[%s]", (void *)context, OPTSTR(context->deviceInfo.path, "*invalid*"));
-	use_device(context);
-
-	if (!context->init) {
+	if (!use_device(context)) {
 		return;
 	}
 
 	serial_isp_delete(context);
+	serial_low_close(context);
 
 	if (context->binding) {
 		free(context->binding);
 		context->binding = NULL;
-	}
-
-	if (context->isOpen) {
-		serial_low_close(context);
-	}
-
-	if (context->m_dev_handle != NULL) {
-		ser_destroy(context->m_dev_handle);
 	}
 
 	context->init = false;

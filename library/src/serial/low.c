@@ -12,6 +12,7 @@ static bool open(kburnSerialDeviceNode *node, ser_opts_t opts) {
 
 	if (r < 0) {
 		copy_last_serial_io_error(node, r);
+		ser_close(handle);
 		ser_destroy(handle);
 		node->isOpen = false;
 		return false;

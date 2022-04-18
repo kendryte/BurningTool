@@ -103,8 +103,10 @@ static uint32_t handle_one_device(kburnSerialDeviceNode *dev) {
 	return false;
 }
 
-static inline bool t(kburnDeviceNode *serial_node) {
-	use_device(serial_node);
+static inline bool do_pair(kburnDeviceNode *serial_node) {
+	if (!use_device(serial_node)) {
+		return false;
+	}
 
 	kburnSerialDeviceNode *dev = serial_node->serial;
 	if (!dev->init) { // FIXME: need lock with deinit
@@ -155,7 +157,7 @@ void pair_serial_ports_thread(void *UNUSED(ctx), KBCTX scope, const bool *const 
 		}
 
 		for (kburnDeviceNode **ptr = scope->waittingDevice->list; *ptr != NULL; ptr++) {
-			bool handled = t(*ptr);
+			bool handled = do_pair(*ptr);
 
 			if (!handled) {
 				item_waitting_pair++;
