@@ -94,7 +94,7 @@ jobs:
       - name: Create zip
         shell: pwsh
         run: |
-          Copy-Item "${{github.workspace}}/QtInstall" -Path -Destination -Force
+          Copy-Item -Recurse -Verbose -Path "${{github.workspace}}/Licenses" -Destination KendryteBurningTool -Force
           Compress-Archive -Path "KendryteBurningTool" -DestinationPath "${{ runner.os }}.zip"
         working-directory: ${{github.workspace}}/dist
 
