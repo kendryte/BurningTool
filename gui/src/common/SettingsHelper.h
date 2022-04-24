@@ -12,6 +12,12 @@
 	Q_SLOT void setValue(const Type &v) { SettingsBase::setValue(v); } \
 	Q_SIGNAL void changed(Type);                                       \
                                                                        \
+	template <typename Func2>                                          \
+	void connectLambda(QObject *bind, Func2 lambda) {                  \
+		QMetaObject::invokeMethod(bind, [=] { lambda(getValue()); });  \
+		connect(this, &Class::changed, bind, lambda);                  \
+	}                                                                  \
+                                                                       \
   private:                                                             \
 	Q_SLOT void setValueImmediate(const Type &v) { SettingsBase<Type>::setValueImmediate(v); }
 
@@ -78,11 +84,6 @@ class SettingsBase : public ISettingsBase {
 	}
 
 	virtual void changed(Type) = 0;
-
-	template <typename Func2>
-	void connectLambda(QObject *bind, Func2 lambda) {
-		connect(this, &SettingsBase::changed, bind, lambda);
-	}
 };
 
 class SettingsBool : public QObject, public SettingsBase<bool> {

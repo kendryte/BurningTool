@@ -1,4 +1,5 @@
 #include "MainWindow.h"
+#include "common/AppGlobalSetting.h"
 #include "common/BurningProcess.h"
 #include "common/BurningRequest.h"
 #include "common/BurnLibrary.h"
@@ -70,7 +71,12 @@ MainWindow::MainWindow(QWidget *parent)
 
 	BurnLibrary::instance()->start();
 
-	updateChecker = new UpdateChecker(ui->btnUpdate);
+	if (GlobalSetting::disableUpdate.getValue()) {
+		ui->btnUpdate->hide();
+		updateChecker = nullptr;
+	} else {
+		updateChecker = new UpdateChecker(ui->btnUpdate);
+	}
 }
 
 void MainWindow::onResized() {
