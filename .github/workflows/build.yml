@@ -12,6 +12,8 @@ on:
       - '**.h'
       - '**.ui'
   workflow_dispatch:
+    branches:
+      - latest
     inputs:
 
 env:
