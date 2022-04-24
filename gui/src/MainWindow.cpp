@@ -57,10 +57,10 @@ MainWindow::MainWindow(QWidget *parent)
 	/* setting send */
 
 	connect(&traceSetting, &SettingsBool::changed, this->ui->textLog, &LoggerWindow::setTraceLevelVisible);
-	traceSetting.connectAction(ui->btnToggleLogTrace);
+	traceSetting.connectAction(ui->btnToggleLogTrace, true);
 
 	connect(&logBufferSetting, &SettingsBool::changed, this, [](bool enable) { kburnSetLogBufferEnabled(enable); });
-	logBufferSetting.connectAction(ui->btnDumpBuffer);
+	logBufferSetting.connectAction(ui->btnDumpBuffer, true);
 
 	connect(BurnLibrary::instance(), &BurnLibrary::onDebugLog, ui->textLog, &LoggerWindow::append);
 

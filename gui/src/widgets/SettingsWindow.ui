@@ -885,8 +885,8 @@
    <slot>acceptSave()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>806</x>
-     <y>612</y>
+     <x>803</x>
+     <y>609</y>
     </hint>
     <hint type="destinationlabel">
      <x>775</x>
@@ -901,7 +901,7 @@
    <slot>restoreDefaults()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>682</x>
+     <x>677</x>
      <y>603</y>
     </hint>
     <hint type="destinationlabel">
@@ -933,7 +933,7 @@
    <slot>setVisible(bool)</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>598</x>
+     <x>571</x>
      <y>603</y>
     </hint>
     <hint type="destinationlabel">
@@ -949,7 +949,7 @@
    <slot>setVisible(bool)</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>598</x>
+     <x>571</x>
      <y>603</y>
     </hint>
     <hint type="destinationlabel">
@@ -965,44 +965,12 @@
    <slot>setVisible(bool)</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>598</x>
+     <x>571</x>
      <y>603</y>
     </hint>
     <hint type="destinationlabel">
      <x>574</x>
      <y>343</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>inputAutoConfirm</sender>
-   <signal>clicked(bool)</signal>
-   <receiver>inputAutoConfirmEvenError</receiver>
-   <slot>setEnabled(bool)</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>76</x>
-     <y>129</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>77</x>
-     <y>164</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>inputAutoConfirm</sender>
-   <signal>clicked(bool)</signal>
-   <receiver>inputAutoConfirmManualJob</receiver>
-   <slot>setEnabled(bool)</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>123</x>
-     <y>126</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>123</x>
-     <y>143</y>
     </hint>
    </hints>
   </connection>

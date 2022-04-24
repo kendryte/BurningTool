@@ -19,7 +19,7 @@ class ISettingsBase {
   protected:
 	explicit ISettingsBase(){};
 	virtual void clear() = 0;
-	virtual void commit() = 0;
+	virtual bool commit() = 0;
 
   public:
 	static QList<ISettingsBase *> settingsRegistry;
@@ -58,23 +58,31 @@ class SettingsBase : public ISettingsBase {
 
 	bool dirty() const { return activeValue != cachedValue; }
 
-	void commit() {
+	bool commit() {
 		if (!dirty()) {
-			return;
+			return false;
 		}
 		qDebug() << "settings:" << settings.organizationName() + "." + settings.applicationName() + "." + field << "=" << activeValue << "->"
 				 << cachedValue;
 		activeValue = cachedValue;
 		settings.setValue(field, activeValue);
 		emit changed(activeValue);
+		return true;
 	}
 
 	void clear() {
 		cachedValue = defaultValue;
-		commit();
+		if (!commit()) {
+			emit changed(activeValue);
+		}
 	}
 
 	virtual void changed(Type) = 0;
+
+	template <typename Func2>
+	void connectLambda(QObject *bind, Func2 lambda) {
+		connect(this, &SettingsBase::changed, bind, lambda);
+	}
 };
 
 class SettingsBool : public QObject, public SettingsBase<bool> {
@@ -85,6 +93,8 @@ class SettingsBool : public QObject, public SettingsBase<bool> {
 	using SettingsBase::SettingsBase;
 	void connectAction(class QAction *action, bool autoCommit = false);
 	void connectCheckBox(class QCheckBox *input, bool autoCommit = false);
+	void connectWidgetEnabled(std::initializer_list<class QWidget *> const &targets, bool enableValue = true);
+	void depend(SettingsBool &other);
 };
 
 class SettingsUInt : public QObject, public SettingsBase<uint> {

@@ -1,6 +1,7 @@
 #ifndef SETTINGSWINDOW_H
 #define SETTINGSWINDOW_H
 
+#include "common/SettingsHelper.h"
 #include <QFile>
 #include <QSettings>
 #include <QWidget>
@@ -27,6 +28,8 @@ class SettingsWindow : public QWidget {
 	void settingsCommited();
 	void settingsUnsaved(bool hasUnsave);
 
+	void updateCheckboxState();
+
   public slots:
 	bool checkSysImage();
 
@@ -40,6 +43,7 @@ class SettingsWindow : public QWidget {
 	void checkAndSetInt(const QString &setting, const QString &input);
 	template <typename keyT, typename valueT>
 	void checkAndSetMap(const QMap<keyT, valueT> &map, const char *config, keyT current);
+	void connectCheckboxEnable(SettingsBool &setting, class QCheckBox *source, class QWidget *target);
 };
 
 #endif // SETTINGSWINDOW_H

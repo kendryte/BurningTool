@@ -18,7 +18,7 @@
 #define SETTING_SERIAL_RETRY "serial-write-retry"
 
 static const QList<uint32_t> baudrates = {9600,    115200,  230400,  460800,  576000,  921600,  1000000,
-										  1152000, 1500000, 2000000, 2500000, 3000000, 3500000, 4000000};
+                                          1152000, 1500000, 2000000, 2500000, 3000000, 3500000, 4000000};
 
 static const QMap<uint8_t, enum KBurnSerialConfigByteSize> bsMap = {
 	{8, KBurnSerialConfigByteSize_8},
@@ -28,10 +28,10 @@ static const QMap<uint8_t, enum KBurnSerialConfigByteSize> bsMap = {
 };
 
 static const QMap<QString, enum KBurnSerialConfigParity> parMap = {
-    {"None",  KBurnSerialConfigParityNone },
+	{"None",  KBurnSerialConfigParityNone },
     {"Odd",   KBurnSerialConfigParityOdd  },
     {"Even",  KBurnSerialConfigParityEven },
-    {"Mark",  KBurnSerialConfigParityMark },
+	{"Mark",  KBurnSerialConfigParityMark },
     {"Space", KBurnSerialConfigParitySpace},
 };
 
@@ -50,11 +50,23 @@ SettingsWindow::SettingsWindow(QWidget *parent)
 	ui->advanceView3->setVisible(false);
 
 	GlobalSetting::autoConfirm.connectCheckBox(ui->inputAutoConfirm);
+	connectCheckboxEnable(GlobalSetting::autoConfirm, ui->inputAutoConfirm, {ui->inputAutoConfirmTimeout});
 	GlobalSetting::autoConfirmTimeout.connectSpinBox(ui->inputAutoConfirmTimeout);
+	connect(ui->inputAutoConfirm, &QCheckBox::toggled, this, [=](bool enable) {
+		ui->inputAutoConfirmManualJob->setEnabled(enable);
+		ui->inputAutoConfirmEvenError->setEnabled(enable);
+	});
+
+	GlobalSetting::autoConfirmManualJob.depend(GlobalSetting::autoConfirm);
 	GlobalSetting::autoConfirmManualJob.connectCheckBox(ui->inputAutoConfirmManualJob);
+	connectCheckboxEnable(GlobalSetting::autoConfirmManualJob, ui->inputAutoConfirmManualJob, {ui->inputAutoConfirmManualJobTimeout});
 	GlobalSetting::autoConfirmManualJobTimeout.connectSpinBox(ui->inputAutoConfirmManualJobTimeout);
+
+	GlobalSetting::autoConfirmEvenError.depend(GlobalSetting::autoConfirm);
 	GlobalSetting::autoConfirmEvenError.connectCheckBox(ui->inputAutoConfirmEvenError);
+	connectCheckboxEnable(GlobalSetting::autoConfirmEvenError, ui->inputAutoConfirmEvenError, {ui->inputAutoConfirmEvenErrorTimeout});
 	GlobalSetting::autoConfirmEvenErrorTimeout.connectSpinBox(ui->inputAutoConfirmEvenErrorTimeout);
+
 	GlobalSetting::disableUpdate.connectCheckBox(ui->inputDisableUpdate);
 	GlobalSetting::watchVid.connectSpinBox(ui->inputWatchVid);
 	GlobalSetting::watchPid.connectSpinBox(ui->inputWatchPid);
@@ -71,6 +83,13 @@ SettingsWindow::SettingsWindow(QWidget *parent)
 
 SettingsWindow::~SettingsWindow() {
 	delete ui;
+}
+
+void SettingsWindow::connectCheckboxEnable(SettingsBool &setting, QCheckBox *source, QWidget *target) {
+	setting.connectWidgetEnabled({target});
+	connect(source, &QCheckBox::toggled, this, [=] { emit updateCheckboxState(); });
+	connect(
+		this, &SettingsWindow::updateCheckboxState, target, [=] { target->setEnabled(source->isChecked() && ui->inputAutoConfirm->isChecked()); });
 }
 
 void SettingsWindow::showEvent(QShowEvent *event) {
