@@ -29,10 +29,12 @@ execute_process(
 	COMMAND_ERROR_IS_FATAL ANY
 )
 
-# TODO
+# TODO: dynamic?
 find_program(MAKE_ABSOLUTE "${CMAKE_MAKE_PROGRAM}" REQUIRED)
 get_filename_component(MINGW_PATH "${MAKE_ABSOLUTE}" DIRECTORY)
 file(INSTALL "${MINGW_PATH}/libwinpthread-1.dll" DESTINATION "${DIST_DIR}/bin")
+file(INSTALL "${MINGW_PATH}/libgcc_s_seh-1.dll" DESTINATION "${DIST_DIR}/bin")
+file(INSTALL "${MINGW_PATH}/libstdc++-6.dll" DESTINATION "${DIST_DIR}/bin")
 
 set(SYSTEM32_PATH "$ENV{SystemRoot}/system32")
 

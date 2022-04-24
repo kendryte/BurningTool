@@ -45,9 +45,9 @@ set_target_properties(
 	MACOSX_BUNDLE TRUE
 	WIN32_EXECUTABLE TRUE)
 
-if(WIN32)
-	target_link_options(BurningTool BEFORE PRIVATE -static-libgcc -static-libstdc++)
-endif()
+# if(WIN32)
+# 	target_link_options(BurningTool BEFORE PRIVATE -static-libgcc -static-libstdc++)
+# endif()
 
 qt_finalize_executable(BurningTool)
 
