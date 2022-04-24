@@ -11,6 +11,8 @@ on:
       - 'CMakeLists.txt'
       - '**.h'
       - '**.ui'
+  workflow_dispatch:
+    inputs:
 
 env:
   BUILD_TYPE: Debug
