@@ -2,8 +2,8 @@ name: CMake
 
 on:
   push:
-    branches: 
-      - release
+    branches:
+      - latest
     paths:
       - '**.c'
       - '**.cpp'
