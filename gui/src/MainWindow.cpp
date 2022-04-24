@@ -104,12 +104,15 @@ void MainWindow::on_btnOpenWebsite_triggered() {
 
 void MainWindow::on_btnSaveLog_triggered() {
 	QString selFilter("Log File (*.html)");
+	QDateTime datetime = QDateTime::currentDateTime();
 	QString str = QFileDialog::getSaveFileName(
-		this, tr("日志保存路径"), QDir::currentPath() + "/help.html", tr("Log File (*.html);;All files (*.*)"), &selFilter);
+		this, tr("日志保存路径"), QDir::currentPath() + "/help-" + datetime.toString("yyyyMMdd-hhmmss") + ".html",
+		tr("Log File (*.html);;All files (*.*)"), &selFilter);
 	if (str.isEmpty()) {
 		return;
 	}
-	// TODO: flush and copy log file
+
+	ui->textLog->copyLogFileTo(str);
 }
 
 void MainWindow::on_btnOpenRelease_triggered() {

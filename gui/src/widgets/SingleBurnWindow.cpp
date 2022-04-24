@@ -166,9 +166,25 @@ void SingleBurnWindow::autoDismiss(bool success) {
 	ui->btnDismiss->setDisabled(true);
 	ui->btnRetry->hide();
 
+	uint timeout;
+	if (success) {
+		if (isAutoCreate) {
+			timeout = GlobalSetting::autoConfirmTimeout.getValue();
+		} else {
+			timeout = GlobalSetting::autoConfirmManualJobTimeout.getValue();
+		}
+	} else {
+		timeout = GlobalSetting::autoConfirmEvenError.getValue();
+	}
+
+	if (timeout == 0) {
+		deleteLater();
+		return;
+	}
+
 	auto tmr = new QTimer(this);
 	tmr->setInterval(1000);
-	int *i = new int(5);
+	int *i = new int(timeout);
 	auto cb = [=] {
 		ui->btnDismiss->setText(tr("确认") + " (" + QString::number(*i) + ")");
 		if (*i == 0) {

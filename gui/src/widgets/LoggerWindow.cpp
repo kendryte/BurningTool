@@ -1,16 +1,37 @@
 #include "LoggerWindow.h"
+#include "config.h"
 #include <QAction>
 #include <QContextMenuEvent>
-#include <QDir>
+#include <QCoreApplication>
 #include <QMenu>
 #include <QScrollBar>
+#include <QString>
+
+#define STRINGIZE(x) STRINGIZE2(x)
+#define STRINGIZE2(x) #x
 
 LoggerWindow::LoggerWindow(QWidget *parent) : QTextEdit(parent) {
-	logfile.setFileName(QDir::currentPath() + "/burning_tool.html");
+	logfile.setFileName(QCoreApplication::applicationDirPath() + "/burning_tool.html");
 	logfile.open(QIODeviceBase::Unbuffered | QIODeviceBase::Truncate | QIODeviceBase::WriteOnly);
+
+	logfile.write(QStringLiteral("<div>IS_CI=" STRINGIZE(IS_CI) "</div>").toUtf8());
+	logfile.write(QStringLiteral("<div>VERSION_STRING=" VERSION_STRING "</div>").toUtf8());
+	logfile.write(QStringLiteral("<div>VERSION_HASH=" VERSION_HASH "</div>").toUtf8());
+	logfile.write("\n");
 }
 
 LoggerWindow::~LoggerWindow() {
+}
+
+bool LoggerWindow::copyLogFileTo(const QString &target) {
+	// 这个函数必须在ui线程中调用
+	logfile.close();
+
+	QFile dist(target);
+	if(dist.exists()){
+		dist.remove();
+	}
+	return logfile.copy(target);
 }
 
 void LoggerWindow::scrollToBottom() {

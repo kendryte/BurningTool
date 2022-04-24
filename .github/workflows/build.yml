@@ -2,7 +2,15 @@ name: CMake
 
 on:
   push:
-    branches: [master]
+    branches: 
+      - release
+    paths:
+      - '**.c'
+      - '**.cpp'
+      - '**.cmake'
+      - 'CMakeLists.txt'
+      - '**.h'
+      - '**.ui'
 
 env:
   BUILD_TYPE: Debug

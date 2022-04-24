@@ -36,8 +36,8 @@
 	"files.associations": {
 		"*.ts": "xml",
 	},
-	"editor.formatOnSave": true,
-	"editor.formatOnSaveMode": "file",
+	// "editor.formatOnSave": true,
+	// "editor.formatOnSaveMode": "file",
 	"yaml.schemas": {
 		"https://json.schemastore.org/github-workflow.json": "file:///data/DevelopmentRoot/github.com/kendryte/BurningTool/.github/workflows/build.yml"
 	},
