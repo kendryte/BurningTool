@@ -133,7 +133,7 @@ jobs:
         with:
           tag_name: latest
           release_name: Latest
-          body: Auto build from ${{ github.sha }} (master)
+          body: Auto build from ${{ github.sha }} (${{ github.ref_name }})
           draft: false
           prerelease: false
 
