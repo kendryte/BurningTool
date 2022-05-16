@@ -5,6 +5,9 @@
 	"[json]": {
 		"editor.defaultFormatter": "vscode.json-language-features"
 	},
+	"[markdown]": {
+		"editor.formatOnSave": false
+	},
 	"C_Cpp.formatting": "clangFormat",
 	"C_Cpp.clang_format_style": "file",
 	"C_Cpp.default.intelliSenseMode": "gcc-x64",
