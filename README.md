@@ -9,10 +9,11 @@
 # 下载
 * [Windows x64](https://github.com/kendryte/BurningTool/releases/download/latest/windows.zip)
 * [Linux amd64](https://github.com/kendryte/BurningTool/releases/download/latest/linux.zip)
+
 *不提供老版本下载，如有需要，请自行编译*
 
 # 使用手册
-参考 [使用手册](./docs/)
+参考 [使用手册](https://kendryte.github.io/BurningTool/)
 
 # 开发
 参考 [Contribution.md](./Contribution.md)
