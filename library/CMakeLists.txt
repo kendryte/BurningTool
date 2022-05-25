@@ -86,6 +86,7 @@ if(${DISABLE_TERM_HYPERLINK})
 endif()
 
 load_binary(canaan_burn "usb_isp_buffer" "${CMAKE_CURRENT_LIST_DIR}/usbisp.bin")
+target_link_libraries(canaan_burn PUBLIC pthread)
 
 push_source_code(canaan_burn lib)
 push_source_code(canaan_burn usb lib)

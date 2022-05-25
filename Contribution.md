@@ -6,19 +6,26 @@
 
 # 依赖
 * UBuntu:
+    * 基本需要: build-essential dh-autoreconf cmake
 	* libusb: libudev-dev
 	* qt6: libdouble-conversion-dev // TODO: 不知道qt本身的名字是什么
 * RHEL:
+	* 基本需要: gcc-c++ autotools make cmake
 	* libusb: systemd-devel
 	* qt6: qt6-qtbase-devel qt6-qttools-devel
 
 * Windows:
-  * 请在默认位置安装Qt6，建议保持使用最新版
+  * 请在默认位置安装Qt6，建议保持使用最新版 - [链接](https://www.qt.io/download-qt-installer)
   * 必须安装：
     * Qt/Qt 6.x.x/MinGW x.x.x 64-bit
     * Qt/Qt 6.x.x/Additional Libraries/Qt Image Formats （用于显示svg格式的图标）
   * 推荐安装：
     * Qt/Qt 6.x.x/Qt Debug Information Files
+
+# vscode
+本程序使用vscode和qtcreator共同开发。
+vscode启动后，按下Command Palette (默认ctrl+shift+P)，输入recomm，选择“扩展：显示推荐的扩展”
+
 
 # 结构说明
 * library项目为动态链接库，用于实际执行烧录过程

@@ -18,6 +18,12 @@ macro(find_qt_at WHERE)
 	message("  - ${WHERE1}")
 
 	file(GLOB_RECURSE QT_CFG "${WHERE1}/*/Qt6Config.cmake")
+
+	foreach(QT_CFG_ELE ${QT_CFG})
+		if("${QT_CFG_ELE}" MATCHES "/Tools/")
+			list(REMOVE_ITEM QT_CFG "${QT_CFG_ELE}")
+		endif()
+	endforeach()
 	list(POP_FRONT QT_CFG QT_CFG1)
 
 	if(QT_CFG1)
@@ -72,6 +78,7 @@ function(find_qt)
 		find_qt_at("C:/Qt")
 	else()
 		find_qt_at("/opt/Qt")
+		find_qt_at("$ENV{HOME}/Qt")
 	endif()
 
 	if(UNIX AND NOT APPLE)
