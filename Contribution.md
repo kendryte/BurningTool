@@ -8,7 +8,7 @@
 * UBuntu:
     * 基本需要: build-essential dh-autoreconf cmake
 	* libusb: libudev-dev
-	* qt6: libdouble-conversion-dev // TODO: 不知道qt本身的名字是什么
+	* qt6: qt6-base-dev qt6-tools-dev qt6-l10n-tools qt6-tools-dev-tools libqt6svg6-dev libdouble-conversion-dev libgl1-mesa-dev
 * RHEL:
 	* 基本需要: gcc-c++ autotools make cmake
 	* libusb: systemd-devel

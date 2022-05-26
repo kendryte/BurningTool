@@ -33,7 +33,7 @@ function(push_source_code target src_dir)
 		list(APPEND inc_dirs "${CMAKE_CURRENT_LIST_DIR}/src/${dir}")
 	endforeach()
 
-	set(EXOPT -Wall -Wextra -pedantic -Werror)
+	set(EXOPT -Wall -Wextra -pedantic -Werror -Wno-format-security)
 
 	foreach(file IN LISTS NEW_SOURCES)
 		set_source_files_properties("${file}" PROPERTIES

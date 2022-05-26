@@ -83,9 +83,10 @@ function(find_qt)
 
 	if(UNIX AND NOT APPLE)
 		find_qt_at("/usr/lib64/cmake")
+		find_qt_at("/usr/lib/x86_64-linux-gnu/cmake")
 	endif()
 
-	message(FATAL_ERROR "Can not find QT install path, set QT_INSTALL_DIR")
+	message(FATAL_ERROR "Can not find QT install path, set QT_INSTALL_DIR, or report an issue.")
 endfunction()
 
 if(NOT DEFINED CACHE{QT_DIR})
